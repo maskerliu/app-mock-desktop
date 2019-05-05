@@ -11,20 +11,32 @@
                     </div>
                 </div>
             </mu-popover>
-            <mu-button flat slot="left" @click="openMockConfig">mock配置</mu-button>
-            <mu-button icon @click="showHelp" slot="right">
+            <mu-button flat slot="left" @click="openMockConfig(curRecord)">mock配置</mu-button>
+            <mu-button icon @click="showGuide" slot="right">
                 <mu-icon value="info"></mu-icon>
             </mu-button>
-            <mu-button color="red" icon @click="clearCache" slot="right">
-                <mu-icon value="clear_all"></mu-icon>
-            </mu-button>
+            <span slot="right" style="margin-right: 15px;">v 0.0.3</span>
         </mu-appbar>
         <mu-flex direction='row' id="content" style="width: 100vw; height: calc(100vh - 64px);">
             <mu-flex class="url-container" fill direction='column'>
                 <mu-flex fill direction="row" align-items="center"
+                         style="width: 100%; min-height: 64px; padding: 15px;">
+                    <mu-checkbox v-model="proxyRequest" @change="onSetProxyRequest"
+                                 uncheck-icon="http" checked-icon="http" style="margin-left: 15px;"></mu-checkbox>
+                    <mu-checkbox v-model="proxyStatistics" @change="onSetProxyStatistics"
+                                 uncheck-icon="link" checked-icon="link" style="margin-left: 25px;"></mu-checkbox>
+                    <mu-switch v-model="proxyDelay" label="延时模拟:" label-left style="margin-left: 25px;"
+                               @change="onProxyDelayChange"></mu-switch>
+                    <mu-text-field v-model="customDelay" v-show="proxyDelay" action-icon="done"
+                                   style="width: 30%; margin:0 0 0 20px; min-height: 21px; padding: 0;"
+                                   :action-click="onSetProxyDelay"></mu-text-field>
+                </mu-flex>
+
+                <mu-divider/>
+                <mu-flex fill direction="row" align-items="center"
                          style="margin: 3px;width: 98%; box-shadow: 3px 3px 3px lightgrey;">
                     <mu-text-field full-width type="text" placeholder="筛选条件" icon="swap_vert"
-                                   action-icon="clear"
+                                   action-icon="clear" v-model="filterKeyword" :action-click="clearSearch"
                                    style="margin: 10px 0; padding: 5px 10px 0 45px;"></mu-text-field>
                     <mu-button icon color="red" @click="clearAllRequest">
                         <mu-icon value="delete_sweep"></mu-icon>
@@ -34,44 +46,53 @@
                 <mu-list textline="two-line" style="width: 100%; height: calc(100vh - 112px);" id="reqList"
                          v-if="!!records">
                     <mu-list-item class="request-snap" avatar :ripple="false" button
-                                  v-bind:class="item.mock ? 'mock': ''"
-                                  v-for="item in records" :key="item.id"
+                                  v-bind:class="{'mock': item.mock, 'statistic': item.type === 5008}"
+                                  v-for="item in filterRecords" :key="item.id"
                                   @click="recordDetail(item)">
                         <span class="selected" v-if="curRecordId === item.id"></span>
-                        <mu-list-item-content>
+                        <mu-list-item-content v-if="item.type === 5001">
                             <mu-list-item-title>
                                 <strong class="request-snap-method">[{{item.method}}] </strong>
                                 <strong class="request-snap-url">{{item.url}}</strong>
                             </mu-list-item-title>
                             <mu-list-item-sub-title>
-                                <mu-badge :content="item.statusCode + ''"
+                                <mu-badge :content="'[HTTP] ' + item.statusCode"
                                           v-if="!!item.responseData"
-                                          :color="item.statusCode === 200 ? 'success' : 'red'"></mu-badge>
+                                          :color="item.statusCode === 200 ? 'green300' : 'red400'"></mu-badge>
+                                <mu-badge :content="'[BIZ] ' + item.responseData.code + ''" v-if="!!item.responseData"
+                                          :color="parseInt(item.responseData.code) === 8000 ? 'green300' : 'red300'"></mu-badge>
                                 <mu-badge :content="'耗时: ' + (item.time ? item.time : '--') + 'ms'"
-                                          color="orange"></mu-badge>
+                                          :color="(item.time && item.time < 200) ? 'green300': 'red200'"></mu-badge>
                             </mu-list-item-sub-title>
+                        </mu-list-item-content>
+                        <mu-list-item-content v-if="item.type === 5008">
+                            <mu-list-item-title>
+                                 <strong style="color: #8e44ad;">打点</strong>
+                            </mu-list-item-title>
                         </mu-list-item-content>
                         <mu-list-item-action>
                             <mu-list-item-after-text>{{item.startTime}}</mu-list-item-after-text>
-                            <mu-button fab small color="success" @click="openMockConfig">
+                            <mu-button fab small color="success" @click="openMockConfig(item)"
+                                       v-if="item.type === 5001">
                                 <mu-icon value="add"></mu-icon>
                             </mu-button>
-
                         </mu-list-item-action>
-                        <mu-linear-progress v-if="!!!item.responseData"></mu-linear-progress>
+                        <mu-linear-progress v-if="!!!item.responseData && item.type === 5001"></mu-linear-progress>
                     </mu-list-item>
                 </mu-list>
             </mu-flex>
             <mu-flex class="inspect-container" direction="column" justify-content="start">
                 <mu-tabs inverse :value.sync="tabActive" style="width: 100%;">
-                    <mu-tab>Inspector</mu-tab>
-                    <mu-tab>Request Builder</mu-tab>
-                    <mu-tab>Tools</mu-tab>
+                    <mu-tab>代理</mu-tab>
+                    <mu-tab>打点</mu-tab>
+                    <mu-tab>响应构建</mu-tab>
+
                 </mu-tabs>
                 <div id="tab_content" style="width: 100%; height: calc(100vh - 130px);">
-                    <Inspector v-if="tabActive === 0" v-bind:record="curRecord"></Inspector>
-                    <RequestBuilder v-if="tabActive === 1"></RequestBuilder>
-                    <Tools v-if="tabActive === 2"></Tools>
+                    <Inspector v-if="tabActive === 0 && curRecord.type === 5001" :record="curRecord"></Inspector>
+                    <Statistics v-if="tabActive === 1 && curRecord.type === 5008" :record="curRecord"></Statistics>
+                    <RequestBuilder v-if="tabActive === 2"></RequestBuilder>
+
                 </div>
             </mu-flex>
         </mu-flex>
@@ -79,8 +100,13 @@
             {{snackbarConfig.message}}
         </mu-snackbar>
 
-        <MockConfig :record="curRecord"></MockConfig>
+        <mu-dialog title="本地服务端口" width="360" :open.sync="showPortSetting">
+            <mu-text-field v-model="customPort" type="text" error-text="需重启后生效"></mu-text-field>
+            <mu-button slot="actions" color="secondary" @click="showPortSetting = false">取消</mu-button>
+            <mu-button slot="actions" color="primary" style="margin-left: 40px;" @click="onSavePortSetting">确认</mu-button>
+        </mu-dialog>
     </mu-flex>
+
 </template>
 
 <script>
@@ -90,21 +116,31 @@
 
     import Inspector from './Inspector'
     import RequestBuilder from './RequestBuilder'
-    import Tools from './Tools'
+    import Statistics from './Statistics'
 
     import QrcodeVue from 'qrcode.vue'
-    import MockConfig from './MockConfig'
 
-    let listCount = 0;
+    import {ipcRenderer} from 'electron'
 
     export default {
         name: "Mock",
         mounted() {
+            ipcRenderer.on('open-port-setting', ()=>{
+                this.showPortSetting = true;
+            });
+            ipcRenderer.on('get-local-server-reply', this.onGetLocalServer);
+
             this.popoverConfig.trigger = this.$refs.button.$el;
-            this.init();
+            ipcRenderer.send('get-local-server');
+        },
+        destroyed() {
+            ipcRenderer.removeAllListeners('open-port-setting');
+            ipcRenderer.removeAllListeners('get-local-server-reply');
         },
         data() {
             return {
+                showPortSetting: false,
+                customPort: 0,
                 snackbarConfig: {
                     message: null,
                     open: false,
@@ -114,27 +150,31 @@
                     open: false,
                     trigger: null,
                 },
-                isLooping: false,
+                proxyRequest: true,
+                proxyStatistics: false,
+                proxyDelay: false,
+                customDelay: 0,
                 tabActive: 0,
                 registerUrl: '',
                 records: {},
-                curRecord: null,
+                curRecord: {},
                 curRecordId: 0,
-                filepath: null
+                filepath: null,
+                filterKeyword: null
             }
         },
         methods: {
-            init() {
-                getIp().then(resp => {
-                    let uid = this.$cookies.isKey('uid') ? this.$cookies.get('uid') : generateUid();
-                    this.registerUrl = ['http://', resp.ip, '/mw/register?_=0__0&uid=', uid].join('');
-                    this.filepath = resp.path;
-                    this.$options.sockets.onmessage = (stream) => {
-                        this.handleMsg(stream.data);
-                    };
-                }).catch(err => {
-                    this.registerUrl = err;
-                });
+            onGetLocalServer(event, resp){
+                let uid = this.$cookies.isKey('uid') ? this.$cookies.get('uid') : generateUid();
+                this.registerUrl = ['http://', resp.registerIp, ':',resp.customPort, '/mw/register?_=0__0&uid=', uid].join('');
+                this.$options.sockets.onmessage = (stream) => {
+                    this.handleMsg(stream.data);
+                };
+                this.customPort = resp.customPort;
+            },
+            onSavePortSetting() {
+                ipcRenderer.send('port-setting-save', {customPort: this.customPort});
+                this.showPortSetting = false;
             },
             click2Reg() {
                 let uid = this.$cookies.isKey('uid') ? this.$cookies.get('uid') : generateUid();
@@ -144,17 +184,34 @@
 
                 });
             },
-            openMockConfig() {
-                this.$store.dispatch('updateShowMockConfig', {show: true});
+            openMockConfig(record) {
+                this.curRecord = record;
+                this.$router.push({name: 'mock-setting', params: this.curRecord});
+            },
+            clearSearch() {
+                this.filterKeyword = null;
             },
             clearAllRequest() {
                 this.records = {};
                 this.curRecord = {};
             },
-            clearCache() {
-
+            onProxyDelayChange() {
+                if (!this.proxyDelay) {
+                    this.customDelay = 0;
+                    ipcRenderer.send('set-proxy-delay', {delay: this.customDelay});
+                }
             },
-            showHelp() {
+            onSetProxyDelay() {
+                ipcRenderer.send('set-proxy-delay', {delay: this.customDelay});
+            },
+            onSetProxyRequest() {
+                ipcRenderer.send('set-proxy-request', {proxyRequest: this.proxyRequest});
+            },
+            onSetProxyStatistics() {
+                ipcRenderer.send('set-proxy-statistics', {proxyStatistics: this.proxyStatistics});
+            },
+            showGuide() {
+                this.$router.push({name: 'mock-guide'});
             },
             handleMsg(data) {
                 let msg = JSON.parse(data);
@@ -168,23 +225,32 @@
                         }, 1000);
                         break;
                     case CmdCode.REQUEST_START:
+                        msg.data.type = CmdCode.REQUEST;
                         this.requestStart(msg.data);
                         break;
                     case CmdCode.REQUEST_END:
+                        msg.data.type = CmdCode.REQUEST;
                         this.requestEnd(msg.data);
+                        break;
+                    case CmdCode.STATISTICS:
+                        msg.data.type = CmdCode.STATISTICS;
+                        this.addStatistics(msg.data);
                         break;
                     default:
                         console.log('unhandled code:', msg);
                 }
             },
             requestStart(data) {
-                let result = {};
-                result.id = data.id;
-                result.url = data.url;
-                result.method = data.method;
-                result.requestHeader = Object.assign({}, data.headers);
-                result.requestData = Object.assign({}, data.requestData);
-                result.startTime = currentTime();
+                let result = {
+                    id: data.id,
+                    url: data.url,
+                    method: data.method,
+                    requestHeader: Object.assign({}, data.headers),
+                    requestData: Object.assign({}, data.requestData),
+                    startTime: currentTime(),
+                    type: data.type
+                };
+
                 this.$set(this.records, data.id, result);
                 this.scrollToBottom();
             },
@@ -196,7 +262,8 @@
                     responseData: JSON.parse(data.responseData),
                     time: data.time,
                     delay: data.delay,
-                    mock: data.mock
+                    mock: data.mock,
+                    type: data.type
                 };
 
                 if (!!!record) {
@@ -206,27 +273,59 @@
                 let result = Object.assign({}, this.records[data.id], appendRecord);
                 this.$set(this.records, data.id, result);
             },
+            addStatistics(data) {
+                let record = data.statistics;
+                record.startTime = currentTime();
+                record.type = CmdCode.STATISTICS;
+                record.id = data.id;
+                this.$set(this.records, data.id, record);
+            },
             scrollToBottom() {
                 let container = document.getElementById("reqList");
-                container.scrollTop = container.scrollHeight;
+                if (!!container) {
+                    container.scrollTop = container.scrollHeight;
+                }
             },
             recordDetail(item) {
-                console.log(item);
-                this.tabActive = 0;
+                switch (item.type) {
+                    case CmdCode.STATISTICS:
+                        this.tabActive = 1;
+                        break;
+                    case CmdCode.REQUEST:
+                        this.tabActive = 0;
+                        break;
+                }
                 this.curRecordId = !!item.id ? item.id : 0;
                 this.curRecord = !!item ? item : {};
-                console.log(this.records);
+            }
+        },
+        computed: {
+            filterRecords() {
+                let filterRecords = {};
+
+                if (!!!this.filterKeyword) {
+                    return this.records;
+                }
+                for (let key in this.records) {
+                    if (this.records[key].url.indexOf(this.filterKeyword) !== -1)
+                        filterRecords[key] = this.records[key];
+                }
+                return filterRecords;
             }
         },
         watch: {
             records() {
                 this.$nextTick(() => {
-                    this.scrollToBottom();
-                })
+                    try {
+                        this.scrollToBottom();
+                    } catch (e) {
+
+                    }
+                });
             }
         },
         components: {
-            Inspector, RequestBuilder, Tools, QrcodeVue, MockConfig
+            Inspector, RequestBuilder, Statistics, QrcodeVue
         }
     }
 </script>
@@ -293,6 +392,18 @@
 
     .mock {
         background: #fffde7;
+    }
+
+    .statistic {
+        background: #f3e5f5;
+    }
+
+    .biz-success {
+        background: #f1f8e9;
+    }
+
+    .biz-error {
+        background: #ffccbc;
     }
 
     .selected {

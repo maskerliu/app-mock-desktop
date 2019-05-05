@@ -18,19 +18,24 @@
                 </template>
             </mu-auto-complete>
         </mu-flex>
-        <v-jsoneditor class="model-def" v-model="apiDef" :options="jsonEditorOptions0"></v-jsoneditor>
-        <v-jsoneditor class="model-def" style="height: 55%;" v-model="mockData" :options="jsonEditorOptions1"></v-jsoneditor>
+        <div class="model-def" id="je-api-def"></div>
+        <div class="model-def" id="je-model-def"></div>
+        <!--<v-jsoneditor class="model-def" v-model="apiDef" :options="jsonEditorOptions0"></v-jsoneditor>-->
+        <!--<v-jsoneditor class="model-def" style="height: 55%;" v-model="mockData"-->
+                      <!--:options="jsonEditorOptions1"></v-jsoneditor>-->
     </div>
 </template>
 
 <script>
 
+    import JsonEditor from "jsoneditor"
     import ModelFactory from '@/common/ModelFactory'
 
     export default {
         name: "RequestBuilder",
         mounted() {
             this.getDataModels();
+            this.initJsonEditor();
         },
         data() {
             return {
@@ -63,10 +68,22 @@
                 apisDefine: null,
                 apiPath: null,
                 apiDef: null,
-                mockData: null
+                mockData: null,
+                jeApiDef: null,
+                jeModelDef: null
             }
         },
         methods: {
+            initJsonEditor() {
+                let options = {
+                    mode: 'tree',
+                    modes: [],
+                    search: false,
+                    navigationBar: false
+                };
+                this.jeApiDef = new JsonEditor(document.getElementById('je-api-def'), options);
+                this.jeModelDef = new JsonEditor(document.getElementById('je-model-def'), options);
+            },
             getDataModels() {
                 this.$http.get('http://localhost:9080/static/biz.json')
                     .then(resp => {
@@ -95,8 +112,8 @@
                     });
             },
             showApiDefine() {
-                this.apiDef = this.apisDefine[this.apiPath];
-                this.mockData = this.modelFactory.generateDataByApi(this.apiDef);
+                this.jeApiDef.set(this.apisDefine[this.apiPath]);
+                this.jeModelDef.set(this.modelFactory.generateDataByApi(this.apisDefine[this.apiPath]));
             }
         }
     }

@@ -1,12 +1,13 @@
-import {app, BrowserWindow, Menu} from 'electron'
+import {app, BrowserWindow, ipcMain, Menu} from 'electron'
 
-if (process.env.NODE_ENV === 'development') {
-    const {fork} = require('child_process');
-    const ps = fork(`${__dirname}/LocalServer`);
-} else {
-    require('./LocalServer');
-}
+// if (process.env.NODE_ENV === 'development') {
+//     const {fork} = require('child_process');
+//     const ps = fork(`${__dirname}/LocalServer`);
+// } else {
+//
+// }
 
+const LocalServer = require('./LocalServer');
 
 /**
  * Set `__static` path to static files in production
@@ -19,21 +20,34 @@ if (process.env.NODE_ENV !== 'development') {
 let mainWindow;
 const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:9080` : `file://${__dirname}/index.html`;
 
+
 function createWindow() {
     if (process.platform === 'darwin') {
         const template = [
             {
-                label: "Application",
+                label: "AppMock",
                 submenu: [
-                    { label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
+                    {
+                        label: "端口设置", accelerator: "Command+P", click: function () {
+                            setLocalServerPort();
+                        }
+                    },
+                    {
+                        label: "退出", accelerator: "Command+Q", click: function () {
+                            app.quit();
+                        }
+                    }
                 ]
             },
             {
                 label: "Edit",
                 submenu: [
-                    { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-                    { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+                    {label: "复制", accelerator: "CmdOrCtrl+C", selector: "copy:"},
+                    {label: "粘贴", accelerator: "CmdOrCtrl+V", selector: "paste:"},
                 ]
+            },
+            {
+                label: "Settings",
             }
         ];
         Menu.setApplicationMenu(Menu.buildFromTemplate(template))
@@ -42,9 +56,9 @@ function createWindow() {
     }
 
     mainWindow = new BrowserWindow({
-        height: 700,
+        height: 800,
         useContentSize: true,
-        width: 1020,
+        width: 1200,
         transparent: false,
         frame: true,
         resizable: true
@@ -72,6 +86,70 @@ app.on('activate', () => {
         createWindow();
     }
 });
+
+ipcMain.on('port-setting-save', (event, args) => {
+    app.relaunch();
+    app.exit(0);
+});
+
+function setLocalServerPort() {
+    mainWindow.webContents.send('open-port-setting');
+}
+
+const {autoUpdater} = require("electron-updater");
+
+let template = [];
+if (process.platform === 'darwin') {
+    // OS X
+    const name = app.getName();
+    template.unshift({
+        label: name,
+        submenu: [
+            {
+                label: 'About ' + name,
+                role: 'about'
+            },
+            {
+                label: 'Quit',
+                accelerator: 'Command+Q',
+                click() {
+                    app.quit();
+                }
+            },
+        ]
+    })
+}
+
+autoUpdater.on('checking-for-update', () => {
+    sendStatusToWindow('Checking for update...');
+});
+
+autoUpdater.on('update-available', (info) => {
+    sendStatusToWindow('Update available.');
+});
+
+autoUpdater.on('update-not-available', (info) => {
+    sendStatusToWindow('Update not available.');
+});
+
+autoUpdater.on('error', (err) => {
+    sendStatusToWindow('Error in auto-updater. ' + err);
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    sendStatusToWindow(log_message);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+    sendStatusToWindow('Update downloaded');
+});
+
+function sendStatusToWindow(text) {
+    mainWindow.webContents.send('message', text);
+}
 
 /*
 import {autoUpdater} from 'electron-updater'

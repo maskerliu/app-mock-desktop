@@ -1,6 +1,5 @@
 <template>
-    <mu-dialog transition="slide-bottom" width="600" fullscreen
-               :open="$store.getters.showMockConfig.show" :overlay-close="false" :esc-press-close="false" :padding="1">
+    <div>
         <mu-appbar style="width: 100%">
             <mu-button flat slot="left" @click="onClose" color="red">
                 <mu-icon value="close"></mu-icon>
@@ -22,14 +21,13 @@
         </mu-appbar>
 
         <mu-flex direction="row">
-            <v-jsoneditor class="preview" v-model="myRecord" :options="jsonEditorOptions0"
-                          @input="jsonChange"></v-jsoneditor>
+            <div class="preview" id="mockRecord"></div>
             <mu-flex direction="column" style="padding-top: 50px;">
                 <mu-button fab small color="indigo400" @click="addMockRule">
                     <mu-icon value="keyboard_arrow_right"></mu-icon>
                 </mu-button>
             </mu-flex>
-            <v-jsoneditor class="preview" v-model="mockRules" :options="jsonEditorOptions1"></v-jsoneditor>
+            <div class="preview" id="mockRules"></div>
         </mu-flex>
 
         <mu-dialog title="" width="360" :open.sync="openConfigNameInput">
@@ -48,26 +46,38 @@
         <mu-snackbar :color="snackbarConfig.color" position="top" :open.sync="snackbarConfig.open">
             {{snackbarConfig.message}}
         </mu-snackbar>
-    </mu-dialog>
+    </div>
 </template>
 
 <script>
-    import {
-        reset,
-        loadMockConfigs,
-        saveMockConfig,
-        updateMockConfig,
-        removeMockConfig,
-        loadMockRules
-    } from "../model/LocalApi";
-    import JSONEditor from 'jsoneditor'
+
+    import JsonEditor from "jsoneditor"
+    import GrapherJson from 'grapher-json-ui'
+    import {ipcRenderer} from 'electron'
 
     export default {
-        name: "MockConfig",
+        name: "MockSetting",
         mounted() {
+
+            this.initJsonEditors();
+
+            ipcRenderer.on('reset-reply', this.onReset);
+            ipcRenderer.on('get-mock-configs-reply', this.onGetMockConfigs);
+            ipcRenderer.on('save-mock-configs-reply', this.onSaveMockConfig);
+            ipcRenderer.on('get-mock-rules-reply', this.onGetMockRules);
+            ipcRenderer.on('set-mock-config-reply', this.onSetMockConfig);
+            ipcRenderer.on('del-mock-config-reply', this.onDelMockConfig);
+
             this.getMockConfigs();
         },
-        props: ['record'],
+        destroyed() {
+            ipcRenderer.removeAllListeners('reset-reply');
+            ipcRenderer.removeAllListeners('get-mock-configs-reply');
+            ipcRenderer.removeAllListeners('save-mock-configs-reply');
+            ipcRenderer.removeAllListeners('get-mock-rules-reply');
+            ipcRenderer.removeAllListeners('set-mock-config-reply');
+            ipcRenderer.removeAllListeners('del-mock-config-reply');
+        },
         data() {
             return {
                 snackbarConfig: {
@@ -85,34 +95,87 @@
                     {validate: (val) => val.length >= 3, message: '配置名长度大于3'}
                 ],
                 mockRules: {},
-                myRecord: {},
-                curRecord: {},
                 mockConfigs: [],
                 curMockConfigId: 0,
                 curMockConfigName: null,
                 curMockConfigStatus: false,
-                jsonEditorOptions0: {
-                    mode: 'text',
-                    modes: ['text', 'view',],
-                    search: false,
-                    navigationBar: false
-                },
-                jsonEditorOptions1: {
+                jeRecord: null,
+                jeRules: null,
+            }
+        },
+        methods: {
+            initJsonEditors() {
+                let options = {
                     mode: 'tree',
                     modes: [],
                     search: false,
                     navigationBar: false
-                }
-            }
-        },
-        methods: {
-            init() {
-                // let container = document.getElementById("preEditor");
-                // this.preEditor = new JSONEditor(container, this.jsonEditorOptions0);
-                //
-                // container = document.getElementById("preEditor");
-                // this.rulePreview = new JSONEditor(container, this.jsonEditorOptions1);
+                };
+                this.jeRecord = new JsonEditor(document.getElementById("mockRecord"), options);
+                this.jeRecord.set(this.$route.params);
+                this.jeRecord.expandAll();
+                this.jeRules = new JsonEditor(document.getElementById("mockRules"), options);
+            },
+            onReset(event, resp) {
+                this.snackbarConfig = {open: true, message: resp.msg, color: resp.color};
+                if (this.snackbarConfig.timer) clearTimeout(this.snackbarConfig.timer);
+                this.snackbarConfig.timer = setTimeout(() => {
+                    this.snackbarConfig.open = false;
+                }, 1000);
+                this.getMockConfigs();
+            },
+            onGetMockConfigs(event, resp) {
+                this.mockConfigs = resp;
+                this.curMockConfigId = 0;
+                this.curMockConfigName = null;
+                this.curMockConfigStatus = false;
+                for (let key in this.mockConfigs) {
+                    let mockConfig = this.mockConfigs[key];
+                    let status = mockConfig.status;
+                    mockConfig.status = (status === 1);
 
+                    if (mockConfig.status) {
+                        this.curMockConfigId = mockConfig.id;
+                        this.curMockConfigName = mockConfig.name;
+                        this.curMockConfigStatus = true;
+                        this.getMockRules();
+                    }
+                }
+            },
+            onSaveMockConfig(event, resp) {
+                this.snackbarConfig = {open: true, message: resp.msg, color: resp.color};
+                if (this.snackbarConfig.timer) clearTimeout(this.snackbarConfig.timer);
+                this.snackbarConfig.timer = setTimeout(() => {
+                    this.snackbarConfig.open = false;
+                }, 1000);
+                this.getMockConfigs();
+            },
+            onGetMockRules(event, resp) {
+                let rules = resp;
+                for (let key in rules) {
+                    if (!!rules[key].mockData) {
+                        rules[key].mockData = JSON.parse(rules[key].mockData);
+                    }
+                    this.$set(this.mockRules, key, rules[key]);
+                    this.jeRules.set(this.mockRules);
+                }
+            },
+            onSetMockConfig(event, resp) {
+                this.snackbarConfig = {open: true, message: resp.msg, color: resp.color};
+                if (this.snackbarConfig.timer) clearTimeout(this.snackbarConfig.timer);
+                this.snackbarConfig.timer = setTimeout(() => {
+                    this.snackbarConfig.open = false;
+                }, 1000);
+                this.getMockConfigs();
+            },
+            onDelMockConfig(event, resp) {
+                this.snackbarConfig = {open: true, message: resp.msg, color: resp.color};
+                if (this.snackbarConfig.timer) clearTimeout(this.snackbarConfig.timer);
+                this.snackbarConfig.timer = setTimeout(() => {
+                    this.snackbarConfig.open = false;
+                }, 1000);
+
+                this.getMockConfigs();
             },
             onMockConfigChanged(val) {
                 for (let config of this.mockConfigs) {
@@ -127,10 +190,10 @@
                 }
             },
             onClose() {
-                this.$store.dispatch('updateShowMockConfig', {show: false});
+                this.$router.go(-1);
             },
             addMockRule() {
-                let path = this.curRecord.url;
+                let path = this.jeRecord.get().url;
                 if (!!!path) {
                     this.snackbarConfig = {open: true, message: '规则名[path]不能为空', color: 'red'};
                     if (this.snackbarConfig.timer) clearTimeout(this.snackbarConfig.timer);
@@ -142,9 +205,9 @@
                 let rule = {
                     path: path,
                     mockData: {
-                        statusCode: this.curRecord.statusCode,
-                        responseHeader: this.curRecord.responseHeader,
-                        responseData: this.curRecord.responseData
+                        statusCode: this.jeRecord.get().statusCode,
+                        responseHeader: this.jeRecord.get().responseHeader,
+                        responseData: this.jeRecord.get().responseData
                     }
                 };
 
@@ -158,29 +221,11 @@
 
                 delete this.mockRules[path];
                 this.$set(this.mockRules, path, rule);
+
+                this.jeRules.set(this.mockRules);
             },
             getMockConfigs() {
-                loadMockConfigs().then(resp => {
-                    this.mockConfigs = resp;
-                    this.curMockConfigId = 0;
-                    this.curMockConfigName = null;
-                    this.curMockConfigStatus = false;
-                    for (let key in this.mockConfigs) {
-                        let mockConfig = this.mockConfigs[key];
-                        let status = mockConfig.status;
-                        mockConfig.status = (status === 1);
-
-
-                        if (mockConfig.status) {
-                            this.curMockConfigId = mockConfig.id;
-                            this.curMockConfigName = mockConfig.name;
-                            this.curMockConfigStatus = true;
-                            this.getMockRules();
-                        }
-                    }
-                }).catch(err => {
-
-                });
+                ipcRenderer.send('get-mock-configs');
             },
             saveMockConfigClick() {
                 if (!!this.curMockConfigId) {
@@ -194,19 +239,8 @@
                     for (let key in this.mockRules) {
                         delete this.mockRules[key];
                     }
-                    loadMockRules(this.curMockConfigId).then(resp => {
-                        this.$set(this.mockRules, 'test', null);
-                        delete this.mockRules['test'];
-                        let rules = resp;
-                        for (let key in rules) {
-                            if (!!rules[key].mockData) {
-                                rules[key].mockData = JSON.parse(rules[key].mockData);
-                            }
-                            this.$set(this.mockRules, key, rules[key]);
-                        }
-                    }).catch(err => {
 
-                    });
+                    ipcRenderer.send('get-mock-rules', {configId: this.curMockConfigId});
                 }
             },
             saveAsMockConfigClick() {
@@ -214,17 +248,7 @@
             },
             deleteMockConfig() {
                 if (this.curMockConfigId !== 0) {
-                    removeMockConfig(this.curMockConfigId).then(resp => {
-                        this.snackbarConfig = {open: true, message: resp.msg, color: resp.color};
-                        if (this.snackbarConfig.timer) clearTimeout(this.snackbarConfig.timer);
-                        this.snackbarConfig.timer = setTimeout(() => {
-                            this.snackbarConfig.open = false;
-                        }, 1000);
-
-                        this.getMockConfigs();
-                    }).catch(err => {
-
-                    });
+                    ipcRenderer.send('del-mock-config', {configId: this.curMockConfigId});
                 }
             },
             setMockConfig() {
@@ -232,19 +256,7 @@
                     this.curMockConfigStatus = false;
                     return;
                 }
-                updateMockConfig(this.curMockConfigId, this.curMockConfigStatus)
-                    .then(resp => {
-                        this.snackbarConfig = {open: true, message: resp.msg, color: resp.color};
-                        if (this.snackbarConfig.timer) clearTimeout(this.snackbarConfig.timer);
-                        this.snackbarConfig.timer = setTimeout(() => {
-                            this.snackbarConfig.open = false;
-                        }, 1000);
-
-                        this.getMockConfigs();
-                    })
-                    .catch(err => {
-
-                    });
+                ipcRenderer.send('set-mock-config', {configId: this.curMockConfigId, status: this.curMockConfigStatus});
             },
             configNameInputDone() {
                 this.$refs.configNameForm.validate().then((result) => {
@@ -268,49 +280,16 @@
                     config.name = this.curMockConfigName;
                 }
 
-                saveMockConfig(config, this.mockRules)
-                    .then(resp => {
-                        this.snackbarConfig = {open: true, message: resp.msg, color: resp.color};
-                        if (this.snackbarConfig.timer) clearTimeout(this.snackbarConfig.timer);
-                        this.snackbarConfig.timer = setTimeout(() => {
-                            this.snackbarConfig.open = false;
-                        }, 1000);
-                        this.getMockConfigs();
-                    })
-                    .catch(err => {
-                    });
+                ipcRenderer.send('save-mock-config', {config: config, rules: this.jeRules.get()});
             },
             clearAllConfigs() {
-                reset().then(resp => {
-                    this.snackbarConfig = {open: true, message: resp.msg, color: resp.color};
-                    if (this.snackbarConfig.timer) clearTimeout(this.snackbarConfig.timer);
-                    this.snackbarConfig.timer = setTimeout(() => {
-                        this.snackbarConfig.open = false;
-                    }, 1000);
-                    this.getMockConfigs();
-                }).catch(err => {
-
-                })
-
-            },
-            jsonChange(val) {
-                this.curRecord = val;
-            }
-        },
-        watch: {
-            record(val) {
-                this.myRecord = Object.assign({}, val);
-                delete this.myRecord['id'];
-                delete this.myRecord['requestHeader'];
-                delete this.myRecord['mock'];
-                delete this.myRecord['requestData'];
-                delete this.myRecord['startTime'];
-                delete this.myRecord['time'];
-                this.curRecord = this.myRecord;
+                ipcRenderer.send('reset');
             }
         },
         computed: {},
-        components: {}
+        components: {
+            GrapherJson
+        }
     }
 </script>
 

@@ -1,23 +1,21 @@
-let Url = require('url');
-let axios = require("axios");
-let bodyParser = require('body-parser');
-let interfaces = require('os').networkInterfaces();
-let cors = require('cors');
-let express = require('express');
+const Url = require('url');
+const axios = require("axios");
+const bodyParser = require('body-parser');
+const compression = require('compression');
+const interfaces = require('os').networkInterfaces();
+const zlib = require('zlib');
+const cors = require('cors');
+const path = require('path');
+const express = require('express');
+const websocket = require("nodejs-websocket");
+const {ipcMain} = require('electron');
 
-let ErrorCode = {
-    EMPTY_COOKIE: 1001
-};
-
-let cmd = 5000;
 const CmdCode = {
-    SET_COOKIE: ++cmd,
-    REQUEST_START: ++cmd,
-    REQUEST_DATA_COMPLETE: ++cmd,
-    REQUEST_END: ++cmd,
-    REGISTER_SUCCESS: ++cmd,
-    SET_MOCK_CONFIG: ++cmd,
-    SET_WS_UID: ++cmd,
+    REQUEST: 5001,
+    REQUEST_START: 5002,
+    REQUEST_END: 5004,
+    REGISTER_SUCCESS: 5005,
+    STATISTICS: 5008
 };
 
 const corsOptions = {
@@ -26,49 +24,27 @@ const corsOptions = {
     optionsSuccessStatus: 200
 };
 
-let app = express();
-app.use(cors(corsOptions));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.all('*', function (req, res, next) {
-    if (req.url === '/' || /^\/mw\//.test(req.url)) {
-        Web.filter(req, res);
-    } else if (req.url !== '/favicon.ico') {
-        ProxyFactory.handleRequest(req, res);
-    } else {
-        res.end();
-    }
-});
-app.listen(8888, function () {
-    console.log('CORS-enabled web server listening on port 8888')
-});
 
+let curServerPort = 8888;
+let curMockConfigId = 0;
 
-let ws = require("nodejs-websocket");
-let wsServer = ws.createServer(function (conn) {
-    conn.on("text", function (str) {
-        conn.sendText(str)
-    });
-    conn.on("close", function (code, reason) {
-        console.log("关闭连接")
-    });
-    conn.on("error", function (code, reason) {
-        console.log("异常关闭")
-    });
-}).listen(8889);
-
-
-const path = require('path');
 const DB_URL_PROD = path.resolve(__dirname, '../../../../AppMock.db');
 const DB_URL_BETA = "AppMock.db";
 let dbPath = process.env.NODE_ENV === 'development' ? DB_URL_BETA : DB_URL_PROD;
 const Database = require('better-sqlite3');
-console.log(process.env.NODE_ENV);
-console.log(dbPath);
-// const db = new Database('AppMock.db', {verbose: console.log});
 const db = new Database(dbPath);
 let SqliteFactory = {
     initDB: function () {
+        try {
+            db.prepare('select id from AppMockPref limit 1').get();
+        } catch (e) {
+            db.prepare('create table AppMockPref' +
+                '(' +
+                '  id     INTEGER  not null primary key autoincrement,' +
+                '  name   char(48) not null,' +
+                '  value  char(48) ' +
+                ')').run();
+        }
 
         try {
             db.prepare('select id from AppMockConfig limit 1').get();
@@ -92,135 +68,84 @@ let SqliteFactory = {
                 '  mock_data blob' +
                 ')').run();
         }
+    },
+    initApp: function () {
+        try {
+            let row = db.prepare('select id from AppMockConfig where `status` = 1').get();
+            curMockConfigId = row === undefined ? 0 : row.id;
+        } catch (e) {
+            curMockConfigId = 0;
+        }
+
+        try {
+            let row = db.prepare('select value from AppMockPref where `name` = "customPort"').get();
+            curServerPort = row === undefined ? 8888 : parseInt(row.value);
+        } catch (e) {
+            db.prepare('insert into AppMockPref (`name`, `value`) value(?, ?)').run("customePort", "8888");
+            curServerPort = 8888;
+        }
     }
 };
 
 SqliteFactory.initDB();
+SqliteFactory.initApp();
 
-let curMockConfigId = 0;
-try {
-    let row = db.prepare('select id from AppMockConfig where `status` = 1').get();
-    curMockConfigId = row === undefined ? 0 : row.id;
-} catch (e) {
-    curMockConfigId = 0;
-}
+ipcMain.on('port-setting-save', (event, args) => {
+    if (!!!args.customPort) {
+        return;
+    }
+    let result = db.prepare('select `value` from AppMockPref where `name`=?').get('customPort');
+    if (result) {
+        db.prepare('update AppMockPref set `value`= ? where `name` = ?').run(args.customPort, 'customPort');
+    } else {
+        db.prepare('insert into AppMockPref(`name`, `value`) values(?, ?)').run('customPort', args.customPort);
+    }
 
-let PushFactory = {
-    sendRequestStartMessage: function (req, sessionId) {
-        let reqUrl = Url.parse(req.header("host"));
-        let requestData = null;
-        if (req.method === 'GET') {
-            requestData = !!req.query ? req.query : null;
-        } else {
-            requestData = !!req.body ? req.body : null;
-        }
+});
 
-        wsServer.connections.forEach(function (connection) {
-            connection.sendText(JSON.stringify({
-                code: CmdCode.REQUEST_START,
-                data: {
-                    id: sessionId,
-                    url: req.url,
-                    method: req.method,
-                    headers: req.headers,
-                    proxyport: reqUrl.port,
-                    requestData: requestData
-                }
-            }));
-        });
-    },
-    sendRequestEndMessage: function (sessionId, startTime, statusCode, respHeaders, respData, isMock) {
-        wsServer.connections.forEach(function (conn) {
-            conn.sendText(JSON.stringify({
-                code: CmdCode.REQUEST_END,
-                data: {
-                    id: sessionId,
-                    statusCode: statusCode,
-                    headers: !!respHeaders ? respHeaders : null,
-                    responseData: !!respData ? JSON.stringify(respData) : null,
-                    time: new Date().getTime() - startTime,
-                    mock: isMock
-                }
-            }));
-        });
-    },
-};
+ipcMain.on('reset', (event, args) => {
+    let result = {};
+    try {
+        db.prepare('delete from AppMockConfig').run();
+        db.prepare('delete from MockRule').run();
+        db.prepare('update sqlite_sequence set seq=0').run();
+        result = {color: 'success', msg: '重置成功'};
+    } catch (e) {
+        result = {color: 'red500', msg: '重置失败'};
+    }
+    event.sender.send('reset-reply', result);
+});
 
-const VALID_PATHS = ['getIp', 'register', 'reset', 'getMockConfigs', 'saveMockConfig', 'getMockRules', 'setMockConfig', 'deleteMockConfig'];
-let Web = {
-    filter: function (req, resp) {
-        let url = req.url;
-        if (url === '/') {
-            Web.index(req, resp);
-            return;
-        }
+ipcMain.on('get-local-server', (event) => {
 
-        let props = this.parseUrl(url);
-        if (props) {
-            if (props.type === 'cgi' && Web[props.path]) {
-                Web[props.path].apply(null, [req, resp]);
-                return;
-            }
-        }
-        this.error(req, resp);
-    },
-    getIp: function (req, resp) {
-        resp.json({ip: Web.getLocalIp() + ":" + 8888, path: `${__dirname}`});
-        resp.end();
-    },
-    register: function (req, resp) {
-        resp.writeHead(200, DEFAULT_HEADER);
-        let uid = req.query['uid'];
-        if (uid) {
-            resp.end();
-            wsServer.connections.forEach(function (connection) {
-                connection.sendText(JSON.stringify({
-                    code: CmdCode.REGISTER_SUCCESS,
-                    data: uid
-                }));
-            });
-        } else {
-            resp.end('invalid uid');
-        }
-    },
-    reset: function (req, resp) {
-        let result = {};
-        try {
-            db.prepare('delete from AppMockConfig').run();
-            db.prepare('delete from MockRule').run();
-            db.prepare('update sqlite_sequence set seq=0').run();
-            result = {
-                msg: '重置成功',
-                color: 'success'
-            };
-        } catch (e) {
-            result = {
-                msg: '重置失败',
-                color: 'red500'
-            };
-        }
-        resp.json(result);
-        resp.end();
-    },
-    getMockConfigs: function (req, resp) {
-        const stmt = db.prepare('SELECT * FROM AppMockConfig');
-        let configs = [];
-        let i = 0;
-        for (let row of stmt.iterate()) {
-            configs[i] = {
-                id: row.id,
-                name: row.name,
-                status: row.status
-            };
-            i++;
-        }
+    let result = {
+        customPort: curServerPort,
+        registerIp: Web.getLocalIp()
+    };
 
-        resp.json(configs);
-        resp.end();
-    },
-    saveMockConfig: function (req, resp) {
-        let config = req.body.config;
-        let rules = req.body.rules;
+    event.sender.send('get-local-server-reply', result);
+});
+
+ipcMain.on('get-mock-configs', (event, args) => {
+    const stmt = db.prepare('SELECT * FROM AppMockConfig');
+    let configs = [];
+    let i = 0;
+    for (let row of stmt.iterate()) {
+        configs[i] = {
+            id: row.id,
+            name: row.name,
+            status: row.status
+        };
+        i++;
+    }
+
+    event.sender.send('get-mock-configs-reply', configs);
+});
+
+ipcMain.on('save-mock-config', (event, args) => {
+    try {
+        let config = args.config;
+        let rules = args.rules;
 
         const insertMockConfig = db.prepare('insert into AppMockConfig(name) values (?)');
         const getCurMockConfig = db.prepare("select id from AppMockConfig order by id desc limit 0,1");
@@ -274,53 +199,125 @@ let Web = {
             });
             insertMany(rules);
         }
+        event.sender.send('save-mock-configs-reply', {color: 'success', msg: 'mock配置保存成功！'});
+    } catch (e) {
+        event.sender.send('save-mock-configs-reply', {color: 'red', msg: 'mock配置保存失败！'});
+    }
+});
 
-        resp.json({
-            msg: 'mock配置保存成功！',
-            color: 'success'
-        });
-        resp.end();
-    },
-    getMockRules: function (req, resp) {
-        const rows = db.prepare('select * from MockRule where config_id = ?').all(req.body.configId);
+ipcMain.on('get-mock-rules', (event, args) => {
+    try {
+        const rows = db.prepare('select * from MockRule where config_id = ?').all(args.configId);
         let rules = {};
         rows.forEach(item => {
             rules[item.path] = {id: item.id, configId: item.config_id, path: item.path, mockData: item.mock_data};
         });
 
-        resp.json(rules);
-        resp.end();
-    },
-    setMockConfig: function (req, resp) {
-        let status = req.body.status;
-        let configId = req.body.configId;
+        event.sender.send('get-mock-rules-reply', rules);
+    } catch (e) {
+
+    }
+});
+
+ipcMain.on('set-mock-config', (event, args) => {
+    try {
+        let status = args.status;
+        let configId = args.configId;
         if (!!configId) {
             db.prepare('update AppMockConfig set `status` = ?').run(0);
             if (status) {
                 curMockConfigId = configId;
-                db.prepare('update AppMockConfig set `status`= ? where id = ?').run(1, req.body.configId);
+                db.prepare('update AppMockConfig set `status`= ? where id = ?').run(1, configId);
             } else {
                 let row = db.prepare('select id from AppMockConfig where `status`= 1').get();
                 curMockConfigId = row === undefined ? 0 : row.id;
             }
         }
-        resp.json({
-            msg: 'mock配置成功',
-            color: 'success'
-        });
+        event.sender.send('set-mock-config-reply', {color: 'success', msg: 'mock配置成功'});
+    } catch (e) {
+        event.sender.send('del-mock-config-reply', {color: 'red', msg: '配置发生错误！'});
+    }
+});
+
+ipcMain.on('del-mock-config', (event, args) => {
+    try {
+        let configId = args.configId;
+        const deleteMockConfig = db.prepare('delete from AppMockConfig where id = (?)');
+        const deleteMockRules = db.prepare('delete from MockRule where config_id = (?)');
+        deleteMockConfig.run(configId);
+        deleteMockRules.run(configId);
+        event.sender.send('del-mock-config-reply', {color: 'primary', msg: '成功删除配置！'});
+    } catch (e) {
+        event.sender.send('del-mock-config-reply', {color: 'red', msg: '删除配置发生错误！'});
+    }
+});
+
+ipcMain.on('set-proxy-request', (event, args) => {
+    PROXY_REQUEST = args.proxyRequest;
+});
+
+ipcMain.on('set-proxy-statistics', (event, args) => {
+    PROXY_STATISTICS = args.proxyStatistics;
+});
+
+ipcMain.on('set-proxy-delay', (event, args) => {
+    PROXY_DELAY = args.delay;
+});
+
+let PROXY_REQUEST = true;
+let PROXY_STATISTICS = false;
+let PROXY_DELAY = 0;
+let _sessionId = 0;
+const PROXY_DEF_TIMEOUT = 1000 * 15;	// 15s
+const VALID_PATHS = ['getIp', 'register',];
+
+let DEFAULT_HEADER = {'Content-Type': 'text/html'};
+
+let Web = {
+    filter: function (req, resp) {
+        let url = req.url;
+        if (url === '/') {
+            Web.index(req, resp);
+            return;
+        }
+
+        let props = this.parseUrl(url);
+        if (props) {
+            if (props.type === 'cgi' && Web[props.path]) {
+                Web[props.path].apply(null, [req, resp]);
+                return;
+            }
+        }
+        this.error(req, resp);
+    },
+    getIp: function (req, resp) {
+        resp.json({ip: Web.getLocalIp() + ":" + curServerPort, path: `${__dirname}`});
         resp.end();
     },
-    deleteMockConfig: function (req, resp) {
-        try {
-            let configId = req.body.configId;
-            const deleteMockConfig = db.prepare('delete from AppMockConfig where id = (?)');
-            const deleteMockRules = db.prepare('delete from MockRule where config_id = (?)');
-            deleteMockConfig.run(configId);
-            deleteMockRules.run(configId);
-            resp.json({color: 'primary', msg: '成功删除配置！'});
-        } catch (e) {
-            resp.json({color: 'red', msg: '删除配置发生错误！'});
+    register: function (req, resp) {
+        resp.writeHead(200, DEFAULT_HEADER);
+        let uid = req.query['uid'];
+        if (uid) {
+            resp.end();
+
+            let data = {
+                code: CmdCode.REGISTER_SUCCESS,
+                data: uid
+            };
+            wsServer.connections[0].sendText(JSON.stringify(data));
+        } else {
+            resp.end('invalid uid');
         }
+    },
+    statistic: function (req, resp) {
+        let data = Buffer.from(req.rawbody);
+        zlib.unzip(data, (err, buffer) => {
+            if (!err) {
+                PushFactory.sendStatisticsMessage(++_sessionId, JSON.parse(buffer.toString()));
+            } else {
+                console.log(err);
+            }
+        });
         resp.end();
     },
     error: function (req, resp) {
@@ -337,6 +334,11 @@ let Web = {
                     type: 'cgi'
                 };
             }
+        } else if (url === '/burying-point/collect') {
+            return {
+                path: 'statistic',
+                type: 'cgi'
+            };
         }
         return null;
     },
@@ -365,8 +367,67 @@ let Web = {
     }
 };
 
-let _sessionId = 0;
-const PROXY_DEF_TIMEOUT = 1000 * 15;	// 15s
+let PushFactory = {
+    sendRequestStartMessage: function (req, sessionId) {
+        if (!PROXY_REQUEST) {
+            return;
+        }
+
+        let reqUrl = Url.parse(req.header("host"));
+        let requestData = null;
+        if (req.method === 'GET') {
+            requestData = !!req.query ? req.query : null;
+        } else {
+            requestData = !!req.body ? req.body : null;
+        }
+
+        let data = {
+            code: CmdCode.REQUEST_START,
+            data: {
+                id: sessionId,
+                url: req.url,
+                method: req.method,
+                headers: req.headers,
+                proxyport: reqUrl.port,
+                requestData: requestData
+            }
+        };
+
+        wsServer.connections[0].sendText(JSON.stringify(data));
+    },
+    sendRequestEndMessage: function (sessionId, startTime, statusCode, respHeaders, respData, isMock) {
+        if (!PROXY_REQUEST) {
+            return;
+        }
+
+        let data = {
+            code: CmdCode.REQUEST_END,
+            data: {
+                id: sessionId,
+                statusCode: statusCode,
+                headers: !!respHeaders ? respHeaders : null,
+                responseData: !!respData ? JSON.stringify(respData) : null,
+                time: new Date().getTime() - startTime + parseInt(PROXY_DELAY),
+                mock: isMock,
+            }
+        };
+        wsServer.connections[0].sendText(JSON.stringify(data));
+    },
+    sendStatisticsMessage: function (sessionId, statistics) {
+        if (!PROXY_STATISTICS) {
+            return;
+        }
+        let data = {
+            code: CmdCode.STATISTICS,
+            data: {
+                id: sessionId,
+                statistics: statistics
+            }
+        };
+        wsServer.connections[0].sendText(JSON.stringify(data));
+    }
+};
+
 let ProxyFactory = {
     handleRequest: function (req, resp) {
         let startTime = new Date().getTime();
@@ -419,8 +480,11 @@ let ProxyFactory = {
         }
         axios(options).then(resp => {
             PushFactory.sendRequestEndMessage(sessionId, startTime, resp.status, resp.headers, resp.data, false);
-            proxyResp.send(resp.data);
-            proxyResp.end();
+
+            setTimeout(function () {
+                proxyResp.send(resp.data);
+                proxyResp.end();
+            }, PROXY_DELAY);
         }).catch(err => {
             // console.log("err: " + err.code);
             // console.log("err:" + err.message);
@@ -441,7 +505,6 @@ let ProxyFactory = {
     }
 };
 
-let DEFAULT_HEADER = {'Content-Type': 'text/html'};
 let MockFactory = {
     mockRequestData: function (req, resp, rule, sessionId, startTime) {
         let statusCode = rule.statusCode || 200;
@@ -452,3 +515,48 @@ let MockFactory = {
 
     }
 };
+
+let app = express();
+app.use(cors(corsOptions));
+app.use(compression());
+app.use(function (req, res, next) {
+    if (req.url === '/burying-point/collect') {
+        let buf = [];
+        req.on('data', function (data) {
+            buf.push(data);
+        });
+        req.on('end', function () {
+            req.rawbody = Buffer.concat(buf);
+        });
+    }
+    next();
+});
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.text());
+app.use(bodyParser.urlencoded({extended: false}));
+app.all('*', function (req, res, next) {
+    if (req.url === '/' || /^\/mw\//.test(req.url) || /^\/burying-point\//.test(req.url)) {
+        Web.filter(req, res);
+    } else if (req.url !== '/favicon.ico') {
+        ProxyFactory.handleRequest(req, res);
+    } else {
+        res.end();
+    }
+});
+
+app.listen(curServerPort, function () {
+    console.log('CORS-enabled web server listening on port ' + curServerPort);
+});
+
+let wsServer = websocket.createServer(function (conn) {
+    conn.on("text", function (str) {
+        conn.sendText(str)
+    });
+    conn.on("close", function (code, reason) {
+        console.log("关闭连接")
+    });
+    conn.on("error", function (code, reason) {
+        console.log("异常关闭")
+    });
+}).listen(8889);

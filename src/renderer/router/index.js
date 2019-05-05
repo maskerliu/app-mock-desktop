@@ -2,7 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 import Mock from '@/page/Mock'
-import MockConfig from "@/page/MockConfig";
+import MockSetting from "@/page/MockSetting"
+import Guide from '@/page/Guide'
 
 Vue.use(Router);
 
@@ -11,12 +12,26 @@ export default new Router({
         {
             path: '/',
             name: 'landing-page',
-            component: Mock
+            component: Mock,
+            meta: {
+                keepAlive: true
+            }
         },
         {
-            path: '/mockConfig',
-            name: 'mock-config',
-            component: MockConfig
+            path: '/mockSetting',
+            name: 'mock-setting',
+            component: MockSetting,
+            meta: {
+                keepAlive: false
+            }
+        },
+        {
+            path: '/mockGuide',
+            name: 'mock-guide',
+            component: Guide,
+            meta: {
+                keepAlive: false
+            }
         }
     ]
 })
