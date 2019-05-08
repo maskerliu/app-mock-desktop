@@ -1,8 +1,10 @@
 <template>
     <mu-flex direction="column">
         <mu-appbar color="primary" title="移动客户端mock工具" style="width: 100%;">
-            <mu-button ref="button" flat @click="popoverConfig.open = !popoverConfig.open" slot="left">注册</mu-button>
-            <mu-popover :open.sync="popoverConfig.open" :trigger="popoverConfig.trigger">
+            <mu-button ref="btnRegister" flat @click="qrcodePopoverConfig.open = !qrcodePopoverConfig.open" slot="left">
+                注册
+            </mu-button>
+            <mu-popover :open.sync="qrcodePopoverConfig.open" :trigger="qrcodePopoverConfig.trigger">
                 <div id="register">
                     扫描二维码或者手机访问:<br/>
                     <qrcode-vue :value="registerUrl" size="256"></qrcode-vue>
@@ -12,6 +14,7 @@
                 </div>
             </mu-popover>
             <mu-button flat slot="left" @click="openMockConfig(curRecord)">mock配置</mu-button>
+
             <mu-button icon @click="showGuide" slot="right">
                 <mu-icon value="info"></mu-icon>
             </mu-button>
@@ -67,7 +70,7 @@
                         </mu-list-item-content>
                         <mu-list-item-content v-if="item.type === 5008">
                             <mu-list-item-title>
-                                 <strong style="color: #8e44ad;">打点</strong>
+                                <strong style="color: #8e44ad;">打点</strong>
                             </mu-list-item-title>
                         </mu-list-item-content>
                         <mu-list-item-action>
@@ -103,7 +106,19 @@
         <mu-dialog title="本地服务端口" width="360" :open.sync="showPortSetting">
             <mu-text-field v-model="customPort" type="text" error-text="需重启后生效"></mu-text-field>
             <mu-button slot="actions" color="secondary" @click="showPortSetting = false">取消</mu-button>
-            <mu-button slot="actions" color="primary" style="margin-left: 40px;" @click="onSavePortSetting">确认</mu-button>
+            <mu-button slot="actions" color="primary" style="margin-left: 40px;" @click="onSavePortSetting">确认
+            </mu-button>
+        </mu-dialog>
+
+        <mu-dialog title="版本更新" width="360" :open.sync="showUpdateTips">
+            <span v-html="releaseNotes"></span>
+            <p>{{message}}</p>
+            <mu-linear-progress mode="determinate"
+                                style="width: 100%; position: relative; margin-top: 15px;"
+                                :value="downloadPercent" :size="15" color="green"></mu-linear-progress>
+            <mu-button slot="actions" color="secondary" @click="showUpdateTips = false">取消</mu-button>
+            <mu-button slot="actions" color="primary" style="margin-left: 40px;" @click="onUpdateNow">确认
+            </mu-button>
         </mu-dialog>
     </mu-flex>
 
@@ -125,17 +140,48 @@
     export default {
         name: "Mock",
         mounted() {
-            ipcRenderer.on('open-port-setting', ()=>{
+            this.qrcodePopoverConfig.trigger = this.$refs.btnRegister.$el;
+
+            ipcRenderer.on('open-port-setting', () => {
                 this.showPortSetting = true;
             });
             ipcRenderer.on('get-local-server-reply', this.onGetLocalServer);
 
-            this.popoverConfig.trigger = this.$refs.button.$el;
+
+            ipcRenderer.on("update-check", (event, data) => {
+                this.message = data;
+            });
+            ipcRenderer.on("update-available", (event, data) => {
+                this.showUpdateTips = true;
+                this.releaseNotes = data.releaseNotes;
+                this.message="是否下载新版本？"
+            });
+            ipcRenderer.on("update-not-available", (event, data) => {
+                this.message = data;
+            });
+
+            ipcRenderer.on("download-progress", (event, progress) => {
+                this.downloadPercent = progress.percent || 0;
+                console.log(this.downloadPercent);
+            });
+
+            ipcRenderer.on("update-now", (event, resp) => {
+                this.showUpdateTips = true;
+                this.message = "是否立刻重启更新？";
+                this.downloadPercent = 100;
+            });
+
+            ipcRenderer.send("check-update");
             ipcRenderer.send('get-local-server');
         },
         destroyed() {
             ipcRenderer.removeAllListeners('open-port-setting');
             ipcRenderer.removeAllListeners('get-local-server-reply');
+            ipcRenderer.removeAllListeners('update-check');
+            ipcRenderer.removeAllListeners('update-available');
+            ipcRenderer.removeAllListeners('update-not-available');
+            ipcRenderer.removeAllListeners('download-progress');
+            ipcRenderer.removeAllListeners('update-now');
         },
         data() {
             return {
@@ -146,7 +192,7 @@
                     open: false,
                     timeout: 3000
                 },
-                popoverConfig: {
+                qrcodePopoverConfig: {
                     open: false,
                     trigger: null,
                 },
@@ -160,13 +206,17 @@
                 curRecord: {},
                 curRecordId: 0,
                 filepath: null,
-                filterKeyword: null
+                filterKeyword: null,
+                message: '',
+                downloadPercent: 0,
+                showUpdateTips: false,
+                releaseNotes: null
             }
         },
         methods: {
-            onGetLocalServer(event, resp){
+            onGetLocalServer(event, resp) {
                 let uid = this.$cookies.isKey('uid') ? this.$cookies.get('uid') : generateUid();
-                this.registerUrl = ['http://', resp.registerIp, ':',resp.customPort, '/mw/register?_=0__0&uid=', uid].join('');
+                this.registerUrl = ['http://', resp.registerIp, ':', resp.customPort, '/mw/register?_=0__0&uid=', uid].join('');
                 this.$options.sockets.onmessage = (stream) => {
                     this.handleMsg(stream.data);
                 };
@@ -175,6 +225,14 @@
             onSavePortSetting() {
                 ipcRenderer.send('port-setting-save', {customPort: this.customPort});
                 this.showPortSetting = false;
+            },
+            onUpdateNow() {
+                if (this.downloadPercent === 100) {
+                    ipcRenderer.send("update-now");
+                } else {
+                    ipcRenderer.send("download-update");
+                    this.showUpdateTips = false;
+                }
             },
             click2Reg() {
                 let uid = this.$cookies.isKey('uid') ? this.$cookies.get('uid') : generateUid();
@@ -217,9 +275,10 @@
                 let msg = JSON.parse(data);
                 switch (msg.code) {
                     case CmdCode.REGISTER_SUCCESS:
-                        this.popoverConfig.open = false;
+                        this.qrcodePopoverConfig.open = false;
                         this.snackbarConfig = {open: true, message: '设备[' + msg.data + ']注册成功'};
-                        if (this.snackbarConfig.timer) clearTimeout(this.snackbarConfig.timer);
+                        if (this.snackbarConfig.timer)
+                            clearTimeout(this.snackbarConfig.timer);
                         this.snackbarConfig.timer = setTimeout(() => {
                             this.snackbarConfig.open = false;
                         }, 1000);
@@ -237,6 +296,12 @@
                         this.addStatistics(msg.data);
                         break;
                     default:
+                        this.snackbarConfig = {open: true, message: 'unhandled code:' + msg.code};
+                        if (this.snackbarConfig.timer)
+                            clearTimeout(this.snackbarConfig.timer);
+                        this.snackbarConfig.timer = setTimeout(() => {
+                            this.snackbarConfig.open = false;
+                        }, 1000);
                         console.log('unhandled code:', msg);
                 }
             },
@@ -368,6 +433,16 @@
     #register {
         width: 300px;
         height: 350px;
+        background-color: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 5px 5px 5px lightgray;
+        text-align: center;
+    }
+
+    #update {
+        width: 280px;
+        height: 100px;
         background-color: white;
         padding: 10px;
         border-radius: 5px;

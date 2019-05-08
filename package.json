@@ -1,7 +1,7 @@
 {
   "name": "app-mock-desktop",
   "version": "0.0.3",
-  "author": "liuzhufeng@yupaopao.com",
+  "author": "liuzhufeng",
   "description": "Application network mock & proxy project",
   "license": "MIT",
   "main": "./dist/electron/main.js",
@@ -15,7 +15,7 @@
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "postinstall": "",
-    "publish": "build --mac --win -p always"
+    "publish": "build --mac -p always"
   },
   "build": {
     "productName": "AppMock",
@@ -58,7 +58,9 @@
       {
         "provider": "github",
         "owner": "maskerliu",
-        "repo": "electron-updater-example"
+        "repo": "app-mock-desktop",
+        "releaseType": "pre-release",
+        "releaseNotes": "1、新增了本地服务端口自定义支持；\n2、对请求响应内容中的图片、音频加入预览支持；\n3、新增打点数据预览；\n4、增加功能Hand Book页；\n"
       }
     ]
   },
@@ -79,7 +81,8 @@
     "vue-router": "^3.0.2",
     "vuex": "^3.1.0",
     "vuex-electron": "^1.0.3",
-    "electron-updater": "^4.0.6"
+    "electron-updater": "^4.0.6",
+    "electron-log": "^3.0.5"
   },
   "devDependencies": {
     "ajv": "^6.10.0",
