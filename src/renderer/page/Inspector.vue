@@ -42,6 +42,12 @@
             </mu-button>
         </div>
 
+        <mu-dialog title="" width="455" :open.sync="showVideoPreview">
+            <div style="width: 411px; height: 731px;">
+                <video style="width: 100%; height: 100%; object-fit: contain;"
+                        :src="curVideoSrc" controls="controls"></video>
+            </div>
+        </mu-dialog>
     </div>
 </template>
 
@@ -53,6 +59,7 @@
 
 
     const AUDIO_RGX = new RegExp('(.mp3|.ogg|.wav)$');
+    const VIDEO_RGX = new RegExp('(.mp4)$');
     const IMG_RGX = new RegExp("(.jpg|.jpeg|.png|.JPG|.gif|.GIF)$");
 
     export default {
@@ -75,7 +82,9 @@
                 curImgSrc: null,
                 curAudioSrc: null,
                 audioPlayer: null,
-                showImgPreview: false
+                showImgPreview: false,
+                curVideoSrc: null,
+                showVideoPreview: false
             }
         },
         methods: {
@@ -87,8 +96,7 @@
                     mode: 'view',
                     modes: ['tree', 'view'],
                     search: false,
-                    navigationBar: false,
-                    theme: 'jqueryui'
+                    navigationBar: false
                 };
                 this.jsonEditor = new JsonEditor(document.getElementById("jsonEditor"), options);
                 this.updateJsonEditor();
@@ -111,6 +119,9 @@
                             self.curAudioSrc = null;
                             self.curImgSrc = this.href;
                             canShow = true;
+                        } else if (!!VIDEO_RGX.test(this.href)) {
+                            self.curVideoSrc = this.href;
+                            self.showVideoPreview = true;
                         }
                         self.showImgPreview = canShow;
                     });
@@ -124,7 +135,6 @@
             },
             addToMock() {
                 if (!!!this.record.responseData) {
-
                     return;
                 }
 

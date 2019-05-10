@@ -18,7 +18,6 @@
             <mu-button icon @click="showGuide" slot="right">
                 <mu-icon value="info"></mu-icon>
             </mu-button>
-            <span slot="right" style="margin-right: 15px;">v 0.0.3</span>
         </mu-appbar>
         <mu-flex direction='row' id="content" style="width: 100vw; height: calc(100vh - 64px);">
             <mu-flex class="url-container" fill direction='column'>
@@ -111,7 +110,7 @@
         </mu-dialog>
 
         <mu-dialog title="版本更新" width="360" :open.sync="showUpdateTips">
-            <span v-html="releaseNotes"></span>
+            <span v-html="releaseNotes" v-show="!!releaseNotes"></span>
             <p>{{message}}</p>
             <mu-linear-progress mode="determinate"
                                 style="width: 100%; position: relative; margin-top: 15px;"
