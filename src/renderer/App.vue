@@ -1,19 +1,30 @@
 <template>
-    <div id="app">
-        <mu-fade-transition>
-            <keep-alive include="Mock">
-                <router-view></router-view>
-            </keep-alive>
-        </mu-fade-transition>
-    </div>
+  <biz-main v-if="canRender" />
 </template>
 
-<script>
-    export default {
-        name: 'app-mock-desktop'
-    }
-</script>
+<script lang="ts" src="./App.vue.ts"></script>
 
 <style>
-    /* CSS */
+.el-tabs--border-card > .el-tabs__content {
+  padding: 0;
+}
+
+.el-tabs__header {
+  margin-bottom: 5px;
+}
+
+.tabs-pure .el-tabs__item {
+  color: #fff;
+}
+
+* {
+  user-select: none;
+  -webkit-appearance: none;
+  outline: 0 none !important;
+}
+
+input,
+textarea {
+  user-select: auto;
+}
 </style>

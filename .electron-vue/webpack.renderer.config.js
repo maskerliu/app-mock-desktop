@@ -3,14 +3,15 @@
 process.env.BABEL_ENV = 'renderer';
 
 const path = require('path');
-const {dependencies} = require('../package.json');
+const { dependencies } = require('../package.json');
 const webpack = require('webpack');
 
 const BabiliWebpackPlugin = require('babili-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const {VueLoaderPlugin} = require('vue-loader');
+const { VueLoaderPlugin } = require('vue-loader');
+const TerserPlugin = require('terser-webpack-plugin');
 
 /**
  * List of node_modules to include in webpack bundle
@@ -19,15 +20,15 @@ const {VueLoaderPlugin} = require('vue-loader');
  * that provide pure *.vue files that need compiling
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
  */
-let whiteListedModules = ['vue'];
+let whiteListedModules = ['vue', 'muse-ui-loading', 'muse-ui-toast'];
 
 let rendererConfig = {
-    devtool: '#cheap-module-eval-source-map',
+    devtool: '#eval-source-map',
     entry: {
-        renderer: path.join(__dirname, '../src/renderer/main.js')
+        renderer: path.join(__dirname, '../src/renderer/main.ts')
     },
     externals: [
-        ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
+        ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d)),
     ],
     module: {
         rules: [
@@ -52,9 +53,17 @@ let rendererConfig = {
                 use: 'vue-html-loader'
             },
             {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                exclude: /node_modules/,
+                options: {
+                    appendTsSuffixTo: [/\.vue$/]
+                }
+            },
+            {
                 test: /\.js$/,
                 use: 'babel-loader',
-                exclude: /node_modules/
+                exclude: [/NIM_Web_SDK.*\.js/, /node_modules/]
             },
             {
                 test: /\.node$/,
@@ -110,7 +119,7 @@ let rendererConfig = {
     },
     plugins: [
         new VueLoaderPlugin(),
-        new MiniCssExtractPlugin({filename: 'styles.css'}),
+        new MiniCssExtractPlugin({ filename: 'styles.css' }),
         new HtmlWebpackPlugin({
             filename: 'index.html',
             template: path.resolve(__dirname, '../src/index.ejs'),
@@ -136,10 +145,27 @@ let rendererConfig = {
             '@': path.join(__dirname, '../src/renderer'),
             'vue$': 'vue/dist/vue.esm.js'
         },
-        extensions: ['.js', '.vue', '.json', '.css', '.node']
+        extensions: ['.js', '.ts', '.vue', '.json', '.css', '.node']
+    },
+    optimization: {
+        minimizer: [
+            new TerserPlugin({
+                extractComments: true,
+                cache: true,
+                parallel: true,
+                sourceMap: true, // Must be set to true if using source-maps in production
+                terserOptions: {
+                    // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+                    extractComments: 'all',
+                    compress: {
+                        drop_console: true,
+                    },
+                }
+            }),
+        ],
     },
     target: 'electron-renderer'
-}
+};
 
 /**
  * Adjust rendererConfig for development settings
@@ -149,14 +175,14 @@ if (process.env.NODE_ENV !== 'production') {
         new webpack.DefinePlugin({
             '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
         })
-    )
+    );
 }
 
 /**
  * Adjust rendererConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
-    rendererConfig.devtool = ''
+    rendererConfig.devtool = '';
 
     rendererConfig.plugins.push(
         new BabiliWebpackPlugin(),
@@ -173,7 +199,7 @@ if (process.env.NODE_ENV === 'production') {
         new webpack.LoaderOptionsPlugin({
             minimize: true
         })
-    )
+    );
 }
 
-module.exports = rendererConfig
+module.exports = rendererConfig;

@@ -37,4 +37,4 @@ hotClient.subscribe(event => {
       </div>
     `
   }
-});
+})

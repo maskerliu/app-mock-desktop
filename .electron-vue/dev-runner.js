@@ -1,12 +1,10 @@
 'use strict';
 
-process.env.NODE_ENV = 'development';
-
 const chalk = require('chalk');
 const electron = require('electron');
 const path = require('path');
-const {say} = require('cfonts');
-const {spawn} = require('child_process');
+const { say } = require('cfonts');
+const { spawn } = require('child_process');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const webpackHotMiddleware = require('webpack-hot-middleware');
@@ -17,6 +15,10 @@ const rendererConfig = require('./webpack.renderer.config');
 let electronProcess = null;
 let manualRestart = false;
 let hotMiddleware;
+
+const exec = require('child_process').exec;
+const os = require('os');
+const platform = os.platform();
 
 function logStats(proc, data) {
     let log = '';
@@ -29,15 +31,15 @@ function logStats(proc, data) {
             colors: true,
             chunks: false
         }).split(/\r?\n/).forEach(line => {
-            log += '  ' + line + '\n'
-        })
+            log += '  ' + line + '\n';
+        });
     } else {
-        log += `  ${data}\n`
+        log += `  ${data}\n`;
     }
 
-    log += '\n' + chalk.yellow.bold(`┗ ${new Array(28 + 1).join('-')}`) + '\n'
+    log += '\n' + chalk.yellow.bold(`┗ ${new Array(28 + 1).join('-')}`) + '\n';
 
-    console.log(log)
+    console.log(log);
 }
 
 function startRenderer() {
@@ -52,9 +54,9 @@ function startRenderer() {
 
         compiler.hooks.compilation.tap('compilation', compilation => {
             compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync('html-webpack-plugin-after-emit', (data, cb) => {
-                hotMiddleware.publish({action: 'reload'});
-                cb()
-            })
+                hotMiddleware.publish({ action: 'reload' });
+                cb();
+            });
         });
 
         compiler.hooks.done.tap('done', stats => {
@@ -69,26 +71,26 @@ function startRenderer() {
                 before(app, ctx) {
                     app.use(hotMiddleware);
                     ctx.middleware.waitUntilValid(() => {
-                        resolve();
-                    })
+                        resolve()
+                    });
                 }
             }
         );
 
-        server.listen(9080);
+        server.listen(9080)
     })
 }
 
 function startMain() {
     return new Promise((resolve, reject) => {
-        mainConfig.entry.main = [path.join(__dirname, '../src/main/index.dev.js')].concat(mainConfig.entry.main)
+        mainConfig.entry.main = [path.join(__dirname, '../src/main/index.dev.ts')].concat(mainConfig.entry.main);
         mainConfig.mode = 'development';
         const compiler = webpack(mainConfig);
 
         compiler.hooks.watchRun.tapAsync('watch-run', (compilation, done) => {
             logStats('Main', chalk.white.bold('compiling...'));
-            hotMiddleware.publish({action: 'compiling'});
-            done()
+            hotMiddleware.publish({ action: 'compiling' });
+            done();
         });
 
         compiler.watch({}, (err, stats) => {
@@ -101,16 +103,28 @@ function startMain() {
 
             if (electronProcess && electronProcess.kill) {
                 manualRestart = true;
-                process.kill(electronProcess.pid);
-                electronProcess = null;
-                startElectron();
 
-                setTimeout(() => {
-                    manualRestart = false;
-                }, 5000);
+                if (platform === "darwin") {
+                    process.kill(electronProcess.pid);
+                    electronProcess = null;
+                    startElectron();
+    
+                    setTimeout(() => {
+                        manualRestart = false
+                    }, 5000);
+                } else {
+                    const pid = electronProcess.pid;
+                    exec(`TASKKILL /F /IM electron.exe`, function (err, data) {
+                        if (err) console.log(err);
+                        else console.log('kill pid: ' + pid + ' success!');
+                        electronProcess = null;
+                        startElectron();
+                        manualRestart = false
+                    });
+                }                
             }
 
-            resolve()
+            resolve();
         })
     })
 }
@@ -118,6 +132,7 @@ function startMain() {
 function startElectron() {
     var args = [
         '--inspect=5858',
+        '--remote-debugging-port=9223', // add this line
         path.join(__dirname, '../dist/electron/main.js')
     ];
 
@@ -151,7 +166,7 @@ function electronLog(data, color) {
     if (/[0-9A-z]+/.test(log)) {
         console.log(
             chalk[color].bold('┏ Electron -------------------') +
-            '\n' +
+            '\n\n' +
             log +
             chalk[color].bold('┗ ----------------------------') +
             '\n'
@@ -173,19 +188,20 @@ function greeting() {
             font: 'simple3d',
             space: false
         })
-    } else console.log(chalk.yellow.bold('\n  electron-vue'));
+    } else
+        console.log(chalk.yellow.bold('\n  electron-vue'));
     console.log(chalk.blue('  getting ready...') + '\n');
 }
 
 function init() {
-    // greeting();
+    greeting();
 
     Promise.all([startRenderer(), startMain()])
         .then(() => {
             startElectron();
         })
         .catch(err => {
-            console.error(err)
+            console.error(err);
         })
 }
 
