@@ -1,25 +1,38 @@
 import {ipcRenderer} from 'electron'
+import { ActionTree, Commit, GetterTree, MutationTree } from 'vuex'
 
-const state = {
+import { EnvState } from '../types'
+
+const state: EnvState = {
     env: 'test',
+    appId: "",
+    bundleId: "",
 }
 
-const actions = {
-    init({ commit }) {
+const getters: GetterTree<EnvState, any> = {
+    env(state: EnvState): string {
+        return state.env;
+    }
+};
+
+export const actions: ActionTree<EnvState, any> = {
+    init({ commit }, data?: any) {
         return new Promise((resolve, reject) => {
             return resolve(1);
-        })
+        });
     }
 }
 
-const mutations = {
-    updateState(state, payload) {
+const mutations: MutationTree<EnvState> = {
+
+    updateState(state, payload: any) {
         Object.keys(payload).forEach(key => state[key] = payload[key])
-    },
+    }, 
+
     updateEnv(state, payload) {
         state.env = payload
     },
-}
+};
 
 export default {
     namespaced: true,

@@ -1,12 +1,19 @@
 import { ProxyRequestRecord, ProxyStatRecord, MockRule } from "../model/DataModels"
 
-export interface CommonState {
-  navTest: NavTest,
-  navBarConfig: NavBarConfig
+export interface EnvState {
+  env: string;
+  appId: string;
+  bundleId: string;
 }
 
-export interface NavTest {
-  title: string
+export interface CommonState {
+  showQrCodeDialog: boolean,
+  navBarConfig: NavBarConfig,
+  registerUrl: string,
+  localServerConfig: {
+    ip: string,
+    port: string,
+  }
 }
 
 export interface NavBarConfig {

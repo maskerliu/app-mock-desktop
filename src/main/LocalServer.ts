@@ -9,6 +9,7 @@ const axios = require("axios");
 const compression = require("compression");
 const websocket = require("nodejs-websocket");
 const JSONBigInt = require("json-bigint");
+// const JSONBigInt = require('node-json-bigint');
 const interfaces = require('os').networkInterfaces();
 
 const CmdCode = {
@@ -31,20 +32,43 @@ let PROXY_STATISTICS: boolean = false;
 let PROXY_DELAY: number = 0;
 let _sessionId: number = 0;
 let curMockConfigId: number = 0;
-let curServerPort: number = 0;
+let curServerPort: number = 8888;
 let DEFAULT_HEADER = { 'Content-Type': 'text/html' };
 
 const VALID_PATHS = ['register',];
 const PROXY_DEF_TIMEOUT = 1000 * 15;	// 15s
 
-ipcMain.on('get-mock-configs', (event: any, args?: any) => {
-    event.sender.send('get-mock-configs-reply', {
-        // ruleConfig: SqliteFactory.getMockConfigs(),
-        mockTestEnable: MOCK_TEST_ENABLE
-    })
-})
+function getLocalIp() {
+    let tempAddress = "127.0.0.1";
+    for (let devName in interfaces) {
+        let iface = interfaces[devName];
+        for (let i = 0; i < iface.length; i++) {
+            let alias = iface[i];
+            if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
+                if (new RegExp("^192.168").test(alias.address)) {
+                    return alias.address;
+                }
+                tempAddress = alias.address;
+            }
+        }
+    }
+    return tempAddress;
+}
 
-ipcMain.on('save-mock-config', (event, args) => {
+ipcMain.on('get-local-server-config', (event: any, args?: any) => {
+    let result = {
+        customPort: curServerPort,
+        registerIp: getLocalIp()
+    };
+
+    event.sender.send('get-local-server-config', result);
+});
+
+ipcMain.on('get-mock-configs', (event: any, args?: any) => {
+    
+});
+
+ipcMain.on('save-mock-config', (event: any, args?: any) => {
     try {
         // SqliteFactory.saveMockConfigs(args.config, args.rules)
         event.sender.send('save-mock-configs-reply', { code: 8000, message: 'mock配置保存成功！' })
@@ -53,7 +77,7 @@ ipcMain.on('save-mock-config', (event, args) => {
     }
 })
 
-let Web = {
+let WebFactory = {
     filter: (req: any, resp: any) => {
         let url = req.url;
         if (url === '/') {
@@ -61,14 +85,14 @@ let Web = {
             return;
         }
 
-        let props = this.parseUrl(url);
+        let props = WebFactory.parseUrl(url);
         if (props) {
-            if (props.type === 'cgi' && Web[props.path]) {
-                Web[props.path].apply(null, [req, resp]);
+            if (props.type === 'cgi' && WebFactory[props.path]) {
+                WebFactory[props.path].apply(null, [req, resp]);
                 return;
             }
         }
-        this.error(req, resp);
+        WebFactory.error(req, resp);
     },
     register: (req: any, resp: any) => {
         resp.writeHead(200, DEFAULT_HEADER);
@@ -102,23 +126,10 @@ let Web = {
         }
         return null;
     },
-    getLocalIp: () => {
-        let tempAddress = "127.0.0.1";
-        for (let devName in interfaces) {
-            let iface = interfaces[devName];
-            for (let i = 0; i < iface.length; i++) {
-                let alias = iface[i];
-                if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
-                    if (new RegExp("^192.168").test(alias.address)) {
-                        return alias.address;
-                    }
-                    tempAddress = alias.address;
-                }
-            }
-        }
-        return tempAddress;
-    }
+
 };
+
+
 
 let PushFactory = {
     sendRequestStartMessage: (req: any, sessionId: number) => {
@@ -339,7 +350,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text({ type: "application/json" }));
 app.all('*', (req: any, resp: any, next: any) => {
     if (req.url === '/' || /^\/mw\//.test(req.url) || /^\/burying-point\//.test(req.url)) {
-        Web.filter(req, resp);
+        WebFactory.filter(req, resp);
     } else if (req.url !== '/favicon.ico') {
         ProxyFactory.handleRequest(req, resp);
     } else {
@@ -353,12 +364,15 @@ app.listen(curServerPort, () => {
 
 let wsServer = websocket.createServer((conn: any) => {
     conn.on("text", (str: string) => {
-        conn.sendText(str)
+        conn.sendText(str);
     });
     conn.on("close", (code: number, reason: any) => {
-        console.log("关闭连接")
+        console.log("关闭连接");
     });
+    conn.on('connect', function(code: number) {
+        console.log('开启连接', code);
+      })
     conn.on("error", (code: number, reason: any) => {
-        console.log("异常关闭")
+        console.log("异常关闭");
     });
 }).listen(8889);

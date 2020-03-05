@@ -1,0 +1,50 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Electron: Main",
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": "node",
+            "windows": {
+                "runtimeExecutable": "node"
+            },
+            "args" : [
+                ".electron-vue/dev-runner.js",
+                "--debug",
+            ],
+            "sourceMaps": true,
+            "env": {
+                "npm_execpath": "npm-cli.js"
+            },
+            "outFiles": ["./dist/electron/main.js"],
+            "autoAttachChildProcesses": true,
+            "outputCapture": "std"
+        },
+        {
+            "type": "chrome",
+            "request": "attach",
+            "name": "Electron: Render",
+            "port": 9223,
+            "timeout": 30000,
+            "sourceMaps": true,
+            "webRoot": "${workspaceFolder}/src",
+            "sourceMapPathOverrides": {
+                "webpack:///./src/*": "${webRoot}/*",
+            }
+        },
+    ],
+    "compounds": [
+        {
+            "name": "Electron: All",
+            "configurations": [
+                "Electron: Main",
+                "Electron: Render"
+            ]
+        }
+    ]
+}

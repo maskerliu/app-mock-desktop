@@ -39,6 +39,6 @@
   },
   "plugins": [
     "transform-runtime",
-    "transform-remove-strict-mode"
+    // "transform-remove-strict-mode"
   ]
 }

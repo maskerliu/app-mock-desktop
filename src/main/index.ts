@@ -12,7 +12,7 @@ const platform = require('os').platform();
 //
 // }
 
-// require('./LocalServer');
+require('./LocalServer');
 
 /**
  * Set `__static` path to static files in production
@@ -32,7 +32,7 @@ const trayFloder = process.env.NODE_ENV === 'development' ? path.join(__dirname,
 
 
 function createWindow() {
-    let icon = nativeImage.createFromPath(path.join(trayFloder, 'app_tray.png'));
+    let icon = nativeImage.createFromPath(path.join(trayFloder, 'icon_tray.png'));
 
     if (process.platform === 'darwin') {
         const template = [
@@ -79,7 +79,7 @@ function createWindow() {
         useContentSize: true,
         
         transparent: false,
-        frame: true,
+        frame: false,
         resizable: true,
         icon: icon,
         webPreferences: {

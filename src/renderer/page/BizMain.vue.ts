@@ -1,10 +1,12 @@
 import { Component, Vue, Watch } from "vue-property-decorator"
-import { Action, Mutation, namespace, State } from 'vuex-class'
+import { Action, Mutation, namespace, State, Getter } from 'vuex-class'
 
 import QrcodeVue from 'qrcode.vue'
 import { ipcRenderer } from 'electron'
 
 import DebugPanel from "./DebugPanel.vue"
+import { CommonState } from "../store/types"
+import store from "../store"
 
 @Component({
     name: 'BizMain',
@@ -17,42 +19,28 @@ export default class BizMain extends Vue {
 
     @Action('updateNavBarConfig') updateNavBarConfig: any;
 
+    @State(state => state.Common.registerUrl) registerUrl: string;
     @State(state => state.Common.navBarConfig) navBarConfig: any;
 
+    showQrCodeDialog: boolean = false;
     canRender: boolean = false;
     transitionEnterName: string = "animated fadeIn";
     transitionLeaveName: string = "animated fadeOut";
     curPage: string = null;
-    showLoading: boolean = false;
-    searchKey: string = null;
-    logged: boolean = false;
-    registerUrl: string = "padding-left: 25px;padding-left: 25px;";
 
-    showIPSetting: boolean = false;
+    navMenu: Array<string> = ["Proxy", "MockRuleMgr", "Settings"]
+    curActivedNavMenuIdx: string = this.navMenu[0];
 
     created() {
 
     }
 
     mounted() {
-
-        ipcRenderer.on('open-ip-setting', () => {
-            this.showIPSetting = true;
-        });
-        ipcRenderer.on('get-local-server-reply', this.onGetLocalServer);
-
-        ipcRenderer.send('get-local-server');
+        
     }
 
     destroy() {
-        ipcRenderer.removeAllListeners('open-ip-setting');
-        ipcRenderer.removeAllListeners('open-port-setting');
-        ipcRenderer.removeAllListeners('get-local-server-reply');
-        ipcRenderer.removeAllListeners('update-check');
-        ipcRenderer.removeAllListeners('update-available');
-        ipcRenderer.removeAllListeners('update-not-available');
-        ipcRenderer.removeAllListeners('download-progress');
-        ipcRenderer.removeAllListeners('update-now');
+
     }
 
     leftNavBarItemClick() {
@@ -78,11 +66,15 @@ export default class BizMain extends Vue {
         }
     }
 
-    onNavTabClick(path: string) {
-        if (path === this.curPage) return;
-        this.curPage = path;
-        this.showLoading = true;
-        this.$router.replace({ name: path });
+    onNavTabClick(index: string) {
+        this.curActivedNavMenuIdx = index;
+        if (index === this.curPage) return;
+        this.curPage = index;
+        this.$router.replace({ name: index });
+    }
+
+    onClose() {
+        console.log("on close");
     }
 
     @Watch('$route')
@@ -97,19 +89,7 @@ export default class BizMain extends Vue {
             this.transitionEnterName = 'animated';
             this.transitionLeaveName = 'animated fadeOut';
         }
-        this.updateNavBarConfig({ title: "加载中..." })
-        this.showLoading = true;
-    }
-
-    onGetLocalServer(event: any, resp: any) {
-        console.log(this.$options);
-        // this.$options.sockets.onmessage = (stream) => {
-        //     this.handleMsg(stream.data);
-        // };
-    }
-
-    handleMsg(data: any) {
-
+        this.updateNavBarConfig({ title: "加载中..." });
     }
 
     click2Reg() {

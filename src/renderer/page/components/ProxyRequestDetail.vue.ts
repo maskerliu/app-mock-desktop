@@ -1,11 +1,11 @@
 import { Component, Vue, Prop, Watch } from "vue-property-decorator"
-import { namespace } from 'vuex-class'
+import { Action, namespace } from 'vuex-class'
 
 import VJsonEditor from "v-jsoneditor"
 
 import { ProxyRequestRecord } from "../../model/DataModels"
 
-const AUDIO_RGX = new RegExp('(.mp3|.ogg|.wav)$');
+const AUDIO_RGX = new RegExp('(.mp3|.ogg|.wav|.m4a|.aac)$');
 const VIDEO_RGX = new RegExp('(.mp4)$');
 const IMG_RGX = new RegExp("(.jpg|.jpeg|.png|.JPG|.gif|.GIF|.webp)$");
 
@@ -17,12 +17,16 @@ const IMG_RGX = new RegExp("(.jpg|.jpeg|.png|.JPG|.gif|.GIF|.webp)$");
 })
 export default class ProxyRequestDetail extends Vue {
 
-    public $refs!: {
-        respJsonEditor: VJsonEditor,
+
+    @Action('sendMessage')
+    public sendMessage: Function;
+
+    $refs!: {
+        respJsonEditor: VJsonEditor
     };
 
     @Prop()
-    request: ProxyRequestRecord = null;
+    record: ProxyRequestRecord = null;
 
     wrapperRecord: ProxyRequestRecord = null;
 
@@ -30,14 +34,16 @@ export default class ProxyRequestDetail extends Vue {
     curImgSrc: string = null;
     curAudioSrc: string = null;
     audioPlayer: any = null;
-    showImgPreview: boolean = false;
     curVideoSrc: string = null;
-    showVideoPreview: boolean = false;
+    showPreview: boolean = false;
 
 
     headerOption: any = {
-        mode: "view",
+        mode: "code",
         search: false,
+        navigationBar: false,
+        statusBar: false,
+        mainMenuBar: false
     }
 
     responseOption: any = {
@@ -51,56 +57,46 @@ export default class ProxyRequestDetail extends Vue {
     }
 
     mounted() {
-        this.init();
+        this.audioPlayer = document.getElementById('audioPlayer');
     }
 
-    init() {
-        this.audioPlayer = document.getElementById('audio-player');
-        this.updateJsonEditor();
-    }
-
-    updateJsonEditor() {
-        if (this.wrapperRecord == null) return;
-
-        this.$refs.respJsonEditor.editor.set(this.wrapperRecord.responseData);
-        if (this.$refs.respJsonEditor.editor.mode != "code") {
-            this.$refs.respJsonEditor.editor.expandAll();
-            this.addClickOnJsonEditor();
-        }
-    }
-
-    addClickOnJsonEditor() {
+    addJsonEditorClickListensers() {
+        this.$refs.respJsonEditor.editor.expandAll();
         let as = document.getElementsByTagName('a');
         let self = this;
+
         for (let i = 0; i < as.length; ++i) {
-            as[i].addEventListener('click', function (event) {
+            as[i].addEventListener('click', function (this, event) {
                 event.preventDefault();
                 let canShow = false;
-                if (!!AUDIO_RGX.test(this.href)) {
-                    self.curAudioSrc = this.href;
+                if (!!AUDIO_RGX.test(as[i].href)) {
+                    self.curAudioSrc = as[i].href;
                     self.curImgSrc = null;
                     canShow = true;
-                } else if (!!IMG_RGX.test(this.href)) {
+                } else if (!!IMG_RGX.test(as[i].href)) {
                     self.curAudioSrc = null;
-                    self.curImgSrc = this.href;
+                    self.curImgSrc = as[i].href;
                     canShow = true;
-                } else if (!!VIDEO_RGX.test(this.href)) {
-                    self.curVideoSrc = this.href;
-                    self.showVideoPreview = true;
+                } else if (!!VIDEO_RGX.test(as[i].href)) {
+                    self.curVideoSrc = as[i].href;
+                    canShow = true;
                 }
-                self.showImgPreview = canShow;
+                self.showPreview = canShow;
             });
         }
     }
 
     closeImgPreview() {
-        this.showImgPreview = false;
+        this.showPreview = false;
         this.curImgSrc = null;
         this.curAudioSrc = null;
-        this.audioPlayer.pause();
+        if (this.audioPlayer != null) {
+            this.audioPlayer.pause();
+        }
     }
 
     addToMock() {
+        this.sendMessage("hello world");
         // if (!!!this.record.responseData) {
         //     return;
         // }
@@ -109,8 +105,22 @@ export default class ProxyRequestDetail extends Vue {
         // this.$router.replace({ name: 'MockRuleMgr', params: this.record });
     }
 
-    @Watch("request")
+    @Watch("record")
     onRecordChanged() {
-        this.wrapperRecord = Object.assign({}, this.request);
+        this.wrapperRecord = Object.assign({}, this.record);
+        setTimeout(this.addJsonEditorClickListensers, 100);
+    }
+
+    @Watch("showPreview")
+    onShowPreviewChanged() {
+        console.log(this.showPreview);
+        if (!this.showPreview) {
+            if (this.audioPlayer != null) {
+                this.audioPlayer.pause();
+            }
+            this.curImgSrc = null;
+            this.curAudioSrc = null;
+            this.curVideoSrc = null;
+        }
     }
 }

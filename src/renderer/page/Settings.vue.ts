@@ -1,5 +1,5 @@
 import { Component, Vue } from "vue-property-decorator"
-import { namespace } from 'vuex-class'
+import { Action, namespace, Getter, Mutation } from "vuex-class"
 
 @Component({
     name: 'Settings',
@@ -8,8 +8,14 @@ import { namespace } from 'vuex-class'
     },
 })
 export default class Settings extends Vue {
+    @Action('updateNavBarConfig')
+    public updateNavBarConfig: Function;
 
     created() {
-
+        this.updateNavBarConfig({
+            title: "设置",
+            leftItem: false,
+            rightItem: false,
+        });
     }
 }

@@ -1,11 +1,11 @@
 <template>
   <el-row id="app">
-    <el-col style="width: 80px; height: 100vh;">
-      <el-menu default-active="1-4-1" :collapse="false" style="width: 80px; height: 100%;">
-        <el-menu-item index="1" style="padding-left: 19px; margin-top: 50px;">
-          <el-popover placement="right" title="调试面板" width="260" height="400" trigger="click">
+    <el-col style="width: 70px; height: 100vh;">
+      <el-menu :default-active="curActivedNavMenuIdx" :collapse="false" style="width: 100%; height: 100%;">
+        <el-menu-item index="0" style="padding-left: 15px; margin-top: 50px;">
+          <el-popover placement="right" title="" width="260" height="400" v-model="showQrCodeDialog">
             <div id="register">
-              扫描二维码或者手机访问:
+              扫描二维码或者手机访问：
               <br />
               <qrcode-vue :value="registerUrl" size="256" style="margin-top: 5px;"></qrcode-vue>
               <div>
@@ -17,41 +17,42 @@
             </el-avatar>
           </el-popover>
         </el-menu-item>
-        <el-menu-item index="2" style="padding-left: 25px;" @click="onNavTabClick('Proxy')">
+        <el-menu-item index="Proxy" style="padding-left: 20px;" @click="onNavTabClick('Proxy')">
           <i class="iconfont icon-mock" style="font-size: 1.8rem;"></i>
         </el-menu-item>
         <el-menu-item
-          index="3"
-          style="padding-left: 25px;"
+          index="MockRuleMgr"
+          style="padding-left: 20px;"
           @click="onNavTabClick('MockRuleMgr')"
         >
           <i class="iconfont icon-rule" style="font-size: 1.8rem;"></i>
         </el-menu-item>
-        <el-menu-item index="6" style="padding-left: 25px;" @click="onNavTabClick('Settings')">
+        <el-menu-item index="Settings" style="padding-left: 20px;" @click="onNavTabClick('Settings')">
           <i class="iconfont icon-setting" style="font-size: 1.8rem;"></i>
         </el-menu-item>
-        <el-menu-item index="10" style="padding-left: 19px;">
+        <el-menu-item index="4" style="padding-left: 15px;">
           <debug-panel />
         </el-menu-item>
       </el-menu>
     </el-col>
-    <el-col style="width: calc(100vw - 82px); height: calc(100vh - 10px); background: transparent;">
-      <el-page-header @back="leftNavBarItemClick">
-        <i class="navbar-btn" slot="title">{{$store.state.Common.navBarConfig.title}}</i>
-        <i
-          class="iconfont navbar-btn"
-          v-bind:class="$store.state.Common.navBarConfig.rightIcon"
-          @click="rightNavBarItemClick"
-          slot="content"
-          style="position: absolute; right: 15px;"
-        ></i>
-      </el-page-header>
+    <el-col style="width: calc(100vw - 70px); height: calc(100vh - 10px); background: transparent;">
+      <div class="header">
+        <div class="header-title" @click="leftNavBarItemClick">
+          <i class="el-icon-back" v-if="navBarConfig.leftItem"></i>
+          <span class="navbar-btn">{{navBarConfig.title}}</span>
+        </div>
+        <div class="header-content">
+          <div class="el-icon-switch-button" style="color: #e74c3c; font-size: 1.1rem; font-weight: bold;" @click="onClose()"></div>
+          <!-- <el-button circle type="danger" size="small" icon="el-icon-switch-button" @click="onClose">
+          </el-button> -->
+        </div>
+      </div>
       <transition
         mode="out-in"
         :enter-active-class="transitionEnterName"
         :leave-active-class="transitionLeaveName"
       >
-        <keep-alive include="MockHome">
+        <keep-alive include="Proxy">
           <router-view></router-view>
         </keep-alive>
       </transition>
@@ -86,15 +87,6 @@
   width: 80px;
 }
 
-.el-page-header {
-  width: calc(100vw - 80px);
-  padding: 15px;
-  background: #3498db;
-  color: white;
-  -webkit-app-region: drag;
-  text-align: center;
-}
-
 .navbar-btn {
   -webkit-app-region: no-drag;
   padding: 2px 10px;
@@ -104,7 +96,6 @@
 
 .navbar-btn:hover {
   color: white;
-  font-weight: bold;
   /*background: #ffffff50;*/
   /*border-radius: 40px;*/
 }
@@ -134,4 +125,21 @@
   padding: 2px;
   background: red;
 }
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: #3498db;
+  color: white;
+  -webkit-app-region: drag;
+}
+.header-title {
+  flex: 1;
+}
+.header-content {
+  display: flex;
+  align-items: center;
+}
+
 </style>

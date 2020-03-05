@@ -14,6 +14,9 @@ export default class ProxyStatSnap extends Vue {
     @Prop()
     statRecord: ProxyStatRecord;
 
+    @Prop()
+    isSelected: boolean = false;
+    
     created() {
 
     }

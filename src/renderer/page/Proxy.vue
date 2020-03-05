@@ -1,48 +1,53 @@
 <template>
   <el-row :gutter="20">
     <el-col class="bg-border" style="width: 300px; margin-left: 15px;">
-      <el-checkbox-group size="small" v-model="checkList" style="width: 100%; padding: 10px 0;">
-        <el-checkbox-button label border size="medium" disabled>
+      <el-checkbox-group size="mini" v-model="proxyTypes" style="width: 100%; padding: 10px 0;">
+        <el-checkbox-button label disabled>
           <i class="iconfont icon-filter" style="font-weight: blod;" />
         </el-checkbox-button>
-        <el-checkbox-button label="请求" border>
+        <el-checkbox-button label="5001">
           <i class="iconfont icon-network-data" style="font-weight: blod;" />
         </el-checkbox-button>
-        <el-checkbox-button label="打点" border>
+        <el-checkbox-button label="5008">
           <i class="iconfont icon-statistics" style="font-weight: blod;" />
         </el-checkbox-button>
       </el-checkbox-group>
 
-      <el-input size="small" placeholder="延时时长" v-model="filterInput">
+      <el-input size="small" placeholder="延时时长" v-model="mockDelay">
         <i slot="prefix" class="el-input__icon iconfont icon-delay"></i>
-        <el-checkbox-button slot="append" size="medium" icon="el-icon-"></el-checkbox-button>
+        <span slot="append">ms&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+        <el-checkbox slot="append" size="mini"></el-checkbox>
       </el-input>
 
       <el-input size="small" placeholder="筛选关键字" v-model="filterInput" style="margin-top: 10px;">
         <i slot="prefix" class="el-input__icon iconfont icon-search"></i>
-        <el-button slot="append">
-          <i icon="iconfont icon-filter"></i>
-        </el-button>
       </el-input>
 
       <el-divider />
 
       <div class="record-snap-panel" ref="wrapper">
-        <div v-for="item in records" :key="item.id">
-          <proxy-request-snap
-            :reqRecord="item"
-            :isSelected="curRecord != null && item.id === curRecord.id"
-            @click.native="onItemClicked(item)"
-          ></proxy-request-snap>
-          <!-- <proxy-stat-snap ></proxy-stat-snap> -->
-        </div>
+        <div >
+          <div v-for="(item, idx) in filtedRecords" :key="idx">
+            <proxy-request-snap
+              :reqRecord="item"
+              :isSelected="curRecord != null && item.id === curRecord.id"
+              @click.native="onItemClicked(item)"
+              v-if="item.type === 5001"
+            ></proxy-request-snap>
+            <proxy-stat-snap
+              :statRecord="item"
+              :isSelected="curRecord != null && item.id === curRecord.id"
+              @click.native="onItemClicked(item)"
+              v-if="item.type === 5008"
+            ></proxy-stat-snap>
+          </div>
 
-        <div ref="bottom"></div>
+          <div ref="bottom"></div>
+        </div>
       </div>
     </el-col>
     <el-col class="bg-border" style="width: calc(100vw - 400px);">
-      <h3>详情</h3>
-      <proxy-request-detail :request="curRecord" v-show="curRecord !== null" />
+      <proxy-request-detail :record="curRecord" v-show="curRecord !== null" />
       <!-- <proxy-stat-detail v-show="curRecord !== null" /> -->
     </el-col>
   </el-row>
@@ -58,7 +63,7 @@
 }
 
 .record-snap-panel {
-  height: calc(100vh - 255px);
+  height: calc(100vh - 245px);
   overflow-y: scroll;
   overflow-x: hidden;
   margin-bottom: 5px;

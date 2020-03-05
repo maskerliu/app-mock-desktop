@@ -11,31 +11,37 @@ export enum CMDCode {
 }
 
 export class BizReponse<T> {
-    code: number; 
+    code: number;
     msg: string;
     data: T;
 }
 
 export class ProxyRequestRecord {
     @Expose()
+    type?: number;
+    @Expose()
     id: string;
     @Expose()
-    readonly method: string;
+    method: string;
     @Expose()
-    readonly url: string;
+    url: string;
     @Expose()
-    readonly statusCode: number;
+    statusCode: number;
     @Expose()
     time: number;
     @Expose()
-    requestHeader: any;
+    headers: any;
     @Expose()
-    responseHeader?: any;
+    requestData: any;
+    @Expose()
+    responseHeaders?: any;
     @Expose()
     responseData?: any;
 }
 
 export class ProxyStatRecord {
+    @Expose()
+    type?: number;
     @Expose()
     id: string;
     @Expose()
