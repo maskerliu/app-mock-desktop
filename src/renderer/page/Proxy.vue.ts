@@ -3,10 +3,10 @@ import { Action, namespace, Getter, Mutation } from "vuex-class"
 
 import { Message } from "element-ui"
 import BScroll from 'better-scroll'
-import { throttle } from 'lodash'
 
-import { CMDCode, ProxyRequestRecord, ProxyStatRecord } from "../model/DataModels"
+import { CMDCode, ProxyRequestRecord, ProxyStatRecord } from "../../model/DataModels"
 
+import AbstractPage from "./AbstractPage.vue"
 import ProxyRequestSnap from "./components/ProxyRequestSnap.vue"
 import ProxyRequestDetail from "./components/ProxyRequestDetail.vue"
 import ProxyStatSnap from "./components/ProxyStatSnap.vue"
@@ -23,15 +23,13 @@ const ProxyRecords = namespace('ProxyRecords')
         ProxyStatDetail
     }
 })
-export default class Proxy extends Vue {
-    @Action('updateNavBarConfig')
-    public updateNavBarConfig: Function;
+export default class Proxy extends AbstractPage {
 
     @ProxyRecords.Getter("proxyRecords")
-    public records: Array<ProxyRequestRecord | ProxyStatRecord>;
+    private records: Array<ProxyRequestRecord | ProxyStatRecord>;
 
-    @ProxyRecords.Action('handleRecords')
-    public handleRecords!: Function;
+    @ProxyRecords.Action('clearRecords')
+    private clearRecords!: Function;
 
 
     public $refs!: {
@@ -100,6 +98,11 @@ export default class Proxy extends Vue {
         });
     }
 
+    clearProxyRecrods() {
+        this.curRecord = null;
+        this.clearRecords();
+    }
+
     @Watch("records")
     onRecordsChanged() {
         this.siftRecords();
@@ -116,7 +119,6 @@ export default class Proxy extends Vue {
 
     @Watch("proxyTypes")
     onProxyTypesChanged() {
-        console.log(this.proxyTypes.includes(String(CMDCode.REQUEST)));
         this.siftRecords();
     }
 }

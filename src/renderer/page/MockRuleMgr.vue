@@ -11,8 +11,8 @@
 
         <div class="rule-snap-panel" ref="wrapper">
           <mock-rule-snap
-            v-for="item in rules"
-            :key="item.id"
+            v-for="(item, idx) in rules"
+            :key="idx"
             :rule="item"
             :isSelected="curRule!== null && item.id === curRule.id"
             @click.native="onRuleClicked(item)"

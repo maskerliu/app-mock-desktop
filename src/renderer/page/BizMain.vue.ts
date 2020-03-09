@@ -1,12 +1,11 @@
 import { Component, Vue, Watch } from "vue-property-decorator"
 import { Action, Mutation, namespace, State, Getter } from 'vuex-class'
 
-import QrcodeVue from 'qrcode.vue'
 import { ipcRenderer } from 'electron'
+import QrcodeVue from 'qrcode.vue'
 
+import AbstractPage from "./AbstractPage.vue"
 import DebugPanel from "./DebugPanel.vue"
-import { CommonState } from "../store/types"
-import store from "../store"
 
 @Component({
     name: 'BizMain',
@@ -15,12 +14,12 @@ import store from "../store"
         DebugPanel,
     }
 })
-export default class BizMain extends Vue {
+export default class BizMain extends AbstractPage {
 
-    @Action('updateNavBarConfig') updateNavBarConfig: any;
-
-    @State(state => state.Common.registerUrl) registerUrl: string;
-    @State(state => state.Common.navBarConfig) navBarConfig: any;
+    @State(state => state.Common.registerUrl)
+    private registerUrl: string;
+    @State(state => state.Common.navBarConfig)
+    private navBarConfig: any;
 
     showQrCodeDialog: boolean = false;
     canRender: boolean = false;
@@ -29,14 +28,14 @@ export default class BizMain extends Vue {
     curPage: string = null;
 
     navMenu: Array<string> = ["Proxy", "MockRuleMgr", "Settings"]
-    curActivedNavMenuIdx: string = this.navMenu[0];
+    curActivedNavMenuIdx: string = null;
 
     created() {
 
     }
 
     mounted() {
-        
+        this.onNavTabClick(this.navMenu[0]);
     }
 
     destroy() {
@@ -73,8 +72,16 @@ export default class BizMain extends Vue {
         this.$router.replace({ name: index });
     }
 
+    onMaximize() {
+        ipcRenderer.send("onMaximize");
+    }
+
+    onMinus() {
+        ipcRenderer.send("onMinus");
+    }
+
     onClose() {
-        console.log("on close");
+        ipcRenderer.send("onQuit");
     }
 
     @Watch('$route')

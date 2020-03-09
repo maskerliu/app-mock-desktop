@@ -5,7 +5,7 @@ import { Message } from 'element-ui'
 
 import store from "../"
 import { CommonState } from '../types'
-import { CMDCode } from '../../model/DataModels'
+import { CMDCode } from '../../../model/DataModels'
 
 const state: CommonState = {
     showQrCodeDialog: false,

@@ -1,6 +1,6 @@
 {
   "name": "app-mock-desktop",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "author": "liuzhufeng",
   "description": "Application network mock & proxy project",
   "license": "MIT",
@@ -53,18 +53,12 @@
     },
     "linux": {
       "icon": "build/icons"
-    },
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "maskerliu",
-        "repo": "app-mock-desktop",
-        "releaseType": "pre-release",
-        "releaseNotes": "1、新增了本地服务端口自定义支持；\n2、对请求响应内容中的图片、音频加入预览支持；\n3、新增打点数据预览；\n4、增加功能Hand Book页；\n"
-      }
-    ]
+    }
   },
   "dependencies": {
+    "axios": "^0.19.0",
+    "nodejs-websocket": "^1.7.2",
+    "adm-zip": "^0.4.13",
     "json-bigint": "^0.3.0"
   },
   "devDependencies": {
@@ -72,11 +66,10 @@
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.2",
     "@types/body-parser": "1.19.0",
+    "@types/pouchdb": "^6.4.0",
     "md5": "^2.2.1",
-    "adm-zip": "^0.4.13",
     "ajv": "^6.5.0",
     "animate.css": "^3.7.2",
-    "axios": "^0.19.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
     "babel-plugin-transform-runtime": "^6.23.0",
@@ -98,16 +91,14 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "dexie": "^2.0.4",
-    "electron": "^8.0.3",
-    "electron-builder": "^20.44.4",
+    "electron": "^8.1.0",
+    "electron-builder": "^22.4.0",
     "electron-debug": "^3.0.1",
     "electron-devtools-installer": "^2.2.4",
-    "electron-rebuild": "^1.8.4",
+    "electron-rebuild": "^1.10.0",
     "element-ui": "^2.12.0",
     "express": "^4.17.1",
     "file-loader": "^1.1.11",
-    "flv.js": "^1.5.0",
-    "grapher-json-ui": "^1.0.4",
     "html-webpack-plugin": "^3.2.0",
     "http-server": "^0.12.1",
     "lodash": "^4.17.15",
@@ -117,12 +108,11 @@
     "multispinner": "^0.2.1",
     "muse-ui": "^3.0.2",
     "nedb": "^1.8.0",
-    "node-json-bigint": "^1.0.1",
     "node-ipc": "^9.1.1",
     "node-loader": "^0.6.0",
     "node-sass": "^4.9.2",
-    "nodejs-websocket": "^1.7.2",
     "normalize.css": "^8.0.1",
+    "pouchdb": "^7.2.1",
     "qrcode.vue": "^1.6.1",
     "reflect-metadata": "^0.1.13",
     "sass-loader": "^7.0.3",

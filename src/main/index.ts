@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, nativeImage } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, nativeImage, shell, Tray, IpcMainEvent } from 'electron';
 import path from 'path';
 
 const platform = require('os').platform();
@@ -25,13 +25,13 @@ if (process.env.NODE_ENV !== 'development') {
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 let mainWindow: BrowserWindow = null;
-let appTray = null;
+let appTray: Tray = null;
 
-const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:9080` : `file://${__dirname}/index.html`;
-const trayFloder = process.env.NODE_ENV === 'development' ? path.join(__dirname, '../../static') : path.join(__dirname, './static');
+const winURL: string = process.env.NODE_ENV === 'development' ? `http://localhost:9080` : `file://${__dirname}/index.html`;
+const trayFloder: string = process.env.NODE_ENV === 'development' ? path.join(__dirname, '../../static') : path.join(__dirname, './static');
 
 
-function createWindow() {
+function createMainWindow() {
     let icon = nativeImage.createFromPath(path.join(trayFloder, 'icon_tray.png'));
 
     if (process.platform === 'darwin') {
@@ -45,7 +45,7 @@ function createWindow() {
                     },
                     {
                         label: "端口设置", accelerator: "Command+P", click: function () {
-                            setLocalServerPort();
+                            // setLocalServerPort();
                         }
                     },
                     {
@@ -77,7 +77,6 @@ function createWindow() {
         minWidth: 1200,
         minHeight: 800,
         useContentSize: true,
-        
         transparent: false,
         frame: false,
         resizable: true,
@@ -90,17 +89,83 @@ function createWindow() {
     });
 
     mainWindow.loadURL(winURL);
+    mainWindow.webContents.frameRate = 30;
 
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
-
-    handleUpdate();
 }
+
+function createTrayMenu() {
+    //系统托盘右键菜单
+    let trayMenuTemplate = [
+        {
+            label: '设置',
+            click: () => { }, //打开相应页面
+        },
+        {
+            label: '帮助',
+            click: () => { },
+        },
+        {
+            label: '关于',
+            click: () => {
+                shell.openExternal('https://www.hibixin.com/')
+            },
+        },
+        {
+            label: '退出',
+            click: () => {
+                app.quit()
+                app.quit()
+            },
+        },
+    ]
+    if (platform === 'darwin') {
+        appTray = new Tray(path.join(trayFloder, 'icon_tray.png')) // app.ico是app目录下的ico文件
+    } else {
+        appTray = new Tray(path.join(trayFloder, 'app_tray.ico')) // app.ico是app目录下的ico文件
+    }
+    const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
+    appTray.setToolTip('AppMock');
+    appTray.setContextMenu(contextMenu);
+    appTray.on('click', () => {
+        mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
+        mainWindow.isVisible()
+            ? mainWindow.setSkipTaskbar(false)
+            : mainWindow.setSkipTaskbar(true)
+    });
+}
+
+ipcMain.on("onMaximize", (event: IpcMainEvent, args?: any) => {
+    if (mainWindow == null) return;
+
+    if (mainWindow.isMaximized()) {
+        mainWindow.unmaximize();
+    } else {
+        mainWindow.maximize();
+    }
+});
+
+ipcMain.on("onMinus", (event: IpcMainEvent, args?: any) => {
+    if (mainWindow == null) return;
+
+    if (!mainWindow.isMinimized()) {
+        mainWindow.minimize();
+    }
+});
+
+ipcMain.on("onQuit", (event: IpcMainEvent, args?: any) => {
+    app.quit();
+});
+
 
 // app.disableHardwareAcceleration();
 
-app.on('ready', createWindow);
+app.on('ready', () => {
+    createMainWindow();
+    createTrayMenu();
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -110,58 +175,6 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
     if (mainWindow === null) {
-        createWindow();
+        createMainWindow();
     }
 });
-
-ipcMain.on('port-setting-save', (event: any, args: any) => {
-    app.relaunch();
-    app.exit(0);
-});
-
-function setLocalServerPort() {
-    mainWindow.webContents.send('open-port-setting');
-}
-
-const UPDATE_MSG = {
-    error: '检查更新出错',
-    checking: '正在检查更新……',
-    updateAva: '检测到新版本，正在下载……',
-    updateNotAva: '已是最新版本，暂无更新',
-};
-
-function handleUpdate() {
-    // autoUpdater.autoDownload = false;
-    // autoUpdater.on('error', function (error) {
-    //     mainWindow.webContents.send('update-check', UPDATE_MSG.error);
-    // });
-    // autoUpdater.on('checking-for-update', function () {
-    //     mainWindow.webContents.send('update-check', UPDATE_MSG.checking);
-    // });
-    // autoUpdater.on('update-available', function (info) {
-    //     console.log(info);
-    //     mainWindow.webContents.send('update-available', info);
-    // });
-    // autoUpdater.on('update-not-available', function (info) {
-    //     mainWindow.webContents.send('update-not-available', UPDATE_MSG.updateNotAva);
-    // });
-    // autoUpdater.on('download-progress', function (progress) {
-    //     console.log(progress);
-    //     mainWindow.webContents.send('download-progress', progress);
-    // });
-    // autoUpdater.on('update-downloaded', function (info) {
-    //     mainWindow.webContents.send('update-now');
-    // });
-
-    // ipcMain.on('download-update', (event, args) => {
-    //     autoUpdater.downloadUpdate();
-    // });
-    // ipcMain.on('update-now', ()=>{
-    //     autoUpdater.quitAndInstall();
-    // });
-
-    // ipcMain.on("check-update", () => {
-    //     //执行自动更新检查
-    //     autoUpdater.checkForUpdates();
-    // })
-}

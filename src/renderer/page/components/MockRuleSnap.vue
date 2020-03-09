@@ -1,25 +1,24 @@
 <template>
   <div class="rule-snap-item">
     <span class="item-selected" v-if="isSelected"></span>
-    <strong class="rule-snap-method">[{{rule.name}}]</strong>
-    <span class="rule-snap-url">{{rule.desc}}</span>
+    <strong class="rule-snap-name">[{{rule.name}}]</strong>
+    <span style="position: absolute; top: 8px; right: 40px;">
+      <span style="font-size: 0.6rem; margin-left: 15px; color: #34495e;">启用Mock:</span>
+      <el-switch style="margin-top: 3px;" v-model="rule.isMock"></el-switch>
+    </span>
+
+    <br />
+    <span class="rule-snap-desc">{{rule.desc}}</span>
     <div style="width: 100%; margin-top: 10px;">
       <span class="rule-snap-status">
         <b style="color: #2980b9;">请求数:</b>
-        {{rule.requests.length}}
+        {{rule.requests != null ? rule.requests.length : 0}}
       </span>
     </div>
     <i
       class="el-icon-arrow-right"
       style="position: absolute;top: 30px; right: 15px; font-size: 1.2rem; color: grey;"
     ></i>
-    <el-dialog title="提示" :visible.sync="showEditor" width="50%">
-      <span>这是一段信息</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="showEditor = false">取 消</el-button>
-        <el-button type="primary" @click="showEditor = false">确 定</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 
@@ -40,13 +39,13 @@
   cursor: pointer;
 }
 
-.rule-snap-method {
+.rule-snap-name {
   font-size: 0.8rem;
   color: #2980b9;
 }
 
-.rule-snap-url {
-  font-size: 0.8rem;
+.rule-snap-desc {
+  font-size: 0.6rem;
   color: #34495e;
   font-style: italic;
 }
@@ -65,5 +64,9 @@
   background: #16a085;
   left: 0;
   top: 0;
+}
+
+.el-switch__label * {
+  font-size: 0.6rem;
 }
 </style>

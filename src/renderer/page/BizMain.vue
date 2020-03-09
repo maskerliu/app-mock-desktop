@@ -1,9 +1,13 @@
 <template>
   <el-row id="app">
     <el-col style="width: 70px; height: 100vh;">
-      <el-menu :default-active="curActivedNavMenuIdx" :collapse="false" style="width: 100%; height: 100%;">
+      <el-menu
+        :default-active="curActivedNavMenuIdx"
+        :collapse="false"
+        style="width: 100%; height: 100%;"
+      >
         <el-menu-item index="0" style="padding-left: 15px; margin-top: 50px;">
-          <el-popover placement="right" title="" width="260" height="400" v-model="showQrCodeDialog">
+          <el-popover placement="right" title width="260" height="400" v-model="showQrCodeDialog">
             <div id="register">
               扫描二维码或者手机访问：
               <br />
@@ -27,7 +31,11 @@
         >
           <i class="iconfont icon-rule" style="font-size: 1.8rem;"></i>
         </el-menu-item>
-        <el-menu-item index="Settings" style="padding-left: 20px;" @click="onNavTabClick('Settings')">
+        <el-menu-item
+          index="Settings"
+          style="padding-left: 20px;"
+          @click="onNavTabClick('Settings')"
+        >
           <i class="iconfont icon-setting" style="font-size: 1.8rem;"></i>
         </el-menu-item>
         <el-menu-item index="4" style="padding-left: 15px;">
@@ -41,10 +49,19 @@
           <i class="el-icon-back" v-if="navBarConfig.leftItem"></i>
           <span class="navbar-btn">{{navBarConfig.title}}</span>
         </div>
-        <div class="header-content">
-          <div class="el-icon-switch-button" style="color: #e74c3c; font-size: 1.1rem; font-weight: bold;" @click="onClose()"></div>
-          <!-- <el-button circle type="danger" size="small" icon="el-icon-switch-button" @click="onClose">
-          </el-button> -->
+        <div class="header-content"></div>
+        <div class="header-right">
+          <span class="el-icon-minus header-right-btn" style="color: #f39c12;" @click="onMinus()"></span>
+          <span
+            class="el-icon-full-screen header-right-btn"
+            style="color: #2ecc71;"
+            @click="onMaximize()"
+          ></span>
+          <span
+            class="el-icon-switch-button header-right-btn"
+            style="color: #e74c3c;"
+            @click="onClose()"
+          ></span>
         </div>
       </div>
       <transition
@@ -100,13 +117,6 @@
   /*border-radius: 40px;*/
 }
 
-.page-loading {
-  position: absolute;
-  top: calc(50% - 157px);
-  left: calc(50% - 286px);
-  z-index: -1;
-}
-
 .badge-box {
   position: relative;
 }
@@ -134,12 +144,37 @@
   color: white;
   -webkit-app-region: drag;
 }
+
 .header-title {
-  flex: 1;
+  flex: 2;
 }
+
 .header-content {
+  flex: 7;
   display: flex;
+  flex-direction: row;
   align-items: center;
 }
 
+.header-right {
+  flex: 1;
+  align-items: right;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+.header-right-btn {
+  color: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  margin-left: 10px;
+  padding: 3px 2px 3px 3px;
+  border-radius: 4rem;
+  border: 1px solid #bdc3c7;
+}
+
+.header-right-btn:hover {
+  border-radius: 4rem;
+  border: 1px solid #ecf0f1;
+}
 </style>

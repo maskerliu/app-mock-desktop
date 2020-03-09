@@ -2,8 +2,9 @@ import { Component, Vue, Prop, Watch } from "vue-property-decorator"
 import { Action, namespace } from 'vuex-class'
 
 import VJsonEditor from "v-jsoneditor"
+import AddMockRule from "./AddMockRule.vue"
 
-import { ProxyRequestRecord } from "../../model/DataModels"
+import { ProxyRequestRecord } from "../../../model/DataModels"
 
 const AUDIO_RGX = new RegExp('(.mp3|.ogg|.wav|.m4a|.aac)$');
 const VIDEO_RGX = new RegExp('(.mp4)$');
@@ -12,7 +13,8 @@ const IMG_RGX = new RegExp("(.jpg|.jpeg|.png|.JPG|.gif|.GIF|.webp)$");
 @Component({
     name: 'ProxyRequestDetail',
     components: {
-        VJsonEditor
+        VJsonEditor,
+        AddMockRule
     },
 })
 export default class ProxyRequestDetail extends Vue {
@@ -36,6 +38,7 @@ export default class ProxyRequestDetail extends Vue {
     audioPlayer: any = null;
     curVideoSrc: string = null;
     showPreview: boolean = false;
+    showAddMockRule: boolean = true;
 
 
     headerOption: any = {
@@ -96,7 +99,7 @@ export default class ProxyRequestDetail extends Vue {
     }
 
     addToMock() {
-        this.sendMessage("hello world");
+        this.showAddMockRule = true;
         // if (!!!this.record.responseData) {
         //     return;
         // }
@@ -113,7 +116,6 @@ export default class ProxyRequestDetail extends Vue {
 
     @Watch("showPreview")
     onShowPreviewChanged() {
-        console.log(this.showPreview);
         if (!this.showPreview) {
             if (this.audioPlayer != null) {
                 this.audioPlayer.pause();

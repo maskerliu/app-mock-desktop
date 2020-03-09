@@ -1,7 +1,7 @@
 import { Component, Vue } from "vue-property-decorator"
 import { namespace } from 'vuex-class'
 
-import { ProxyStatRecord } from "../../model/DataModels"
+import { ProxyStatRecord } from "../../../model/DataModels"
 
 @Component({
     name: 'ProxyStatDetail',

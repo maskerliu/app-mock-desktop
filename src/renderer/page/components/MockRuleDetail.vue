@@ -9,17 +9,17 @@
       :data="rule != null && rule.requests != null ? rule.requests : []"
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
     >
-      <el-table-column prop="url" label="路径" width="240">
+      <el-table-column prop="url" label="路径" width="320">
         <template slot-scope="scope">
           <span
-            style="font-size: 0.8rem; color: #2980b9; font-style: italic; font-weight: bold;"
+            style="font-size: 0.7rem; color: #2980b9; font-style: italic; font-weight: bold;"
           >{{scope.row.url}}</span>
         </template>
       </el-table-column>
       <el-table-column prop="time" label="耗时" width="100"></el-table-column>
       <el-table-column prop="statusCode" label="请求状态" width="100"></el-table-column>
       <el-table-column prop="responseData.code" label="业务状态" width="100"></el-table-column>
-      <el-table-column label="操作" fixed="right" width="150">
+      <el-table-column label="操作" fixed="right" width="100">
         <template slot-scope="scope">
           <el-button
             type="primary"
@@ -39,18 +39,23 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog title="提示" :visible.sync="showEditor" width="70%">
-      <span>这是一段信息</span>
+    <el-dialog title="详情" :visible.sync="showEditor" width="70%" top="70px">
+      <v-json-editor
+          ref="respJsonEditor"
+          :options="jeOption"
+          v-model="curRecord"
+          style="height: calc(100vh - 300px);"
+        />
       <span slot="footer" class="dialog-footer">
-        <el-button size="mini" @click="showEditor = false">取 消</el-button>
-        <el-button type="primary" size="mini" @click="showEditor = false">确 定</el-button>
+        <el-button size="mini" @click="showEditor = false">取消</el-button>
+        <el-button type="primary" size="mini" @click="showEditor = false">保存</el-button>
       </span>
     </el-dialog>
     <el-dialog title="警告" :visible.sync="showDeleteConfirm" width="30%">
       <span>确认要删除这条请求数据？</span>
       <span slot="footer" class="dialog-footer">
-        <el-button size="mini" @click="showDeleteConfirm = false">取 消</el-button>
-        <el-button type="primary" size="mini" @click="showDeleteConfirm = false">确 定</el-button>
+        <el-button size="mini" @click="showDeleteConfirm = false">取消</el-button>
+        <el-button type="primary" size="mini" @click="showDeleteConfirm = false">确定</el-button>
       </span>
     </el-dialog>
   </div>

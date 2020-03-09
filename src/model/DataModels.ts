@@ -43,7 +43,7 @@ export class ProxyStatRecord {
     @Expose()
     type?: number;
     @Expose()
-    id: string;
+    id: number;
     @Expose()
     app_id: string;
     @Expose()
@@ -78,6 +78,7 @@ export class MockRule {
     name: string;
     @Expose()
     desc: string;
+    isMock?: boolean = false;
     @Type(() => ProxyRequestRecord)
     requests: ProxyRequestRecord[];
 

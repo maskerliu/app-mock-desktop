@@ -19,8 +19,9 @@
         <el-checkbox slot="append" size="mini"></el-checkbox>
       </el-input>
 
-      <el-input size="small" placeholder="筛选关键字" v-model="filterInput" style="margin-top: 10px;">
+      <el-input size="small" placeholder="筛选关键字" v-model="filterInput" clearable style="margin-top: 10px;">
         <i slot="prefix" class="el-input__icon iconfont icon-search"></i>
+        <el-button slot="append" icon="iconfont icon-clear" @click="clearProxyRecrods()"></el-button>
       </el-input>
 
       <el-divider />

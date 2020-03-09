@@ -5,7 +5,7 @@ import { Message } from 'element-ui'
 import { ActionTree, Commit, GetterTree, MutationTree } from 'vuex'
 
 import { ProxyRecordState } from '../types'
-import { CMDCode, ProxyStatRecord, ProxyRequestRecord } from '../../model/DataModels'
+import { CMDCode, ProxyStatRecord, ProxyRequestRecord } from '../../../model/DataModels'
 
 
 const state: ProxyRecordState = {
@@ -20,8 +20,8 @@ const getters: GetterTree<ProxyRecordState, any> = {
 
 // async
 export const actions: ActionTree<ProxyRecordState, any> = {
-    handleRecords(context: { commit: Commit, state: ProxyRecordState }, data: any) {
-
+    clearRecords(context: { commit: Commit, state: ProxyRecordState }, data: any) {
+        context.commit("clearRecords");
     }
 }
 
@@ -40,7 +40,7 @@ const mutations: MutationTree<ProxyRecordState> = {
         for (let i = 0; i < state.records.length; ++i) {
             let anchor: ProxyRequestRecord = <ProxyRequestRecord>state.records[i];
             if (anchor != null && anchor.id === record.id) {
-                anchor.responseHeaders= record.headers;
+                anchor.responseHeaders = record.headers;
                 anchor.responseData = JSON.parse(record.responseData);
                 anchor.statusCode = record.statusCode;
                 anchor.time = record.time;
@@ -67,8 +67,11 @@ const mutations: MutationTree<ProxyRecordState> = {
         };
         let record: ProxyStatRecord = plainToClass(ProxyStatRecord, recordJson, { excludeExtraneousValues: true });
         state.records.push(record);
-    }
+    },
 
+    clearRecords(state, params?: any): void {
+        state.records.splice(0, state.records.length);
+    }
 };
 
 export default {

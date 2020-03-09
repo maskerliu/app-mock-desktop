@@ -1,20 +1,29 @@
 import { Component, Vue, Prop, Watch } from "vue-property-decorator"
 import { namespace } from 'vuex-class'
 
-import { ProxyRequestRecord, ProxyStatRecord, MockRule } from "../../model/DataModels"
+import VJsonEditor from "v-jsoneditor"
+
+import { ProxyRequestRecord, ProxyStatRecord, MockRule } from "../../../model/DataModels"
 
 @Component({
     name: 'MockRuleDetail',
     components: {
-
+        VJsonEditor,
     },
 })
 export default class MockRuleDetail extends Vue {
-
+    jeOption: {} = {
+        mode: "code",
+        search: false,
+        navigationBar: false,
+        statusBar: false,
+        mainMenuBar: false
+    };
+    
     @Prop()
     rule: MockRule;
 
-    curRequest: ProxyRequestRecord = null;
+    curRecord: ProxyRequestRecord = null;
     showEditor: boolean = false;
     showDeleteConfirm: boolean = false;
 
@@ -24,7 +33,7 @@ export default class MockRuleDetail extends Vue {
 
     onEditClicked(request: ProxyRequestRecord) {
         this.showEditor = true;
-        this.curRequest = request;
+        this.curRecord = request;
     }
 
     onDeleteClicked(request: ProxyRequestRecord) {

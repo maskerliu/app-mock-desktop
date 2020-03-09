@@ -1,4 +1,4 @@
-import { ProxyRequestRecord, ProxyStatRecord, MockRule } from "../model/DataModels"
+import { ProxyRequestRecord, ProxyStatRecord, MockRule } from "../../model/DataModels"
 
 export interface EnvState {
   env: string;
@@ -28,10 +28,6 @@ export interface ProxyRecordState {
   records: Array<ProxyRequestRecord | ProxyStatRecord>;
 }
 
-export class MockRuleArray extends Array<MockRule> {
-
-}
-
 export class MockRuleState {
-  rules: MockRuleArray;
+  rules: Array<MockRule>;
 }

@@ -1,7 +1,7 @@
 import { Component, Vue, Prop } from "vue-property-decorator"
 import { namespace } from 'vuex-class'
 
-import { ProxyRequestRecord } from "../../model/DataModels"
+import { ProxyRequestRecord } from "../../../model/DataModels"
 
 @Component({
     name: 'ProxyRequestSnap',
