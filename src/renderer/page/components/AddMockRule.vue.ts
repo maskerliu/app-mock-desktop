@@ -5,6 +5,8 @@ import { MockRule, ProxyRequestRecord } from "../../../model/DataModels"
 
 import VJsonEditor from "v-jsoneditor"
 
+const MockRules = namespace("MockRules");
+
 @Component({
     name: 'Settings',
     components: {
@@ -13,12 +15,15 @@ import VJsonEditor from "v-jsoneditor"
 })
 export default class AddMockRule extends Vue {
 
+    @MockRules.Action("searchMockRules")
+    private searchMockRules: Function;
 
     @Prop()
     show: boolean;
     @Prop()
     record: ProxyRequestRecord;
 
+    keyword: string = null;
     visible: boolean = false;
     rules: Array<MockRule> = null;
     curRule: MockRule = null;
@@ -42,14 +47,16 @@ export default class AddMockRule extends Vue {
         this.wrapperRecord = Object.assign({}, this.record);
 
         this.curRule = {
-            id: "#ypp031349101",
+            _id: "#ypp031349101",
             name: "首页feed流-异网",
             desc: "网络异常下的页面兜底",
             requests: []
         }
     }
 
-    querySearchAsync(queryString: string, cb: any) {
+    querySearchAsync() {
+
+        this.searchMockRules(this.keyword);
         // var restaurants = this.rules;
         // var results = queryString ? restaurants.filter(this.createStateFilter(queryString)) : restaurants;
 
@@ -90,7 +97,7 @@ export default class AddMockRule extends Vue {
 
     onSave() {
         this.isSaving = true;
-        if (this.curRule === null || this.curRule.id === null) {
+        if (this.curRule === null || this.curRule._id === null) {
 
         } else {
 

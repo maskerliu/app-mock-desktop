@@ -164,6 +164,7 @@
 }
 
 .header-right-btn {
+  -webkit-app-region: no-drag;
   color: white;
   font-size: 0.6rem;
   font-weight: bold;

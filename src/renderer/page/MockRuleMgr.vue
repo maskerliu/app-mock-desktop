@@ -7,23 +7,51 @@
           <el-button slot="append" icon="el-icon-check"></el-button>
         </el-input>
 
-        <el-divider />
+        <el-divider content-position="right">
+          <el-button size="mini" type="success" icon="el-icon-plus" @click="onEditMockRule(null)"></el-button>
+        </el-divider>
 
         <div class="rule-snap-panel" ref="wrapper">
           <mock-rule-snap
             v-for="(item, idx) in rules"
             :key="idx"
             :rule="item"
-            :isSelected="curRule!== null && item.id === curRule.id"
+            :isSelected="curRule!== null && item._id === curRule._id"
             @click.native="onRuleClicked(item)"
+            v-on:edit="onEditMockRule(item)"
+            v-on:delete="onDeleteMockRule(item)"
+            v-on:open-mock="onMockSwitchChanged(item)"
           />
-          <div ref="bottom"></div>
         </div>
+        <el-pagination small layout="prev, pager, next" :total="1000"></el-pagination>
       </el-col>
       <el-col class="border-panel" style="width: calc(100vw - 400px);">
         <mock-rule-detail :rule="curRule" />
       </el-col>
     </el-row>
+
+    <el-dialog title="Waring" :visible.sync="showDeleteMockRuleDialog" width="30%">
+      <span>确定删除[{{curRule != null ? curRule.name : ""}}]这条Mock规则吗?</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showDeleteMockRuleDialog = false">取 消</el-button>
+        <el-button type="danger" @click="onDeleteMockRuleConfirmed()">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog title="Mock规则详情" :visible.sync="showEditMockRuleDialog" width="50%">
+      <el-form ref="form" :model="curRule" label-width="90px" v-if="curRule != null">
+        <el-form-item label="规则组名">
+          <el-input v-model="curRule.name" placeholder="规则组名"></el-input>
+        </el-form-item>
+        <el-form-item label="规则组描述">
+          <el-input v-model="curRule.desc" placeholder="规则组描述"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showEditMockRuleDialog = false">取 消</el-button>
+        <el-button type="primary" @click="onSaveMockRule()">保 存</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -36,4 +64,16 @@
   margin: 5px;
   padding: 5px;
 }
+
+.rule-snap-panel {
+  height: calc(100vh - 200px);
+  overflow-y: scroll;
+  overflow-x: hidden;
+  margin-bottom: 5px;
+}
+
+.rule-snap-panel::-webkit-scrollbar {
+  display: none;
+}
+
 </style>

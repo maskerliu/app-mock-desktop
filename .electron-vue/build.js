@@ -127,7 +127,7 @@ function greeting() {
 
     if (text && !isCI) {
         say(text, {
-            colors: ['yellow'],
+            colors: ['green'],
             font: 'simple3d',
             space: false
         })

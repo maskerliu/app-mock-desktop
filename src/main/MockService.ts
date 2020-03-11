@@ -19,7 +19,6 @@ export function mockRequestData(req: Request, resp: Response, rule: any, session
 }
 
 export function initDB() {
-    console.log("init pouchdb");
     localDB = new PouchDB('AppMockDB');
 
     localDB.info().then(function (info) {
@@ -38,8 +37,11 @@ export function getMockRuleDetail(): MockRule {
 }
 
 // add or update mock rule
-export function updateMockRule(rule: MockRule) {
+export function saveMockRule(rule: MockRule) {
+    if (rule._id === null) {
 
+    } else {
+    }
 }
 
 // delete mock rule

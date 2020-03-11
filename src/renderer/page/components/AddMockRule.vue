@@ -1,9 +1,15 @@
 <template>
-  <el-row style="width: 100%; height: calc(100vh - 215px);">
-    <el-row style="padding: 15px; margin-bottom: 10px; box-shadow: 2px 4px 6px #00000080;">
+  <el-row style="width: 100%; height: calc(100vh - 185px);">
+    <el-row style="padding: 10px; margin:-30px 0 10px 0; box-shadow: 2px 4px 6px #00000080;">
       <el-col :span="12">
-        <el-input v-model="curRule.name" size="mini" style="width: 100%;" placeholder="请输入内容" clearable>
-          <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-input
+          v-model="keyword"
+          size="mini"
+          style="width: 100%;"
+          placeholder="请输入内容"
+          clearable
+        >
+          <el-button slot="append" icon="el-icon-search" @click="querySearchAsync()"></el-button>
         </el-input>
       </el-col>
       <el-col :span="12">
@@ -24,7 +30,7 @@
       </el-col>
     </el-row>
 
-    <el-row style="width: 100%; height: calc(100% - 70px); display: flex;">
+    <el-row style="width: 100%; height: calc(100% - 20px); display: flex;">
       <el-col style="flex:1; height: 100%; box-shadow: 2px 4px 6px #00000080;">
         <v-json-editor
           ref="respJsonEditor"
@@ -34,7 +40,13 @@
         />
       </el-col>
       <el-col :span="1" style="padding: 10px;">
-        <el-button type="primary" size="mini" icon="el-icon-arrow-right" circle @click.native="addRule()"></el-button>
+        <el-button
+          type="primary"
+          size="mini"
+          icon="el-icon-arrow-right"
+          circle
+          @click.native="addRule()"
+        ></el-button>
       </el-col>
       <el-col style="width: 471px; height: 100%; box-shadow: 2px 4px 6px #00000080;">
         <el-table
@@ -52,7 +64,7 @@
           </el-table-column>
           <el-table-column prop="statusCode" label="请求状态" width="85"></el-table-column>
           <el-table-column prop="responseData.code" label="业务状态" width="85"></el-table-column>
-          <el-table-column label="操作"  width="60">
+          <el-table-column label="操作" width="60">
             <template slot-scope="scope">
               <el-button
                 type="danger"
@@ -72,4 +84,5 @@
 <script lang="ts" src="./AddMockRule.vue.ts"></script>
 
 <style>
+
 </style>

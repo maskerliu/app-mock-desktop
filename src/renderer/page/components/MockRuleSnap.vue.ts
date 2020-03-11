@@ -15,19 +15,9 @@ export default class MockRuleSnap extends Vue {
     rule: MockRule;
 
     @Prop()
-    isSelected: boolean = false;
-
-    showEditor: boolean = false;
+    isSelected: boolean;
 
     created() {
-
-    }
-
-    onEditClicked() {
-
-    }
-
-    onDeleteClicked() {
 
     }
 

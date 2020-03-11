@@ -15,7 +15,7 @@ export default class ProxyRequestSnap extends Vue {
     reqRecord: ProxyRequestRecord;
 
     @Prop()
-    isSelected: boolean = false;
+    isSelected: boolean;
 
     created() {
 

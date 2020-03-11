@@ -73,7 +73,7 @@ export class ProxyStatRecord {
 
 export class MockRule {
     @Expose()
-    id: string;
+    _id: string;
     @Expose()
     name: string;
     @Expose()

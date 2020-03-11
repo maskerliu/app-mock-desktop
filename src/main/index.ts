@@ -124,7 +124,7 @@ function createTrayMenu() {
     if (platform === 'darwin') {
         appTray = new Tray(path.join(trayFloder, 'icon_tray.png')) // app.ico是app目录下的ico文件
     } else {
-        appTray = new Tray(path.join(trayFloder, 'app_tray.ico')) // app.ico是app目录下的ico文件
+        appTray = new Tray(path.join(trayFloder, 'icon.ico')) // app.ico是app目录下的ico文件
     }
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
     appTray.setToolTip('AppMock');

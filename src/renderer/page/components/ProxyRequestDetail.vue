@@ -48,7 +48,7 @@
       />
     </div>
 
-    <el-dialog title="AddMockRule" :visible.sync="showAddMockRule" width="90%" top="50px">
+    <el-dialog title="AddMockRule" :visible.sync="showAddMockRule" width="90%" top="20px">
       <add-mock-rule :show="showAddMockRule" :record="wrapperRecord"></add-mock-rule>
     </el-dialog>
 
@@ -142,6 +142,6 @@ div.jsoneditor-value {
 }
 
 .ace-jsoneditor .ace_gutter {
-  visibility: hidden;
+  /* visibility: hidden; */
 }
 </style>
