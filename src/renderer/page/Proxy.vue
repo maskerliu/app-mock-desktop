@@ -19,7 +19,13 @@
         <el-checkbox slot="append" size="mini"></el-checkbox>
       </el-input>
 
-      <el-input size="small" placeholder="筛选关键字" v-model="filterInput" clearable style="margin-top: 10px;">
+      <el-input
+        size="small"
+        placeholder="筛选关键字"
+        v-model="filterInput"
+        clearable
+        style="margin-top: 10px;"
+      >
         <i slot="prefix" class="el-input__icon iconfont icon-search"></i>
         <el-button slot="append" icon="iconfont icon-clear" @click="clearProxyRecrods()"></el-button>
       </el-input>
@@ -27,13 +33,14 @@
       <el-divider />
 
       <div class="record-snap-panel" ref="wrapper">
-        <div >
+        <div>
           <div v-for="(item, idx) in filtedRecords" :key="idx">
             <proxy-request-snap
+              v-loading="item.type !== 5004"
               :reqRecord="item"
               :isSelected="curRecord != null && item.id === curRecord.id"
               @click.native="onItemClicked(item)"
-              v-if="item.type === 5001"
+              v-if="item.type === 5002 || item.type === 5004"
             ></proxy-request-snap>
             <proxy-stat-snap
               :statRecord="item"

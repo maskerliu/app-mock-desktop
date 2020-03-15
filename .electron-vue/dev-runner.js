@@ -23,7 +23,7 @@ const platform = os.platform();
 function logStats(proc, data) {
     let log = '';
 
-    log += chalk.yellow.bold(`┏ ${proc} Process ${new Array((19 - proc.length) + 1).join('-')}`);
+    log += chalk.green.bold(`┏ ${proc} Process ${new Array((19 - proc.length) + 1).join('-')}`);
     log += '\n\n';
 
     if (typeof data === 'object') {

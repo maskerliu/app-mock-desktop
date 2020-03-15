@@ -4,7 +4,7 @@ import { Action, namespace, Getter, Mutation } from "vuex-class"
 import AbstractPage from "./AbstractPage.vue"
 
 @Component({
-    name: 'Settings',
+    name: "Settings",
     components: {
         
     },

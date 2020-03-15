@@ -2,7 +2,7 @@ import { Component, Vue, Watch } from "vue-property-decorator"
 import { Action, namespace, Getter, Mutation } from "vuex-class"
 
 import { Message } from "element-ui"
-import BScroll from 'better-scroll'
+import BScroll from "better-scroll"
 
 import { CMDCode, ProxyRequestRecord, ProxyStatRecord } from "../../model/DataModels"
 
@@ -12,10 +12,10 @@ import ProxyRequestDetail from "./components/ProxyRequestDetail.vue"
 import ProxyStatSnap from "./components/ProxyStatSnap.vue"
 import ProxyStatDetail from "./components/ProxyStatDetail.vue"
 
-const ProxyRecords = namespace('ProxyRecords')
+const ProxyRecords = namespace("ProxyRecords")
 
 @Component({
-    name: 'Proxy',
+    name: "Proxy",
     components: {
         ProxyRequestSnap,
         ProxyRequestDetail,
@@ -28,7 +28,7 @@ export default class Proxy extends AbstractPage {
     @ProxyRecords.Getter("proxyRecords")
     private records: Array<ProxyRequestRecord | ProxyStatRecord>;
 
-    @ProxyRecords.Action('clearRecords')
+    @ProxyRecords.Action("clearRecords")
     private clearRecords!: Function;
 
 
@@ -75,25 +75,34 @@ export default class Proxy extends AbstractPage {
     }
 
     onItemClicked(item: ProxyRequestRecord | ProxyStatRecord) {
-        if (item instanceof ProxyRequestRecord) {
-            this.curRecord = item;
-        } else if (item instanceof ProxyStatRecord) {
-            this.curRecord = item;
-            console.log("ProxyStatRecord");
-        } else {
-            Message({ message: '未知类型数据', type: "warning" });
+        switch (item.type) {
+            case CMDCode.REQUEST:
+            case CMDCode.REQUEST_START:
+            case CMDCode.REQUEST_END:
+                this.curRecord = item;
+                break;
+            case CMDCode.STATISTICS:
+                this.curRecord = item;
+                console.log("ProxyStatRecord");
+                break;
+            default:
+                Message({ message: "未知类型数据", type: "warning" });
+                break;
         }
     }
 
     siftRecords() {
         this.filtedRecords = this.records.filter((item: ProxyRequestRecord | ProxyStatRecord) => {
-            if (item instanceof ProxyRequestRecord && this.proxyTypes.includes(String(CMDCode.REQUEST))) {
-                if (this.filterInput == null) return true;
-                return (<ProxyRequestRecord>item).url.indexOf(this.filterInput) !== -1;
-            } else if (item instanceof ProxyStatRecord && this.proxyTypes.includes(String(CMDCode.STATISTICS))) {
-                return true;
-            } else {
-                return false;
+            switch (item.type) {
+                case CMDCode.REQUEST:
+                case CMDCode.REQUEST_START:
+                case CMDCode.REQUEST_END:
+                    if (this.filterInput == null) return true;
+                    return (<ProxyRequestRecord>item).url.indexOf(this.filterInput) !== -1;
+                case CMDCode.STATISTICS:
+                    return true;
+                default:
+                    return false;
             }
         });
     }

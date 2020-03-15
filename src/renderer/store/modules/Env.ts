@@ -1,10 +1,9 @@
-import {ipcRenderer} from 'electron'
-import { ActionTree, Commit, GetterTree, MutationTree } from 'vuex'
+import { ActionTree, Commit, GetterTree, MutationTree } from "vuex"
 
-import { EnvState } from '../types'
+import { EnvState } from "../types"
 
 const state: EnvState = {
-    env: 'test',
+    env: "test",
     appId: "",
     bundleId: "",
 }

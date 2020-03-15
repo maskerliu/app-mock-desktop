@@ -11,4 +11,4 @@ thumbs.db
 yarn.lock
 package-lock.json
 .idea/*
-AppMockDB/*
+*.log

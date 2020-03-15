@@ -26,7 +26,7 @@
         <el-pagination small layout="prev, pager, next" :total="1000"></el-pagination>
       </el-col>
       <el-col class="border-panel" style="width: calc(100vw - 400px);">
-        <mock-rule-detail :rule="curRule" />
+        <mock-rule-detail :rule-id="curRule._id" v-if="curRule != null" />
       </el-col>
     </el-row>
 

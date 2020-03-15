@@ -1,8 +1,7 @@
-import Url from 'url'
-import zlib from 'zlib'
-import cors from 'cors'
-import express, { Application, Request, Response } from 'express'
-import bodyParser from 'body-parser'
+import zlib from "zlib"
+import cors from "cors"
+import express, { Application, Request, Response } from "express"
+import bodyParser from "body-parser"
 
 import * as WebService from "./WebService"
 import * as PushService from "./PushService"
@@ -10,9 +9,9 @@ import * as ProxyService from "./ProxyService"
 
 import * as MockService from "./MockService"
 
-const { ipcMain } = require('electron');
+const { ipcMain } = require("electron");
 const compression = require("compression");
-const interfaces = require('os').networkInterfaces();
+const interfaces = require("os").networkInterfaces();
 
 const corsOptions = {
     origin: 'http://localhost:9080',
@@ -65,7 +64,7 @@ ipcMain.on('save-mock-config', (event: any, args?: any) => {
 })
 
 
-let app: Application = express();
+const app: Application = express();
 app.use(cors(corsOptions));
 app.use(compression());
 app.use((req: any, resp: Response, next: any) => {
@@ -96,7 +95,7 @@ app.post("/burying-point/collect", bodyParser.raw({ type: "text/plain" }), (req:
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text({ type: "application/json" }));
 app.all('*', (req: Request, resp: Response, next: any) => {
-    if (req.url === '/' || /^\/mw\//.test(req.url) || /^\/burying-point\//.test(req.url)) {
+    if (req.url === '/' || /^\/appmock\//.test(req.url) || /^\/burying-point\//.test(req.url)) {
         WebService.filter(req, resp);
     } else if (req.url !== '/favicon.ico') {
         ProxyService.handleRequest(req, resp);

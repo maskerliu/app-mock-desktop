@@ -166,7 +166,7 @@
 .header-right-btn {
   -webkit-app-region: no-drag;
   color: white;
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   font-weight: bold;
   margin-left: 10px;
   padding: 3px 2px 3px 3px;

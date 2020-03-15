@@ -1,11 +1,11 @@
-import Vue from 'vue'
-import { ActionTree, Commit, GetterTree, MutationTree, Store } from 'vuex'
+import Vue from "vue"
+import { ActionTree, Commit, GetterTree, MutationTree, Store } from "vuex"
 import { ipcRenderer } from "electron"
-import { Message } from 'element-ui'
+import { Message } from "element-ui"
 
 import store from "../"
-import { CommonState } from '../types'
-import { CMDCode } from '../../../model/DataModels'
+import { CommonState } from "../types"
+import { CMDCode } from "../../../model/DataModels"
 
 const state: CommonState = {
     showQrCodeDialog: false,
@@ -29,8 +29,8 @@ function generateUid() {
     for (let i = 0; i !== len; ++i) {
         res.push(String.fromCharCode(Math.floor(Math.random() * 26) + (Math.random() > 0.5 ? 65 : 97)));
     }
-    res.push(new Date().getTime() + 'o');
-    return res.join('');
+    res.push(new Date().getTime() + "o");
+    return res.join("");
 }
 
 function onGetLocalServerIP(event: any, data: any) {
@@ -42,19 +42,18 @@ function handleMsg(data: any) {
     switch (msg.code) {
         case CMDCode.REGISTER_SUCCESS:
             store.commit("updateShowQrCodeDialog", false);
-            Message({ message: '设备[' + msg.data + ']注册成功', type: "success" });
+            Message({ message: "设备[" + msg.data + "]注册成功", type: "success" });
             break;
         case CMDCode.REQUEST_START:
-            msg.data.type = CMDCode.REQUEST;
+            msg.data.type = CMDCode.REQUEST_START;
             store.commit("ProxyRecords/requestStart", msg.data);
             break;
         case CMDCode.REQUEST_END:
-            msg.data.type = CMDCode.REQUEST;
+            msg.data.type = CMDCode.REQUEST_END;
             store.commit("ProxyRecords/requestEnd", msg.data);
             break;
         case CMDCode.STATISTICS:
             msg.data.type = CMDCode.STATISTICS;
-
             for (let i = 0; i != msg.data.statistics.bps.length; i++) {
                 let temp = this.clone(msg.data)
                 temp.statistics.bps = []
@@ -64,7 +63,7 @@ function handleMsg(data: any) {
 
             break;
         default:
-            Message({ message: 'unhandled code:' + msg.code, type: "warning" });
+            Message({ message: "unhandled code:" + msg.code, type: "warning" });
     }
 }
 
@@ -75,7 +74,7 @@ export const getters: GetterTree<CommonState, any> = {
     },
     registerUrl(state: CommonState): string {
         let uid = generateUid();
-        return ['http://', state.localServerConfig.ip, ':', state.localServerConfig.port, '/mw/register?_=0__0&uid=', uid].join('');
+        return ["http://", state.localServerConfig.ip, ":", state.localServerConfig.port, "/appmock/register?_=0__0&uid=", uid].join("");
     }
 }
 
@@ -92,7 +91,7 @@ export const actions: ActionTree<CommonState, any> = {
         context.commit("updateRegisterIP", params);
     },
     sendMessage(context, message) {
-        console.log('send msg');
+        console.log("send msg");
         // Vue.prototype.$socket.send(message);
     },
     unInit({ commit, state, rootState }): void {
@@ -112,7 +111,7 @@ export const mutations: MutationTree<CommonState> = {
         state.localServerConfig.ip = params.registerIp;
         state.localServerConfig.port = params.customPort;
         let uid = generateUid();
-        state.registerUrl = ['http://', params.registerIp, ':', params.customPort, '/mw/register?_=0__0&uid=', uid].join('');
+        state.registerUrl = ["http://", params.registerIp, ":", params.customPort, "/appmock/register?_=0__0&uid=", uid].join("");
 
         Vue.prototype.$socket.onmessage = (stream: any) => {
             handleMsg(stream.data);

@@ -1,7 +1,6 @@
 <template>
   <div class="rule-snap-item">
     <span class="item-selected" v-if="isSelected"></span>
-    <div></div>
     <span class="rule-snap-name">[{{rule.name}}]</span>
     <span class="el-icon-edit" style="color: #3498db; padding: 0 5px;" v-on:click="$emit('edit')"></span>
     <span class="el-icon-delete" style="color: red; padding: 0 5px;" v-on:click="$emit('delete')"></span>
@@ -45,6 +44,7 @@
 .rule-snap-name {
   max-width: 180px;
   font-size: 0.8rem;
+  font-weight: bold;
   color: #2980b9;
   white-space: nowrap;
   word-wrap: break-word;
@@ -78,5 +78,4 @@
   left: 0;
   top: 0;
 }
-
 </style>

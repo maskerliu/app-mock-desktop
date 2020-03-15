@@ -1,45 +1,50 @@
 import { Request, Response } from 'express'
 
 import { sendMessage } from "./PushService"
-import { CMDCode } from '../model/DataModels';
+import { CMDCode } from '../model/DataModels'
+import { getPagedMockRules, saveMockRule, deleteMockRule, getMockRuleDetail, searchMockRules } from './MockService'
 
 const DEFAULT_HEADER = { 'Content-Type': 'text/html' };
-const VALID_PATHS = ['register',];
 
 export function filter(req: Request, resp: Response) {
-    let url = req.url;
-    if (url === '/') {
-        // Web.index(req, resp);
-        return;
-    }
-
-    let props = parseUrl(url);
-    if (props) {
-        console.log(props);
-        console.log(this);
-
-        if (props.type !== "cgi") return;
-
+    let props = parseUrl(req.url);
+    if (props == null) {
+        error(req, resp);
+    } else {
         switch (props.path) {
             case "register":
                 register(req, resp);
+                break;
+            case "getPagedMockRules":
+                getPagedMockRules(req, resp);
+                break;
+            case "searchMockRules":
+                searchMockRules(req, resp);
+                break;
+            case "getMockRuleDetail":
+                getMockRuleDetail(req, resp);
+                break;
+            case "saveMockRule":
+                saveMockRule(req, resp);
+                break;
+            case "deleteMockRule":
+                deleteMockRule(req, resp);
                 break;
             default:
                 error(req, resp);
                 break;
         }
     }
+
 }
 
 function parseUrl(url: string) {
-    if (/^\/mw\//.test(url)) {
-        let path = url.substring(4).split('?')[0];	// remove /mw/
-        if (VALID_PATHS.indexOf(path) !== -1) {
-            return {
-                path: path,
-                type: 'cgi'
-            };
-        }
+    if (/^\/appmock\//.test(url)) {
+        let path = url.substring(9).split('?')[0];	// remove /mw/
+        return {
+            path: path,
+            type: 'cgi'
+        };
     }
     return null;
 }

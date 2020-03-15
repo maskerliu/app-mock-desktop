@@ -1,17 +1,17 @@
 import { Component, Vue } from "vue-property-decorator"
-import BizMain from './page/BizMain.vue'
-import { namespace, Action } from 'vuex-class'
+import BizMain from "./page/BizMain.vue"
+import { namespace, Action } from "vuex-class"
 
-const Env = namespace('Env')
+const Env = namespace("Env")
 
 @Component({
-    name: 'App',
+    name: "App",
     components: {
         BizMain,
     },
 })
 export default class App extends Vue {
-    // @Env.Action('init') init;
+    // @Env.Action("init") init;
 
     @Action("init") init: Function;
 

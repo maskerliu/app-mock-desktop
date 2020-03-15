@@ -1,14 +1,14 @@
 import { Component, Vue, Watch } from "vue-property-decorator"
-import { Action, Mutation, namespace, State, Getter } from 'vuex-class'
+import { Action, Mutation, namespace, State, Getter } from "vuex-class"
 
-import { ipcRenderer } from 'electron'
-import QrcodeVue from 'qrcode.vue'
+import { ipcRenderer } from "electron"
+import QrcodeVue from "qrcode.vue"
 
 import AbstractPage from "./AbstractPage.vue"
 import DebugPanel from "./DebugPanel.vue"
 
 @Component({
-    name: 'BizMain',
+    name: "BizMain",
     components: {
         QrcodeVue,
         DebugPanel,
@@ -49,7 +49,7 @@ export default class BizMain extends AbstractPage {
         } else {
             if (this.$router.currentRoute.meta.index > 1) {
                 if (window.history.length <= 1) {
-                    this.$router.replace({ path: '/' });
+                    this.$router.replace({ path: "/" });
                 } else {
                     this.$router.back();
                 }
@@ -61,7 +61,7 @@ export default class BizMain extends AbstractPage {
         let navBarConfig = this.navBarConfig;
         if (!!navBarConfig.rightCallback) {
             navBarConfig.rightCallback();
-            this.transitionLeaveName = 'animated zoomOutDown';
+            this.transitionLeaveName = "animated zoomOutDown";
         }
     }
 
@@ -84,17 +84,17 @@ export default class BizMain extends AbstractPage {
         ipcRenderer.send("onQuit");
     }
 
-    @Watch('$route')
+    @Watch("$route")
     onRouteChanged(to: any, from: any) {
         if (to.meta.index > from.meta.index) {
-            this.transitionEnterName = 'animated bounceInRight';
-            this.transitionLeaveName = 'animated fadeOut';
+            this.transitionEnterName = "animated bounceInRight";
+            this.transitionLeaveName = "animated fadeOut";
         } else if (to.meta.index < from.meta.index) {
-            this.transitionEnterName = 'animated';
-            this.transitionLeaveName = 'animated bounceOutRight';
+            this.transitionEnterName = "animated";
+            this.transitionLeaveName = "animated bounceOutRight";
         } else {
-            this.transitionEnterName = 'animated';
-            this.transitionLeaveName = 'animated fadeOut';
+            this.transitionEnterName = "animated";
+            this.transitionLeaveName = "animated fadeOut";
         }
         this.updateNavBarConfig({ title: "加载中..." });
     }

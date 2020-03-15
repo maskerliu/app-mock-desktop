@@ -29,5 +29,7 @@ export interface ProxyRecordState {
 }
 
 export class MockRuleState {
+  pagedRules: Array<MockRule>;
+  searchResults: Array<MockRule>;
   rules: Array<MockRule>;
 }

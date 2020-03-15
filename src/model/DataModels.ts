@@ -6,21 +6,34 @@ export enum CMDCode {
     REQUEST = 5001,
     REQUEST_START = 5002,
     REQUEST_END = 5004,
+    STATISTICS = 5008,
     REGISTER_SUCCESS = 5005,
-    STATISTICS = 5008
 }
 
-export class BizReponse<T> {
+export enum BizCode {
+    SUCCESS = 8000,
+    FAIL = 8010,
+    ERROR = 9000
+}
+
+export class BizResponse<T> {
     code: number;
     msg: string;
     data: T;
+}
+
+export class Paged<T> {
+    data: Array<T>;
+    page: any;
+    totalPage: number;
+    isEnd: boolean;
 }
 
 export class ProxyRequestRecord {
     @Expose()
     type?: number;
     @Expose()
-    id: string;
+    id?: string;
     @Expose()
     method: string;
     @Expose()

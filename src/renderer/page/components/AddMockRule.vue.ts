@@ -1,38 +1,34 @@
 import { Component, Vue, Prop, Watch } from "vue-property-decorator"
 import { Action, namespace, Getter, Mutation } from "vuex-class"
 
-import { MockRule, ProxyRequestRecord } from "../../../model/DataModels"
-
+import { Message } from "element-ui"
 import VJsonEditor from "v-jsoneditor"
 
-const MockRules = namespace("MockRules");
+import { MockRule, ProxyRequestRecord } from "../../../model/DataModels"
+import { searchMockRules, getMockRuleDetail, saveMockRule } from "../../../model/LocaAPIs"
 
 @Component({
-    name: 'Settings',
+    name: "Settings",
     components: {
         VJsonEditor,
     },
 })
 export default class AddMockRule extends Vue {
 
-    @MockRules.Action("searchMockRules")
-    private searchMockRules: Function;
-
     @Prop()
     show: boolean;
     @Prop()
     record: ProxyRequestRecord;
 
-    keyword: string = null;
-    visible: boolean = false;
-    rules: Array<MockRule> = null;
-    curRule: MockRule = null;
-    wrapperRecord: ProxyRequestRecord = null;
-    timeout: any = null;
-    isSaving: boolean = false;
+    private keyword: string = null;
+    private searchLoading: boolean = false;
+    private searchResults: Array<MockRule> = null;
+    private curRule: MockRule = null;
+    private wrapperRecord: ProxyRequestRecord = null;
+    private isSaving: boolean = false;
 
     $refs!: {
-        respJsonEditor: VJsonEditor
+        recordJsonEditor: VJsonEditor
     };
 
     jeOption: {} = {
@@ -45,43 +41,38 @@ export default class AddMockRule extends Vue {
 
     created() {
         this.wrapperRecord = Object.assign({}, this.record);
-
-        this.curRule = {
-            _id: "#ypp031349101",
-            name: "首页feed流-异网",
-            desc: "网络异常下的页面兜底",
-            requests: []
-        }
+        this.curRule = new MockRule();
     }
 
-    querySearchAsync() {
+    querySearchAsync(keyword: string) {
+        searchMockRules(keyword).then(result => {
+            this.searchResults = result.data.data;
+        }).catch(err => {
 
-        this.searchMockRules(this.keyword);
-        // var restaurants = this.rules;
-        // var results = queryString ? restaurants.filter(this.createStateFilter(queryString)) : restaurants;
-
-        // clearTimeout(this.timeout);
-        // this.timeout = setTimeout(() => {
-        //     cb(results);
-        // }, 3000 * Math.random());
+        });
     }
 
-    createStateFilter(queryString) {
-        // return (state) => {
-        //     return (state.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
-        // };
-    }
+    onRuleSelected(item: MockRule) {
+        this.keyword = item.name;
+        this.curRule = item;
 
-    handleSelect(item: MockRule) {
-        console.log(item);
+        getMockRuleDetail(this.curRule._id).then(result => {
+            this.curRule = result.data.data;
+        }).catch(err => {
+
+        })
     }
 
     addRule() {
         let isContains = false;
+
+        if (this.curRule.requests == null) this.curRule.requests = [];
+
         for (let i = 0; i < this.curRule.requests.length; ++i) {
             let request = this.curRule.requests[i];
             if (request.url === this.record.url) {
-                this.curRule.requests[i] = Object.assign({}, this.record);
+                Vue.set(this.curRule.requests, i, Object.assign({}, this.record));
+                delete this.curRule.requests[i].id;
                 isContains = true;
                 break;
             }
@@ -98,14 +89,32 @@ export default class AddMockRule extends Vue {
     onSave() {
         this.isSaving = true;
         if (this.curRule === null || this.curRule._id === null) {
-
+            this.isSaving = false;
         } else {
-
+            saveMockRule(this.curRule).then(result => {
+                Message({ message: "保存成功", type: 'success' });
+                this.isSaving = false;
+            }).catch(err => {
+                Message({ message: "保存失败", type: 'warning' });
+                this.isSaving = false;
+            });
         }
     }
 
     @Watch("record")
     onRecordChanged() {
         this.wrapperRecord = Object.assign({}, this.record);
+    }
+
+    @Watch("show")
+    onShowChanged() {
+        if (!this.show) {
+            this.keyword = null;
+            this.searchLoading = false;
+            this.searchResults = null;
+            this.curRule = null;
+            this.wrapperRecord = null;
+            this.isSaving = false;
+        }
     }
 }

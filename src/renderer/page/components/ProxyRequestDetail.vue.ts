@@ -38,7 +38,7 @@ export default class ProxyRequestDetail extends Vue {
     audioPlayer: any = null;
     curVideoSrc: string = null;
     showPreview: boolean = false;
-    showAddMockRule: boolean = true;
+    showAddMockRule: boolean = false;
 
 
     headerOption: any = {

@@ -1,20 +1,16 @@
 import { Component, Vue } from "vue-property-decorator"
-import { Action, Mutation, namespace } from 'vuex-class'
-import { webFrame } from 'electron'
+import { Action, Mutation, namespace } from "vuex-class"
+import { webFrame } from "electron"
 
+import AbstractPage from "./AbstractPage.vue"
 import MockRuleSnap from "./components/MockRuleSnap.vue"
 import MockRuleDetail from "./components/MockRuleDetail.vue"
 
 import { MockRule, ProxyRequestRecord } from "../../model/DataModels"
-import AbstractPage from "./AbstractPage.vue"
-
-const MockRules = namespace("MockRules");
-
-import { Expose, Type, plainToClass } from "class-transformer"
-import { response } from "express"
+import { saveMockRule, deleteMockRule, getPagedMockRules } from "../../model/LocaAPIs"
 
 @Component({
-    name: 'MockRuleMgr',
+    name: "MockRuleMgr",
     components: {
         MockRuleSnap,
         MockRuleDetail
@@ -22,26 +18,15 @@ import { response } from "express"
 })
 export default class MockRuleMgr extends AbstractPage {
 
-    @MockRules.Getter("mockRules")
-    private rules: Array<MockRule>;
-
-    @MockRules.Action("fetchPagedMockRules")
-    private fetchPagedMockRules: Function;
-
-    @MockRules.Action("saveMockRule")
-    private saveMockRule: Function;
-
-    @MockRules.Action("deleteMockRule")
-    private deleteMockRule: Function;
-
-    showEditMockRuleDialog: boolean = false;
-    showDeleteMockRuleDialog: boolean = false;
-    filterInput: string = null;
-    curRule: MockRule = null;
-
+    private rules: Array<MockRule>=[];
+    private showEditMockRuleDialog: boolean = false;
+    private showDeleteMockRuleDialog: boolean = false;
+    private filterInput: string = null;
+    private curRule: MockRule = null;
+    private curPageKey: string = null;
 
     created() {
-        this.fetchPagedMockRules();
+        
     }
 
     mounted() {
@@ -49,6 +34,16 @@ export default class MockRuleMgr extends AbstractPage {
             title: "Mock规则管理",
             leftItem: false,
             rightItem: false,
+        });
+
+        this.fetchPagedMockRules();
+    }
+
+    fetchPagedMockRules(){
+        getPagedMockRules(this.curPageKey).then((result) => {
+            this.rules = result.data.data.data;
+        }).catch(err => {
+            console.log(err);
         });
     }
 
@@ -74,17 +69,31 @@ export default class MockRuleMgr extends AbstractPage {
 
     onDeleteMockRuleConfirmed() {
         this.showDeleteMockRuleDialog = false;
-        this.deleteMockRule(this.curRule._id);
+        deleteMockRule(this.curRule._id).then(result => {
+            console.log(result);
+            this.fetchPagedMockRules();
+        }).catch(err => {
+            console.log(err);
+        });
     }
 
     onSaveMockRule() {
         if (this.curRule == null) return;
-        this.saveMockRule(this.curRule);
+        saveMockRule(this.curRule)
+            .then((result => {
+                this.fetchPagedMockRules();
+            }))
+            .catch(err => {
+
+            });
         this.showEditMockRuleDialog = false;
     }
 
     onMockSwitchChanged(rule: MockRule) {
-        console.log(rule);
-        this.saveMockRule(rule);
+        saveMockRule(this.curRule).then(result => {
+            this.fetchPagedMockRules();
+        }).catch(err => {
+            console.log(err);
+        });
     }
 }
