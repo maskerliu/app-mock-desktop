@@ -1,7 +1,11 @@
 
-import Url from 'url'
-import { Request, Response } from 'express'
+import {ipcMain} from "electron"
+import Url from "url"
+import { Request, Response } from "express"
 import * as PushService from "./PushService"
+import { mockRequestData } from "./MockService"
+
+
 
 const JSONBigInt = require("json-bigint");
 const axios = require("axios");
@@ -10,21 +14,26 @@ const PROXY_DEF_TIMEOUT = 1000 * 15;	// 15s
 
 let MOCK_TEST_ENABLE: boolean = false;
 let PROXY_DELAY: number = 0;
-let curMockConfigId: number = 0;
 let _sessionId: number = 0;
+
+ipcMain.on("set-delay", (event: any, args?: any) => {
+    try {
+        if(!args.isDelay) {
+            PROXY_DELAY = 0;
+        } else {
+            PROXY_DELAY = args.delay;
+        }
+    } catch (err) {
+
+    }
+});
 
 export function handleRequest(req: Request, resp: Response) {
     let startTime = new Date().getTime();
     let sessionId = ++_sessionId;
     PushService.sendRequestStartMessage(req, sessionId);
 
-    if (curMockConfigId != 0) {
-        // let row = SqliteFactory.getMockData(req.url, curMockConfigId)
-        // if (!!row && !!row.mock_data) {
-        // MockFactory.mockRequestData(req, resp, JSON.parse(row.mock_data), sessionId, startTime);
-        // return;
-        // }
-    }
+    if (mockRequestData(req, resp, sessionId, startTime, PROXY_DELAY)) return;
 
     if (!MOCK_TEST_ENABLE) {
         proxyRequestData(req, resp, sessionId, startTime);
@@ -61,7 +70,13 @@ function proxyRequestData(req: Request, proxyResp: Response, sessionId: number, 
         method: req.method,
         headers: headers,
         transformResponse: [(data: any) => {
-            return JSONBigInt.parse(data)
+            try {
+                return JSONBigInt.parse(data)
+            } catch (err) {
+                console.log(data);
+                console.log(err);
+                return null;
+            }
         }],
         timeout: PROXY_DEF_TIMEOUT
     };
@@ -74,11 +89,15 @@ function proxyRequestData(req: Request, proxyResp: Response, sessionId: number, 
     }
 
     axios(options).then((resp: any) => {
-        setTimeout(() => {
-            PushService.sendRequestEndMessage(sessionId, startTime, resp.status, resp.headers, resp.data, false);
-            proxyResp.send(resp.data);
-            proxyResp.end();
-        }, PROXY_DELAY);
+        try {
+            setTimeout(() => {
+                PushService.sendRequestEndMessage(sessionId, startTime, resp.status, resp.headers, resp.data, false);
+                proxyResp.send(resp.data);
+                proxyResp.end();
+            }, PROXY_DELAY);
+        } catch (err) {
+            console.log(err);
+        }
     }).catch((err: any) => {
         let resp = err.response;
         if (!!resp) {

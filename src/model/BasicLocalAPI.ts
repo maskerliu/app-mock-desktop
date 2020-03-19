@@ -59,11 +59,12 @@ axios.interceptors.response.use(
 
 export const BASE_LOCAL_URL = 'http://localhost:8888';
 
-export function post(path: string, baseUrl?: string, data?: {}): AxiosPromise<BizResponse<any>> {
+export function post(path: string, baseUrl?: string, params?: {}, data?: {}): AxiosPromise<BizResponse<any>> {
     return axios({
         baseURL: baseUrl !== null ? baseUrl : BASE_LOCAL_URL,
         url: path,
         method: 'POST',
+        params: params,
         data: data,
     }).then(resp => {
         switch (resp.data.code) {

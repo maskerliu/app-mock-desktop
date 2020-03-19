@@ -66,8 +66,9 @@ export default class AddMockRule extends Vue {
     addRule() {
         let isContains = false;
 
-        if (this.curRule.requests == null) this.curRule.requests = [];
-
+        if (this.curRule.requests == null) {
+            Vue.set(this.curRule, "requests", []);
+        }
         for (let i = 0; i < this.curRule.requests.length; ++i) {
             let request = this.curRule.requests[i];
             if (request.url === this.record.url) {
@@ -91,7 +92,7 @@ export default class AddMockRule extends Vue {
         if (this.curRule === null || this.curRule._id === null) {
             this.isSaving = false;
         } else {
-            saveMockRule(this.curRule).then(result => {
+            saveMockRule(this.curRule, false).then(result => {
                 Message({ message: "保存成功", type: 'success' });
                 this.isSaving = false;
             }).catch(err => {

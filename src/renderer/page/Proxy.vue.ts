@@ -1,6 +1,7 @@
 import { Component, Vue, Watch } from "vue-property-decorator"
 import { Action, namespace, Getter, Mutation } from "vuex-class"
 
+import { ipcRenderer } from "electron"
 import { Message } from "element-ui"
 import BScroll from "better-scroll"
 
@@ -39,6 +40,7 @@ export default class Proxy extends AbstractPage {
 
     proxyTypes: string[] = [String(CMDCode.REQUEST)];
     mockDelay: number = null;
+    isDelay: boolean = false;
     filterInput: string = null;
     activeTab: string = "0";
 
@@ -110,6 +112,12 @@ export default class Proxy extends AbstractPage {
     clearProxyRecrods() {
         this.curRecord = null;
         this.clearRecords();
+    }
+
+    @Watch("isDelay")
+    onSetDelayChanged() {
+        if (!this.isDelay) this.mockDelay = null;
+        ipcRenderer.send("set-delay", { isDelay: this.isDelay, delay: this.mockDelay });
     }
 
     @Watch("records")

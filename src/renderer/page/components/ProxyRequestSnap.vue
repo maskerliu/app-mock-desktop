@@ -1,5 +1,8 @@
 <template>
-  <div class="request-snap-item">
+  <div
+    class="request-snap-item"
+    v-bind:style="{background: reqRecord.isMock ? '#ffeaa755' : 'white'}"
+  >
     <span class="item-selected" v-if="isSelected"></span>
     <div style="display: block;">
       <strong class="request-snap-method">[{{reqRecord.method}}]</strong>

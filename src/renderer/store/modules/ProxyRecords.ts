@@ -44,6 +44,7 @@ const mutations: MutationTree<ProxyRecordState> = {
             for (let i = 0; i < state.records.length; ++i) {
                 let anchor: ProxyRequestRecord = <ProxyRequestRecord>state.records[i];
                 if (anchor != null && anchor.id === record.id) {
+                    Vue.set(state.records[i], "isMock", record.isMock);
                     Vue.set(state.records[i], "type", record.type);
                     Vue.set(state.records[i], "responseHeaders", record.responseHeaders);
                     Vue.set(state.records[i], "responseData", JSON.parse(record.responseData));

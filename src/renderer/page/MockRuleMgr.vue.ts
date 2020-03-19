@@ -1,13 +1,15 @@
-import { Component, Vue } from "vue-property-decorator"
+import { Component, Vue, Watch } from "vue-property-decorator"
 import { Action, Mutation, namespace } from "vuex-class"
 import { webFrame } from "electron"
+import { throttle } from 'lodash'
+import { Message } from "element-ui"
 
 import AbstractPage from "./AbstractPage.vue"
 import MockRuleSnap from "./components/MockRuleSnap.vue"
 import MockRuleDetail from "./components/MockRuleDetail.vue"
 
-import { MockRule, ProxyRequestRecord } from "../../model/DataModels"
-import { saveMockRule, deleteMockRule, getPagedMockRules } from "../../model/LocaAPIs"
+import { MockRule, ProxyRequestRecord, BizCode } from "../../model/DataModels"
+import { saveMockRule, deleteMockRule, searchMockRules } from "../../model/LocaAPIs"
 
 @Component({
     name: "MockRuleMgr",
@@ -18,15 +20,15 @@ import { saveMockRule, deleteMockRule, getPagedMockRules } from "../../model/Loc
 })
 export default class MockRuleMgr extends AbstractPage {
 
-    private rules: Array<MockRule>=[];
+    private rules: Array<MockRule> = [];
     private showEditMockRuleDialog: boolean = false;
     private showDeleteMockRuleDialog: boolean = false;
-    private filterInput: string = null;
+    private searchKeyword: string = null;
     private curRule: MockRule = null;
     private curPageKey: string = null;
 
     created() {
-        
+
     }
 
     mounted() {
@@ -35,15 +37,14 @@ export default class MockRuleMgr extends AbstractPage {
             leftItem: false,
             rightItem: false,
         });
-
         this.fetchPagedMockRules();
     }
 
-    fetchPagedMockRules(){
-        getPagedMockRules(this.curPageKey).then((result) => {
-            this.rules = result.data.data.data;
+    fetchPagedMockRules() {
+        searchMockRules(this.searchKeyword).then((result) => {
+            this.rules = result.data.data;
         }).catch(err => {
-            console.log(err);
+            // Message({ message: err.message, type: 'error' });
         });
     }
 
@@ -70,7 +71,6 @@ export default class MockRuleMgr extends AbstractPage {
     onDeleteMockRuleConfirmed() {
         this.showDeleteMockRuleDialog = false;
         deleteMockRule(this.curRule._id).then(result => {
-            console.log(result);
             this.fetchPagedMockRules();
         }).catch(err => {
             console.log(err);
@@ -79,21 +79,28 @@ export default class MockRuleMgr extends AbstractPage {
 
     onSaveMockRule() {
         if (this.curRule == null) return;
-        saveMockRule(this.curRule)
+        saveMockRule(this.curRule, true)
             .then((result => {
+                Message({ message: "规则更新成功", type: "success" });
                 this.fetchPagedMockRules();
             }))
             .catch(err => {
-
+                Message({ message: err.message, type: 'error' });
             });
         this.showEditMockRuleDialog = false;
     }
 
     onMockSwitchChanged(rule: MockRule) {
-        saveMockRule(this.curRule).then(result => {
+        saveMockRule(rule, true).then(result => {
+            Message({ message: "规则更新成功", type: "success" });
             this.fetchPagedMockRules();
         }).catch(err => {
-            console.log(err);
+            Message({ message: err.message, type: 'error' });
         });
     }
+
+    @Watch('searchKeyword', { immediate: false, deep: true })
+    throttlesearchKeywordChange = throttle(function (val: string) {
+        this.fetchPagedMockRules();
+    }, 1000);
 }

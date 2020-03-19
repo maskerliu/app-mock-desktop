@@ -4,8 +4,8 @@ import { get, post } from './BasicLocalAPI'
 
 import { BizResponse, Paged, MockRule } from "./DataModels"
 
-export function getPagedMockRules(pageNo: string): AxiosPromise<BizResponse<Paged<MockRule>>> {
-    return get('/appmock/getPagedMockRules', null, { pageNo });
+export function getPagedMockRules(keyword: string, pageNo: string): AxiosPromise<BizResponse<Paged<MockRule>>> {
+    return get('/appmock/getPagedMockRules', null, { keyword, pageNo });
 }
 
 export function searchMockRules(keyword: string): AxiosPromise<BizResponse<Array<MockRule>>> {
@@ -16,8 +16,8 @@ export function getMockRuleDetail(ruleId: string): AxiosPromise<BizResponse<Mock
     return get('/appmock/getMockRuleDetail', null, { ruleId });
 }
 
-export function saveMockRule(mockRule: MockRule): AxiosPromise<BizResponse<string>> {
-    return post('/appmock/saveMockRule', null, mockRule);
+export function saveMockRule(mockRule: MockRule, onlySnap: boolean): AxiosPromise<BizResponse<string>> {
+    return post('/appmock/saveMockRule', null, { onlySnap }, mockRule);
 }
 
 export function deleteMockRule(ruleId: string): AxiosPromise<BizResponse<string>> {

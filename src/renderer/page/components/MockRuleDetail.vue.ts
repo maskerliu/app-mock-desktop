@@ -44,6 +44,9 @@ export default class MockRuleDetail extends Vue {
     }
 
     fetchMockRuleDetail() {
+        if (this.ruleId == null || this.ruleId == undefined) {
+            return;
+        }
         getMockRuleDetail(this.ruleId).then(result => {
             this.rule = result.data.data;
         }).catch(err => {
@@ -63,7 +66,7 @@ export default class MockRuleDetail extends Vue {
                 break;
             }
         }
-        saveMockRule(this.rule).then(result => {
+        saveMockRule(this.rule, false).then(result => {
             Message({ message: "更新成功", type: "success" });
             this.showEditor = false;
         }).catch(err => {
@@ -87,10 +90,9 @@ export default class MockRuleDetail extends Vue {
         if (idx != -1) {
             this.rule.requests.splice(idx, 1);
             console.log(this.rule);
-            saveMockRule(this.rule).then(result => {
-                console.log(result);
+            saveMockRule(this.rule, false).then(result => {
                 this.showDeleteConfirm = false;
-                // Message({ message: "删除成功", type: 'success' });
+                Message({ message: "删除成功", type: 'success' });
             }).catch(err => {
                 console.log(err);
             });

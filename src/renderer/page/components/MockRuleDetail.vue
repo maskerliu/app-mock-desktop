@@ -3,7 +3,6 @@
     <h4 style="font-size: 0.9rem; color: grey;">规则详情</h4>
     <el-table
       style="width: 100%; margin-bottom: 20px;"
-      row-key="id"
       border
       stripe
       :data="rule != null && rule.requests != null ? rule.requests : []"

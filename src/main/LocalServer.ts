@@ -1,3 +1,5 @@
+import {ipcMain} from "electron"
+import compression from "compression"
 import zlib from "zlib"
 import cors from "cors"
 import express, { Application, Request, Response } from "express"
@@ -6,11 +8,8 @@ import bodyParser from "body-parser"
 import * as WebService from "./WebService"
 import * as PushService from "./PushService"
 import * as ProxyService from "./ProxyService"
-
 import * as MockService from "./MockService"
 
-const { ipcMain } = require("electron");
-const compression = require("compression");
 const interfaces = require("os").networkInterfaces();
 
 const corsOptions = {
@@ -56,12 +55,13 @@ ipcMain.on('get-mock-configs', (event: any, args?: any) => {
 
 ipcMain.on('save-mock-config', (event: any, args?: any) => {
     try {
-        // SqliteFactory.saveMockConfigs(args.config, args.rules)
         event.sender.send('save-mock-configs-reply', { code: 8000, message: 'mock配置保存成功！' })
     } catch (e) {
         event.sender.send('save-mock-configs-reply', { code: 8010, message: 'mock配置保存失败！' })
     }
-})
+});
+
+
 
 
 const app: Application = express();

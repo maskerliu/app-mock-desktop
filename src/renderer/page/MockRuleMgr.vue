@@ -2,9 +2,14 @@
   <div>
     <el-row :gutter="20">
       <el-col class="border-panel" style="width: 300px; margin-left: 15px;">
-        <el-input size="small" placeholder="筛选关键字" v-model="filterInput" style="margin-top: 10px;">
+        <el-input
+          size="small"
+          placeholder="筛选关键字"
+          v-model="searchKeyword"
+          clearable
+          style="margin-top: 10px;"
+        >
           <i slot="prefix" class="el-input__icon iconfont icon-search" style="font-size: 1.0rem;"></i>
-          <el-button slot="append" icon="el-icon-check"></el-button>
         </el-input>
 
         <el-divider content-position="right">
@@ -75,5 +80,4 @@
 .rule-snap-panel::-webkit-scrollbar {
   display: none;
 }
-
 </style>

@@ -16,7 +16,7 @@ export function filter(req: Request, resp: Response) {
                 register(req, resp);
                 break;
             case "getPagedMockRules":
-                getPagedMockRules(req, resp);
+                searchMockRules(req, resp);
                 break;
             case "searchMockRules":
                 searchMockRules(req, resp);

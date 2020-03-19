@@ -43,6 +43,8 @@ export class ProxyRequestRecord {
     @Expose()
     time: number;
     @Expose()
+    isMock: boolean;
+    @Expose()
     headers: any;
     @Expose()
     requestData: any;

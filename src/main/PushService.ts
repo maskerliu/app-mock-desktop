@@ -1,6 +1,9 @@
-import Url from 'url'
-import { CMDCode } from '../model/DataModels';
+import Url from "url"
+import { Request, Response } from "express"
 
+import { CMDCode } from "../model/DataModels"
+
+const JSONBigInt = require("json-bigint");
 const websocket = require("nodejs-websocket");
 
 
@@ -26,7 +29,7 @@ export function sendMessage(data: any) {
     wsServer.connections[0].sendText(JSON.stringify(data));
 }
 
-export function sendRequestStartMessage(req: any, sessionId: number) {
+export function sendRequestStartMessage(req: Request, sessionId: number) {
     if (!IS_PROXY_REQUEST) {
         return;
     }
@@ -36,7 +39,7 @@ export function sendRequestStartMessage(req: any, sessionId: number) {
     if (req.method === 'GET') {
         requestData = !!req.query ? req.query : null;
     } else {
-        requestData = !!req.body ? JSON.parse(req.body) : null;
+        requestData = !!req.body ? JSONBigInt.parse(req.body) : null;
     }
 
     let data = {
@@ -74,7 +77,7 @@ export function sendRequestEndMessage(sessionId: number,
             headers: !!respHeaders ? respHeaders : null,
             responseData: !!respData ? JSON.stringify(respData) : null,
             time: new Date().getTime() - startTime,
-            mock: isMock,
+            isMock: isMock,
         }
     };
     if (!!wsServer.connections[0]) {

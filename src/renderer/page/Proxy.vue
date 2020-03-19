@@ -15,8 +15,8 @@
 
       <el-input size="small" placeholder="延时时长" v-model="mockDelay">
         <i slot="prefix" class="el-input__icon iconfont icon-delay"></i>
-        <span slot="append">ms&nbsp&nbsp&nbsp&nbsp&nbsp</span>
-        <el-checkbox slot="append" size="mini"></el-checkbox>
+        <span slot="append" style="padding-right: 10px;">ms</span>
+        <el-checkbox slot="append" size="mini" v-model="isDelay"></el-checkbox>
       </el-input>
 
       <el-input
@@ -54,9 +54,8 @@
         </div>
       </div>
     </el-col>
-    <el-col class="bg-border" style="width: calc(100vw - 400px);">
+    <el-col style="width: calc(100vw - 400px); margin: 5px;">
       <proxy-request-detail :record="curRecord" v-show="curRecord !== null" />
-      <!-- <proxy-stat-detail v-show="curRecord !== null" /> -->
     </el-col>
   </el-row>
 </template>
