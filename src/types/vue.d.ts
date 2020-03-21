@@ -14,6 +14,8 @@ declare module 'vue/types/vue' {
         $eventbus: any
         $db: any
         $socket: any
+        $connect: any
+        $disconnect: any
     }
 }
 

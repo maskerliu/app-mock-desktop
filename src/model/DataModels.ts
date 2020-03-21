@@ -16,6 +16,16 @@ export enum BizCode {
     ERROR = 9000
 }
 
+export interface IP {
+    address: string;
+    netmask: string;
+    family: string;
+    mac: string;
+    internal: boolean;
+    cidr: string;
+    name: string;
+}
+
 export class BizResponse<T> {
     code: number;
     msg: string;

@@ -23,8 +23,6 @@ export default class BizMain extends AbstractPage {
 
     showQrCodeDialog: boolean = false;
     canRender: boolean = false;
-    transitionEnterName: string = "animated fadeIn";
-    transitionLeaveName: string = "animated fadeOut";
     curPage: string = null;
 
     navMenu: Array<string> = ["Proxy", "MockRuleMgr", "Settings"]
@@ -61,7 +59,6 @@ export default class BizMain extends AbstractPage {
         let navBarConfig = this.navBarConfig;
         if (!!navBarConfig.rightCallback) {
             navBarConfig.rightCallback();
-            this.transitionLeaveName = "animated zoomOutDown";
         }
     }
 
@@ -87,16 +84,18 @@ export default class BizMain extends AbstractPage {
     @Watch("$route")
     onRouteChanged(to: any, from: any) {
         if (to.meta.index > from.meta.index) {
-            this.transitionEnterName = "animated bounceInRight";
-            this.transitionLeaveName = "animated fadeOut";
+            
         } else if (to.meta.index < from.meta.index) {
-            this.transitionEnterName = "animated";
-            this.transitionLeaveName = "animated bounceOutRight";
+           
         } else {
-            this.transitionEnterName = "animated";
-            this.transitionLeaveName = "animated fadeOut";
+            
         }
         this.updateNavBarConfig({ title: "加载中..." });
+    }
+
+    @Watch("$store.state.Common.showQrCodeDialog")
+    onShowQrCodeDialogChagned() {
+        this.showQrCodeDialog = this.$store.state.Common.showQrCodeDialog;
     }
 
     click2Reg() {

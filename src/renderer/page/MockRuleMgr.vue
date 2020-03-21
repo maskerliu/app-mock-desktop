@@ -10,11 +10,8 @@
           style="margin-top: 10px;"
         >
           <i slot="prefix" class="el-input__icon iconfont icon-search" style="font-size: 1.0rem;"></i>
+          <el-button slot="append" size="mini" type="success" icon="el-icon-plus" @click="onEditMockRule(null)"></el-button>
         </el-input>
-
-        <el-divider content-position="right">
-          <el-button size="mini" type="success" icon="el-icon-plus" @click="onEditMockRule(null)"></el-button>
-        </el-divider>
 
         <div class="rule-snap-panel" ref="wrapper">
           <mock-rule-snap
@@ -25,13 +22,13 @@
             @click.native="onRuleClicked(item)"
             v-on:edit="onEditMockRule(item)"
             v-on:delete="onDeleteMockRule(item)"
+            v-on:upload="onUploadMockRule(item)"
             v-on:open-mock="onMockSwitchChanged(item)"
           />
         </div>
-        <el-pagination small layout="prev, pager, next" :total="1000"></el-pagination>
       </el-col>
       <el-col class="border-panel" style="width: calc(100vw - 400px);">
-        <mock-rule-detail :rule-id="curRule._id" v-if="curRule != null" />
+        <mock-rule-detail :rule-id="curRule._id" :is-mock="curRule.isMock" v-if="curRule != null" />
       </el-col>
     </el-row>
 
@@ -71,7 +68,8 @@
 }
 
 .rule-snap-panel {
-  height: calc(100vh - 200px);
+  height: calc(100vh - 140px);
+  margin-top: 15px;
   overflow-y: scroll;
   overflow-x: hidden;
   margin-bottom: 5px;

@@ -45,9 +45,7 @@ export function mockRequestData(req: Request, resp: Response, sessionId: number,
 export function initDB() {
     localDB = new PouchDB(path.join(app.getPath('userData'), 'AppMockDB'));
     localDB.createIndex({
-        index: {
-            fields: ['name']
-        }
+        index: { fields: ['name'] }
     }).then((result: any) => {
         // console.log(result);
     }).catch((err: any) => {
@@ -192,7 +190,6 @@ export function saveMockRule(req: Request, resp: Response) {
         localDB.get(rule._id).then((doc: any) => {
             let newRule = Object.assign(rule, { _rev: doc._rev });
             if (onlySnap) newRule.requests = doc.requests;
-
             return localDB.put(newRule);
         }).then((result: any) => {
             if (result.ok) {

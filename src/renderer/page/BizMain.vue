@@ -64,15 +64,9 @@
           ></span>
         </div>
       </div>
-      <transition
-        mode="out-in"
-        :enter-active-class="transitionEnterName"
-        :leave-active-class="transitionLeaveName"
-      >
-        <keep-alive include="Proxy">
-          <router-view></router-view>
-        </keep-alive>
-      </transition>
+      <keep-alive include="Proxy">
+        <router-view></router-view>
+      </keep-alive>
     </el-col>
   </el-row>
 </template>
@@ -92,8 +86,6 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  /*border-radius: 8px;*/
-  /*border: 1px solid lightgray;*/
 }
 
 #app::-webkit-scrollbar {
@@ -113,34 +105,13 @@
 
 .navbar-btn:hover {
   color: white;
-  /*background: #ffffff50;*/
-  /*border-radius: 40px;*/
-}
-
-.badge-box {
-  position: relative;
-}
-
-.badge {
-  color: #fff;
-  line-height: 1;
-  height: 12px;
-  min-width: 14px;
-  text-align: center;
-  position: absolute;
-  top: 7px;
-  left: 20px;
-  font-size: 12px;
-  border-radius: 20px;
-  padding: 2px;
-  background: red;
 }
 
 .header {
   display: flex;
   align-items: center;
   padding: 15px;
-  background: #3498db;
+  background: #8e44ad;
   color: white;
   -webkit-app-region: drag;
 }
@@ -157,7 +128,6 @@
 }
 
 .header-right {
-  flex: 1;
   align-items: right;
   flex-wrap: nowrap;
   justify-content: flex-end;
@@ -171,11 +141,11 @@
   margin-left: 10px;
   padding: 3px 2px 3px 3px;
   border-radius: 4rem;
-  border: 1px solid #bdc3c7;
+  border: 2px solid #e1e1e1;
 }
 
 .header-right-btn:hover {
   border-radius: 4rem;
-  border: 1px solid #ecf0f1;
+  border: 2px solid white;
 }
 </style>

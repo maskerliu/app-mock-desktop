@@ -2,8 +2,9 @@
   <div class="rule-snap-item">
     <span class="item-selected" v-if="isSelected"></span>
     <span class="rule-snap-name">[{{rule.name}}]</span>
-    <span class="el-icon-edit" style="color: #3498db; padding: 0 5px;" v-on:click="$emit('edit')"></span>
-    <span class="el-icon-delete" style="color: red; padding: 0 5px;" v-on:click="$emit('delete')"></span>
+    <span class="iconfont icon-edit" style="color: #3498db; padding: 0 5px;" v-on:click="$emit('edit')"></span>
+    <span class="iconfont icon-delete" style="color: red; padding: 0 5px;" v-on:click="$emit('delete')"></span>
+    <span class="iconfont icon-upload" style="color: red; padding: 0 5px;" v-on:click="$emit('upload')"></span>
     <br />
     <span class="rule-snap-desc">{{rule.desc}}</span>
     <br />

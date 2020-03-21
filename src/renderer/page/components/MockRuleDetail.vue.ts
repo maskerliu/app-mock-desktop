@@ -26,6 +26,9 @@ export default class MockRuleDetail extends Vue {
     @Prop()
     ruleId: string;
 
+    @Prop()
+    isMock: boolean;
+
     public $refs!: {
         jsonEditor: VJsonEditor
     }
@@ -89,7 +92,6 @@ export default class MockRuleDetail extends Vue {
         }
         if (idx != -1) {
             this.rule.requests.splice(idx, 1);
-            console.log(this.rule);
             saveMockRule(this.rule, false).then(result => {
                 this.showDeleteConfirm = false;
                 Message({ message: "删除成功", type: 'success' });
@@ -101,6 +103,11 @@ export default class MockRuleDetail extends Vue {
 
     @Watch("ruleId")
     onRuleIdChanged() {
+        this.fetchMockRuleDetail();
+    }
+
+    @Watch("isMock")
+    onIsMockChanged() {
         this.fetchMockRuleDetail();
     }
 }

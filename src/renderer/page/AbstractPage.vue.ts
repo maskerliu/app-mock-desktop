@@ -1,5 +1,6 @@
 import { Component, Vue } from "vue-property-decorator"
-import { Action, namespace, Getter, Mutation } from "vuex-class"
+import { Action, namespace, Getter, Mutation, State } from "vuex-class"
+
 
 @Component({
     name: "AbstractPage",

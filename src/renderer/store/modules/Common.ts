@@ -1,11 +1,22 @@
 import Vue from "vue"
 import { ActionTree, Commit, GetterTree, MutationTree, Store } from "vuex"
 import { ipcRenderer } from "electron"
+import VueNativeSocket from "vue-native-websocket"
 import { Message } from "element-ui"
 
 import store from "../"
-import { CommonState } from "../types"
+import { CommonState, IP } from "../types"
 import { CMDCode } from "../../../model/DataModels"
+
+const SocketConfig = {
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 3000,
+    format: "json",
+    connectManually: true,
+};
+Vue.use(VueNativeSocket, 'ws://localhost:8889', SocketConfig);
+const vm = new Vue();
 
 const state: CommonState = {
     showQrCodeDialog: false,
@@ -18,8 +29,10 @@ const state: CommonState = {
     },
     registerUrl: "",
     localServerConfig: {
-        ip: "",
-        port: "",
+        serverIP: null,
+        serverPort: null,
+        websocketPort: null,
+        ips: []
     },
 };
 
@@ -31,10 +44,6 @@ function generateUid() {
     }
     res.push(new Date().getTime() + "o");
     return res.join("");
-}
-
-function onGetLocalServerIP(event: any, data: any) {
-    store.commit("updateLocalServerConfig", data);
 }
 
 function handleMsg(data: any) {
@@ -69,33 +78,24 @@ function handleMsg(data: any) {
 
 export const getters: GetterTree<CommonState, any> = {
 
-    showQrCodeDialog(state: CommonState):boolean {
-        return state.showQrCodeDialog;
-    },
-    registerUrl(state: CommonState): string {
-        let uid = generateUid();
-        return ["http://", state.localServerConfig.ip, ":", state.localServerConfig.port, "/appmock/register?_=0__0&uid=", uid].join("");
-    }
 }
 
 // async
 export const actions: ActionTree<CommonState, any> = {
-    init({ commit, state, rootState }): void {
-        ipcRenderer.on("get-local-server-config", onGetLocalServerIP);
+    init(context: { commit: Commit }): void {
+        ipcRenderer.on("get-local-server-config", (event: any, data: any)=>{
+            store.commit("updateLocalServerConfig", data);
+        });
         ipcRenderer.send("get-local-server-config");
     },
-    updateNavBarConfig(context: { commit: Commit }, params: Object): void {
+    updateNavBarConfig(context: { commit: Commit }, params: any): void {
         context.commit("updateNavBarConfig", params);
     },
-    updateRegisterIP(context: { commit: Commit }, params: { ip: string, port: string }): void {
-        context.commit("updateRegisterIP", params);
-    },
-    sendMessage(context, message) {
-        console.log("send msg");
-        // Vue.prototype.$socket.send(message);
-    },
-    unInit({ commit, state, rootState }): void {
+    unInit(context: { commit: Commit }): void {
         ipcRenderer.removeAllListeners("get-local-server-config");
+    },
+    saveLocalServerConfig(context: { commit: Commit }, params: any) {
+        ipcRenderer.send("update-local-server-config", params);
     }
 }
 
@@ -108,11 +108,20 @@ export const mutations: MutationTree<CommonState> = {
         state.navBarConfig = Object.assign({}, navBarConfig);
     },
     updateLocalServerConfig(state, params) {
-        state.localServerConfig.ip = params.registerIp;
-        state.localServerConfig.port = params.customPort;
+        state.localServerConfig.serverIP = params.serverIP;
+        state.localServerConfig.serverPort = params.serverPort;
+        state.localServerConfig.websocketPort = params.websocketPort;
+        state.localServerConfig.ips = params.localIPs;
         let uid = generateUid();
-        state.registerUrl = ["http://", params.registerIp, ":", params.customPort, "/appmock/register?_=0__0&uid=", uid].join("");
+        state.registerUrl = ["http://", params.serverIP, ":", params.serverPort, "/appmock/register?_=0__0&uid=", uid].join("");
 
+        try {
+            vm.$disconnect();
+        } catch(err) {
+            console.log(err);
+        }
+        
+        vm.$connect(`ws://localhost:${params.websocketPort}`, SocketConfig);
         Vue.prototype.$socket.onmessage = (stream: any) => {
             handleMsg(stream.data);
         };

@@ -77,6 +77,10 @@ export default class MockRuleMgr extends AbstractPage {
         });
     }
 
+    onUploadMockRule() {
+        
+    }
+
     onSaveMockRule() {
         if (this.curRule == null) return;
         saveMockRule(this.curRule, true)

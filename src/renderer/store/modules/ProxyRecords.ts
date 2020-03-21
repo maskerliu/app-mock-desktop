@@ -1,4 +1,3 @@
-import "reflect-metadata"
 import { Expose, Type, plainToClass } from "class-transformer"
 import Vue from "vue"
 import { ActionTree, Commit, GetterTree, MutationTree } from "vuex"
