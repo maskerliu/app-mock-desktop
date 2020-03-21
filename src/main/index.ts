@@ -30,6 +30,7 @@ let appTray: Tray = null;
 const winURL: string = process.env.NODE_ENV === 'development' ? `http://localhost:9080` : `file://${__dirname}/index.html`;
 const trayFloder: string = process.env.NODE_ENV === 'development' ? path.join(__dirname, '../../static') : path.join(__dirname, './static');
 
+app.disableHardwareAcceleration();
 
 function createMainWindow() {
     let icon = nativeImage.createFromPath(path.join(trayFloder, 'icon_tray.png'));

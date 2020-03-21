@@ -25,6 +25,7 @@ export default class Settings extends AbstractPage {
     private curServerPort: number = 8888;
     private curWebsocketPort: number = 8889;
     private ruleSyncServer: string = null;
+    private serialPlugin: number = 3;
 
     created() {
         this.updateNavBarConfig({
