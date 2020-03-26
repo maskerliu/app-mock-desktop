@@ -1,6 +1,8 @@
 import { Component, Vue } from "vue-property-decorator"
 import { Action, namespace, Getter, Mutation, State } from "vuex-class"
 
+import { ipcRenderer } from "electron"
+
 import AbstractPage from "./AbstractPage.vue"
 import { IP } from "../../model/DataModels"
 
@@ -38,6 +40,10 @@ export default class Settings extends AbstractPage {
         this.curServerPort = this.localServerConfig.serverPort;
         this.curWebsocketPort = this.localServerConfig.websocketPort;
         this.ips = this.localServerConfig.ips;
+    }
+
+    onOpenFileDialog() {
+        ipcRenderer.send("on-open-folder", "openFile");
     }
 
     onSave() {

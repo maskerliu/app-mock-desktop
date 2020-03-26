@@ -70,15 +70,15 @@ export default class BizMain extends AbstractPage {
     }
 
     onMaximize() {
-        ipcRenderer.send("onMaximize");
+        ipcRenderer.send("on-app-maximize");
     }
 
     onMinus() {
-        ipcRenderer.send("onMinus");
+        ipcRenderer.send("on-app-minus");
     }
 
     onClose() {
-        ipcRenderer.send("onQuit");
+        ipcRenderer.send("on-app-quit");
     }
 
     @Watch("$route")

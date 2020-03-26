@@ -139,13 +139,13 @@
   font-size: 0.7rem;
   font-weight: bold;
   margin-left: 10px;
-  padding: 3px 2px 3px 3px;
+  padding: 2.5px 1.5px 3px 3px;
   border-radius: 4rem;
-  border: 2px solid #e1e1e1;
+  border: 1px solid #d1d1d1;
 }
 
 .header-right-btn:hover {
   border-radius: 4rem;
-  border: 2px solid white;
+  border: 1px solid white;
 }
 </style>

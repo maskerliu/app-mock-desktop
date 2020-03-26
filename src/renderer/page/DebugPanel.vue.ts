@@ -1,6 +1,5 @@
 import { Component, Vue } from "vue-property-decorator"
 import { namespace } from "vuex-class"
-import { webFrame } from "electron"
 
 const Env = namespace("Env")
 

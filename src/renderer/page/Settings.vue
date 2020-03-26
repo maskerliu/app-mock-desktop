@@ -29,8 +29,19 @@
           <el-radio :label="6">Protobuf</el-radio>
           <el-radio :label="10">自定义</el-radio>
         </el-radio-group>
-        <el-input v-model="ruleSyncServer" size="small" v-show="serialPlugin == 10" style="width: auto;">
-          <el-button slot="append" size="mini" type="success" icon="iconfont icon-folder-open"></el-button>
+        <el-input
+          v-model="ruleSyncServer"
+          size="small"
+          v-show="serialPlugin == 10"
+          style="width: auto;"
+        >
+          <el-button
+            slot="append"
+            size="mini"
+            type="success"
+            icon="iconfont icon-folder-open"
+            @click="onOpenFileDialog()"
+          ></el-button>
         </el-input>
       </el-form-item>
       <el-form-item>

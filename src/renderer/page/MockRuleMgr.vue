@@ -21,8 +21,8 @@
             :isSelected="curRule!== null && item._id === curRule._id"
             @click.native="onRuleClicked(item)"
             v-on:edit="onEditMockRule(item)"
-            v-on:delete="onDeleteMockRule(item)"
-            v-on:upload="onUploadMockRule(item)"
+            v-on:delete="onDeleteMockRule(item._id)"
+            v-on:upload="onUploadMockRule(item._id)"
             v-on:open-mock="onMockSwitchChanged(item)"
           />
         </div>

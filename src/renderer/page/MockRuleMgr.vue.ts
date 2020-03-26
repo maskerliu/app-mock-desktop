@@ -9,7 +9,7 @@ import MockRuleSnap from "./components/MockRuleSnap.vue"
 import MockRuleDetail from "./components/MockRuleDetail.vue"
 
 import { MockRule, ProxyRequestRecord, BizCode } from "../../model/DataModels"
-import { saveMockRule, deleteMockRule, searchMockRules } from "../../model/LocaAPIs"
+import { saveMockRule, deleteMockRule, searchMockRules, uploadMockRule } from "../../model/LocaAPIs"
 
 @Component({
     name: "MockRuleMgr",
@@ -41,7 +41,7 @@ export default class MockRuleMgr extends AbstractPage {
     }
 
     fetchPagedMockRules() {
-        searchMockRules(this.searchKeyword).then((result) => {
+        searchMockRules(this.searchKeyword).then((result: any) => {
             this.rules = result.data.data;
         }).catch(err => {
             // Message({ message: err.message, type: 'error' });
@@ -70,15 +70,19 @@ export default class MockRuleMgr extends AbstractPage {
 
     onDeleteMockRuleConfirmed() {
         this.showDeleteMockRuleDialog = false;
-        deleteMockRule(this.curRule._id).then(result => {
+        deleteMockRule(this.curRule._id).then((result: any) => {
             this.fetchPagedMockRules();
-        }).catch(err => {
+        }).catch((err: any) => {
             console.log(err);
         });
     }
 
-    onUploadMockRule() {
-        
+    onUploadMockRule(ruleId: string) {
+        uploadMockRule(ruleId).then((result: any) => {
+            console.log("upload mock rule");
+        }).catch((err: any) => {
+            console.log(err);
+        })
     }
 
     onSaveMockRule() {
@@ -89,7 +93,7 @@ export default class MockRuleMgr extends AbstractPage {
                 this.fetchPagedMockRules();
             }))
             .catch(err => {
-                Message({ message: err.message, type: 'error' });
+                Message({ message: err.message, type: "error" });
             });
         this.showEditMockRuleDialog = false;
     }
@@ -99,7 +103,7 @@ export default class MockRuleMgr extends AbstractPage {
             Message({ message: "规则更新成功", type: "success" });
             this.fetchPagedMockRules();
         }).catch(err => {
-            Message({ message: err.message, type: 'error' });
+            Message({ message: err.message, type: "error" });
         });
     }
 
