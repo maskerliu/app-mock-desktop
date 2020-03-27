@@ -33,7 +33,6 @@ ipcMain.on('get-local-server-config', (event: any, args?: any) => {
 ipcMain.on('update-local-server-config', (event: any, args?: any) => {
     try {
         LocalServer.updateLocalServerConfig(args);
-        LocalServer.startLocalServer();
     } catch (err) {
 
     }

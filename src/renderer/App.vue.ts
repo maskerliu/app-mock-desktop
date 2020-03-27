@@ -1,6 +1,8 @@
 import { Component, Vue } from "vue-property-decorator"
 import BizMain from "./page/BizMain.vue"
-import { namespace, Action } from "vuex-class"
+import { namespace, Action, State } from "vuex-class"
+
+import { updateLocalDomain } from "../model/BasicLocalAPI"
 
 const Env = namespace("Env")
 
@@ -11,8 +13,6 @@ const Env = namespace("Env")
     },
 })
 export default class App extends Vue {
-    // @Env.Action("init") init;
-
     @Action("init") init: Function;
 
     canRender: boolean = false;
@@ -20,6 +20,7 @@ export default class App extends Vue {
     created() {
         this.canRender = true;
         this.init();
+
         // this.init().then(res => {
         //     console.log(res)
 

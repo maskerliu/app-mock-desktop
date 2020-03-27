@@ -18,8 +18,8 @@ class WebService {
         try {
             if (MockService[props.path] != null) {
                 MockService[props.path].apply(MockService, [req, resp]);
-            } else if (WebService[props.path] != null) {
-                WebService[props.path].apply(this, [req, resp]);
+            } else if (this[props.path] != null) {
+                this[props.path].apply(this, [req, resp]);
             } else {
                 this.error(req, resp);
             }
@@ -45,6 +45,7 @@ class WebService {
         if (uid) {
             resp.end();
 
+            console.log("register success");
             let data = {
                 code: CMDCode.REGISTER_SUCCESS,
                 data: uid
@@ -56,7 +57,7 @@ class WebService {
     }
 
     private error(req: Request, resp: Response) {
-        resp.writeHead(-100, DEFAULT_HEADER);
+        resp.writeHead(400, DEFAULT_HEADER);
         resp.send("unknow error");
         resp.end();
     }

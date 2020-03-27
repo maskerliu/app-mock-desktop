@@ -14,11 +14,14 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="本地Http端口">
-        <el-input v-model="curServerPort" size="small"></el-input>
+      <el-form-item label="代理Http服务端口">
+        <el-input v-model="curProxyHttpPort" size="small"></el-input>
+      </el-form-item>
+      <el-form-item label="代理长连服务端口">
+        <el-input v-model="curProxySocketPort" size="small"></el-input>
       </el-form-item>
       <el-form-item label="本地WebSocket端口">
-        <el-input v-model="curWebsocketPort" size="small"></el-input>
+        <el-input v-model="curPushSocketPort" size="small"></el-input>
       </el-form-item>
       <el-form-item label="规则数据同步地址">
         <el-input v-model="ruleSyncServer" size="small"></el-input>

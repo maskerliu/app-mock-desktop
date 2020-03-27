@@ -22,8 +22,9 @@ export interface CommonState {
   registerUrl: string;
   localServerConfig: {
     serverIP: string;
-    serverPort: number;
-    websocketPort: number;
+    proxyHttpPort: number;
+    proxySocketPort: number;
+    pushSocketPort: number;
     ips: Array<IP>;
   }
 }

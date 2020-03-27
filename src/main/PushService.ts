@@ -32,7 +32,7 @@ class PushService {
                 console.log("异常关闭");
             });
         }).listen(port, () => {
-            console.log("启动本地websoket服务");
+            console.log(`启动本地websoket服务[${port}]`);
         });
     }
 

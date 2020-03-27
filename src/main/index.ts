@@ -100,7 +100,8 @@ function createTrayMenu() {
 app.on("ready", () => {
     createMainWindow();
     createTrayMenu();
-    LocalServer.startLocalServer();
+    LocalServer.startProxyHttpServer();
+    LocalServer.startLocalPushServer();
 });
 
 app.on("window-all-closed", () => {

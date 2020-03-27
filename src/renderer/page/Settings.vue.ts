@@ -16,7 +16,6 @@ export default class Settings extends AbstractPage {
     @State(state => state.Common.localServerConfig)
     private localServerConfig: any;
 
-    // @State(state => state.Common.localServerConfig.ips)
     private ips: Array<IP>;
 
     @Action("saveLocalServerConfig")
@@ -24,8 +23,9 @@ export default class Settings extends AbstractPage {
 
     private form: any = null;
     private curServerIP: string = null;
-    private curServerPort: number = 8888;
-    private curWebsocketPort: number = 8889;
+    private curProxyHttpPort: number = null;
+    public curProxySocketPort: number = null;
+    private curPushSocketPort: number = null;
     private ruleSyncServer: string = null;
     private serialPlugin: number = 3;
 
@@ -37,8 +37,10 @@ export default class Settings extends AbstractPage {
         });
 
         this.curServerIP = this.localServerConfig.serverIP;
-        this.curServerPort = this.localServerConfig.serverPort;
-        this.curWebsocketPort = this.localServerConfig.websocketPort;
+        this.curProxyHttpPort = this.localServerConfig.proxyHttpPort;
+        this.curProxySocketPort = this.localServerConfig.proxySocketPort;
+        this.curPushSocketPort = this.localServerConfig.pushSocketPort;
+        this.ruleSyncServer = this.localServerConfig.ruleSyncServer;
         this.ips = this.localServerConfig.ips;
     }
 
@@ -49,8 +51,10 @@ export default class Settings extends AbstractPage {
     onSave() {
         this.saveLocalServerConfig({
             serverIP: this.curServerIP,
-            serverPort: this.curServerPort,
-            websocketPort: this.curWebsocketPort
+            proxyHttpPort: this.curProxyHttpPort,
+            proxySocketPort: this.curProxySocketPort,
+            pushSocketPort: this.curPushSocketPort,
+            ruleSyncServer: this.ruleSyncServer
         });
     }
 }

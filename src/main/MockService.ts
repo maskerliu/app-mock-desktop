@@ -35,7 +35,7 @@ class MockService {
         this.updateMockSettings();
     }
 
-    private mockRequestData(sessionId: number, req: Request, resp: Response, startTime: number, proxyDelay: number): boolean {
+    public mockRequestData(sessionId: number, req: Request, resp: Response, startTime: number, proxyDelay: number): boolean {
 
         if (!this.isMock || this.curMockRule == null || this.curMockRule.requests == null) return false;
 
@@ -101,7 +101,7 @@ class MockService {
 
     }
 
-    public getMockRuleDetail(req: Request, resp: Response): void {
+    private getMockRuleDetail(req: Request, resp: Response): void {
         let ruleId: string = req.query['ruleId'];
         let bizResp: BizResponse<Array<MockRule>> = new BizResponse<Array<MockRule>>();
         this.localDB.get(ruleId, { attachments: true }).then((result: any) => {
@@ -117,7 +117,7 @@ class MockService {
         });
     }
 
-    public saveMockRule(req: Request, resp: Response): void {
+    private saveMockRule(req: Request, resp: Response): void {
         let onlySnap: boolean = req.query['onlySnap'] == "true";
         let rule: MockRule = JSONBigInt.parse(req.body);
 
@@ -183,7 +183,7 @@ class MockService {
         }
     }
 
-    public deleteMockRule(req: Request, resp: Response): void {
+    private deleteMockRule(req: Request, resp: Response): void {
         let ruleId: string = JSON.parse(req.body)['ruleId'];
         let bizResp: BizResponse<string> = new BizResponse<string>();
         this.localDB.get(ruleId).then((doc: any) => {
@@ -208,7 +208,7 @@ class MockService {
         });
     }
 
-    public uploadMockRule(req: Request, resp: Response): void {
+    private uploadMockRule(req: Request, resp: Response): void {
         let ruleId: string = req.query["ruleId"];
         let bizResp: BizResponse<string> = new BizResponse<string>();
         this.localDB.get(ruleId, { attachments: true }).then((result: any) => {

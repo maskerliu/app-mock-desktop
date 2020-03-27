@@ -57,7 +57,7 @@ axios.interceptors.response.use(
     },
 );
 
-export const BASE_LOCAL_URL = "http://localhost:8888";
+export let BASE_LOCAL_URL = "http://localhost:8888";
 
 export function post(path: string, baseUrl?: string, params?: {}, data?: {}): AxiosPromise<BizResponse<any>> {
     return axios({
@@ -102,4 +102,8 @@ export function get(path: string, baseUrl?: string, params?: {}): AxiosPromise<B
                 return Promise.reject(resp);
         }
     })
+}
+
+export function updateLocalDomain(localServerConfig: any) {
+    BASE_LOCAL_URL = `http://${localServerConfig.serverIP}:${localServerConfig.proxyHttpPort}`;
 }

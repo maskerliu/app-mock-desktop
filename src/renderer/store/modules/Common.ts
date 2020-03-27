@@ -7,6 +7,7 @@ import { Message } from "element-ui"
 import store from "../"
 import { CommonState, IP } from "../types"
 import { CMDCode } from "../../../model/DataModels"
+import {updateLocalDomain} from "../../../model/BasicLocalAPI"
 
 const SocketConfig = {
     reconnection: true,
@@ -15,7 +16,7 @@ const SocketConfig = {
     format: "json",
     connectManually: true,
 };
-Vue.use(VueNativeSocket, 'ws://localhost:8889', SocketConfig);
+Vue.use(VueNativeSocket, 'ws://localhost:8887', SocketConfig);
 const vm = new Vue();
 
 const state: CommonState = {
@@ -30,8 +31,9 @@ const state: CommonState = {
     registerUrl: "",
     localServerConfig: {
         serverIP: null,
-        serverPort: null,
-        websocketPort: null,
+        proxyHttpPort: null,
+        proxySocketPort: null,
+        pushSocketPort: null,
         ips: []
     },
 };
@@ -109,19 +111,22 @@ export const mutations: MutationTree<CommonState> = {
     },
     updateLocalServerConfig(state, params) {
         state.localServerConfig.serverIP = params.serverIP;
-        state.localServerConfig.serverPort = params.serverPort;
-        state.localServerConfig.websocketPort = params.websocketPort;
-        state.localServerConfig.ips = params.localIPs;
+        state.localServerConfig.proxyHttpPort = params.proxyHttpPort;
+        state.localServerConfig.proxySocketPort = params.proxySocketPort;
+        state.localServerConfig.pushSocketPort = params.pushSocketPort;
+        state.localServerConfig.ips = params.ips;
         let uid = generateUid();
-        state.registerUrl = ["http://", params.serverIP, ":", params.serverPort, "/appmock/register?_=0__0&uid=", uid].join("");
 
+        state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/appmock/register?_=0__0&uid=${uid}`;
+        // state.registerUrl = ["http://", params.serverIP, ":", params.proxyHttpPort, "/appmock/register?_=0__0&uid=", uid].join("");
+        updateLocalDomain(state.localServerConfig);
         try {
             vm.$disconnect();
         } catch(err) {
             console.log(err);
         }
         
-        vm.$connect(`ws://localhost:${params.websocketPort}`, SocketConfig);
+        vm.$connect(`ws://${params.serverIP}:${params.pushSocketPort}`, SocketConfig);
         Vue.prototype.$socket.onmessage = (stream: any) => {
             handleMsg(stream.data);
         };
