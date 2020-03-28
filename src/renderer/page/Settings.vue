@@ -1,8 +1,19 @@
 <template>
   <div>
-    <el-form ref="form" :model="form" label-width="200px" size="small" style="margin: 15px;">
+    <el-form
+      ref="form"
+      :model="form"
+      label-width="200px"
+      size="small"
+      style="margin: 15px;"
+    >
       <el-form-item label="网卡选择">
-        <el-select v-model="curServerIP" placeholder="请选择" size="small" style="width: 100%;">
+        <el-select
+          v-model="curServerIP"
+          placeholder="请选择"
+          size="small"
+          style="width: 100%;"
+        >
           <el-option
             v-for="(item, idx) in ips"
             :key="idx"
@@ -10,7 +21,9 @@
             :value="item.address"
           >
             <span style="float: left">{{ item.name }}</span>
-            <span style="float: right; color: #8492a6; font-size: 13px">{{ item.address }}</span>
+            <span style="float: right; color: #8492a6; font-size: 13px">{{
+              item.address
+            }}</span>
           </el-option>
         </el-select>
       </el-form-item>
@@ -24,7 +37,9 @@
         <el-input v-model="curPushSocketPort" size="small"></el-input>
       </el-form-item>
       <el-form-item label="规则数据同步地址">
-        <el-input v-model="ruleSyncServer" size="small"></el-input>
+        <el-input v-model="ruleSyncServer" size="small" placeholder="http://sync.xxx.com/sync">
+        <el-button slot="append" icon="iconfont icon-cloud-sync"></el-button>
+        </el-input>
       </el-form-item>
       <el-form-item label="数据序列化插件" :inline="true">
         <el-radio-group v-model="serialPlugin">
@@ -56,5 +71,4 @@
 
 <script lang="ts" src="./Settings.vue.ts"></script>
 
-<style>
-</style>
+<style></style>

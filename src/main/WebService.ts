@@ -44,8 +44,6 @@ class WebService {
         let uid = req.query["uid"];
         if (uid) {
             resp.end();
-
-            console.log("register success");
             let data = {
                 code: CMDCode.REGISTER_SUCCESS,
                 data: uid

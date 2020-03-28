@@ -18,7 +18,6 @@ const corsOptions = {
 };
 
 class LocalServer {
-    private _sessionId: number;
     private serverIP: string;
     private proxyHttpPort: number;
     private proxySocketPort: number;
@@ -27,7 +26,6 @@ class LocalServer {
     private httpApp: Application;
 
     constructor() {
-        this._sessionId = 0;
         this.serverIP = this.getDefaultLocalIP();
         this.proxyHttpPort = 8885;
         this.proxySocketPort = 8886;
@@ -167,12 +165,12 @@ class LocalServer {
             if (this.httpServer) {
                 this.httpServer.close((err?: Error) => {
                     console.log(`关闭本地代理服务[${this.proxyHttpPort}]`, err);
-                    this.httpServer = createServer(this.httpApp).listen(this.proxyHttpPort, () => {
+                    this.httpServer = createServer(this.httpApp).listen(this.proxyHttpPort, this.serverIP, () => {
                         console.log(`启动本地代理Http服务[${this.proxyHttpPort}]`);
                     });
                 });
             } else {
-                this.httpServer = createServer(this.httpApp).listen(this.proxyHttpPort, () => {
+                this.httpServer = createServer(this.httpApp).listen(this.proxyHttpPort, this.serverIP, () => {
                     console.log(`启动本地代理Http服务[${this.proxyHttpPort}]`);
                 });
             }

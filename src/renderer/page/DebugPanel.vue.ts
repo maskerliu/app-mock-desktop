@@ -7,7 +7,7 @@ const Env = namespace("Env")
     name: "DebugPanel",
 })
 export default class DebugPanel extends Vue {
-    @Env.State("env") env: any;
+    private env: string = null;
 
     mounted() {
 
@@ -22,6 +22,6 @@ export default class DebugPanel extends Vue {
     }
 
     clearCache() {
-        
+
     }
 }

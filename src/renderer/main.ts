@@ -12,8 +12,6 @@ process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 
-
-import "./assets/iconfont/iconfont.css"
 import "normalize.css/normalize.css"
 
 import ElementUI from "element-ui";

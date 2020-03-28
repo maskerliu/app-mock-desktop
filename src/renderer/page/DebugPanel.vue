@@ -12,7 +12,7 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label-width="80px" label="清除缓存">
-        <el-button size="mini" @click="clearCache">clearCache</el-button>
+        <el-button size="mini" @click="clearCache">ClearCache</el-button>
       </el-form-item>
     </el-form>
     <el-avatar slot="reference">
