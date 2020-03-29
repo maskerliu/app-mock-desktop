@@ -16,14 +16,20 @@ import DebugPanel from "./DebugPanel.vue"
 })
 export default class BizMain extends AbstractPage {
 
+    @State(state => state.Common.showQrCodeDialog)
+    private isShowQrCode: boolean;
+
     @State(state => state.Common.registerUrl)
     private registerUrl: string;
     @State(state => state.Common.navBarConfig)
     private navBarConfig: any;
 
-    showQrCodeDialog: boolean = false;
-    canRender: boolean = false;
-    curPage: string = null;
+    @Mutation("updateShowQrCodeDialog")
+    private updateShowQrCodeDialog: Function;
+
+    private showQrCodeDialog: boolean = false;
+    private canRender: boolean = false;
+    private curPage: string = null;
 
     navMenu: Array<string> = ["Proxy", "MockRuleMgr", "Settings"]
     curActivedNavMenuIdx: string = null;
@@ -81,21 +87,29 @@ export default class BizMain extends AbstractPage {
         ipcRenderer.send("on-app-quit");
     }
 
+    onShowQrCode() {
+        this.showQrCodeDialog = !this.showQrCodeDialog;
+        this.updateShowQrCodeDialog(this.showQrCodeDialog);
+    }
+
     @Watch("$route")
     onRouteChanged(to: any, from: any) {
         if (to.meta.index > from.meta.index) {
-            
+
         } else if (to.meta.index < from.meta.index) {
-           
+
         } else {
-            
+
         }
         this.updateNavBarConfig({ title: "加载中..." });
     }
 
-    @Watch("$store.state.Common.showQrCodeDialog")
-    onShowQrCodeDialogChagned() {
-        this.showQrCodeDialog = this.$store.state.Common.showQrCodeDialog;
+    @Watch("isShowQrCode")
+    onShowQrCodeDialogChanged() {
+        this.showQrCodeDialog = this.isShowQrCode;
+        if (!this.isShowQrCode) {
+            this.updateShowQrCodeDialog(null);
+        }
     }
 
     click2Reg() {

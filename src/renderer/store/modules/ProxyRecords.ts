@@ -1,4 +1,3 @@
-import { Expose, Type, plainToClass } from "class-transformer"
 import Vue from "vue"
 import { ActionTree, Commit, GetterTree, MutationTree } from "vuex"
 
@@ -55,7 +54,6 @@ const mutations: MutationTree<ProxyRecordState> = {
         } catch (err) {
             console.error(err);
         }
-        // let record: ProxyRequestRecord = plainToClass(ProxyRequestRecord, obj, { excludeExtraneousValues: true });
     },
     addStatistics(state, obj) {
         let recordJson = {
@@ -74,8 +72,8 @@ const mutations: MutationTree<ProxyRecordState> = {
             args: "string",
             desc: "string"
         };
-        let record: ProxyStatRecord = plainToClass(ProxyStatRecord, recordJson, { excludeExtraneousValues: true });
-        state.records.push(record);
+        // let record: ProxyStatRecord = plainToClass(ProxyStatRecord, recordJson, { excludeExtraneousValues: true });
+        // state.records.push(record);
     },
     clearRecords(state, params?: any): void {
         state.records.splice(0, state.records.length);

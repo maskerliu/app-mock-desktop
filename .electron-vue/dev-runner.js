@@ -1,29 +1,29 @@
 'use strict';
 
-const chalk = require('chalk');
-const electron = require('electron');
-const path = require('path');
-const { say } = require('cfonts');
-const { spawn } = require('child_process');
-const webpack = require('webpack');
-const WebpackDevServer = require('webpack-dev-server');
-const webpackHotMiddleware = require('webpack-hot-middleware');
+const electron = require("electron");
+const exec = require("child_process").exec;
+const os = require("os");
+const path = require("path");
+const platform = os.platform();
+const { spawn } = require("child_process");
 
-const mainConfig = require('./webpack.main.config');
-const rendererConfig = require('./webpack.renderer.config');
+const chalk = require("chalk");
+const { say } = require("cfonts");
+
+const webpack = require("webpack");
+const WebpackDevServer = require("webpack-dev-server");
+const webpackHotMiddleware = require("webpack-hot-middleware");
+const mainConfig = require("./webpack.main.config");
+const rendererConfig = require("./webpack.renderer.config");
 
 let electronProcess = null;
 let manualRestart = false;
 let hotMiddleware;
 
-const exec = require("child_process").exec;
-const os = require("os");
-const platform = os.platform();
-
 function logStats(proc, data) {
     let log = "";
 
-    log += chalk.green.bold(`┏ ${proc} Process ${new Array((19 - proc.length) + 1).join("-")}`);
+    log += chalk.green(`┏ ${proc} Process ${new Array((19 - proc.length) + 1).join("-")}`);
     log += "\n\n";
 
     if (typeof data === "object") {
@@ -37,7 +37,7 @@ function logStats(proc, data) {
         log += `  ${data}\n`;
     }
 
-    log += "\n" + chalk.yellow.bold(`┗ ${new Array(28 + 1).join("-")}`) + "\n";
+    log += "\n" + chalk.green(`┗ ${new Array(28 + 1).join("-")}`) + "\n";
 
     console.log(log);
 }
@@ -88,7 +88,7 @@ function startMain() {
         const compiler = webpack(mainConfig);
 
         compiler.hooks.watchRun.tapAsync("watch-run", (compilation, done) => {
-            logStats("Main", chalk.white.bold("compiling..."));
+            logStats("Main", chalk.white("compiling..."));
             hotMiddleware.publish({ action: "compiling" });
             done();
         });
@@ -165,10 +165,10 @@ function electronLog(data, color) {
     });
     if (/[0-9A-z]+/.test(log)) {
         console.log(
-            chalk[color].bold("┏ Electron -------------------") +
+            chalk[color]("┏ Electron -------------------") +
             "\n\n" +
             log +
-            chalk[color].bold("┗ ----------------------------") +
+            chalk[color]("┗ ----------------------------") +
             "\n"
         );
     }
@@ -189,7 +189,7 @@ function greeting() {
             space: false
         })
     } else
-        console.log(chalk.yellow.bold("\n  electron-vue"));
+        console.log(chalk.yellow("\n  electron-vue"));
     console.log(chalk.blue("  getting ready...") + "\n");
 }
 

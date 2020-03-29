@@ -6,11 +6,6 @@ import LocalServer from "./LocalServer"
 
 require("./IPCService")
 
-
-/**
- * Set `__static` path to static files in production
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
- */
 if (process.env.NODE_ENV !== "development") {
     (<any>global).__static = require("path").join(__dirname, "/static").replace(/\\/g, "\\\\")
 }
@@ -70,7 +65,7 @@ function createTrayMenu() {
         {
             label: "关于",
             click: () => {
-                shell.openExternal("https://www.hibixin.com/")
+                shell.openExternal("https://github.com/maskerliu/app-mock-desktop")
             },
         },
         {

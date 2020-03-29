@@ -6,8 +6,8 @@
         :collapse="false"
         style="width: 100%; height: 100%;"
       >
-        <el-menu-item index="0" style="padding-left: 15px; margin-top: 50px;">
-          <el-popover placement="right" title width="260" height="400" v-model="showQrCodeDialog">
+        <el-menu-item index="0" style="padding-left: 10px;margin-top: 50px;">
+          <el-popover placement="right" title width="260" height="400" trigger="manual" v-model="showQrCodeDialog">
             <div id="register">
               扫描二维码或者手机访问：
               <br />
@@ -16,9 +16,9 @@
                 <span style="color: #777;" @click="click2Reg">{{registerUrl}}</span>
               </div>
             </div>
-            <el-avatar slot="reference">
+            <el-button circle slot="reference" @click="onShowQrCode">
               <i class="iconfont icon-qrcode" style="font-size: 1.5rem; color: grey;"></i>
-            </el-avatar>
+            </el-button>
           </el-popover>
         </el-menu-item>
         <el-menu-item index="Proxy" style="padding-left: 20px;" @click="onNavTabClick('Proxy')">
@@ -64,9 +64,7 @@
           ></span>
         </div>
       </div>
-      <keep-alive include="Proxy">
-        <router-view></router-view>
-      </keep-alive>
+      <router-view></router-view>
     </el-col>
   </el-row>
 </template>

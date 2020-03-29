@@ -35,7 +35,7 @@ if problem try electron-rebuild for sqlite3.
         由LocalServer拆分为ProxyService、MockService、PushService、WebService，服务依赖如下：
         > <kbd>LocalServer</kbd>
         >
-        > <kbd>ProxyService </kbd>       <kbd>WebService</kbd>
+        > <kbd>ProxyService</kbd>  <kbd>WebService</kbd>
         >
         > <kbd>PushService</kbd>  <kbd>MockService</kbd>
     
@@ -43,14 +43,16 @@ if problem try electron-rebuild for sqlite3.
     + 引入PouchDB :ok_hand: :heavy_check_mark:
     + 完善MockService逻辑，增加延时设置支持 :ok_hand: :heavy_check_mark:
     + Mock数据管理页相关功能： 
-        - 规则组创建/管理 :ok_hand: :heavy_check_mark:
-        - 规则编辑/添加 :ok_hand: :heavy_check_mark:
-        - 规则组代理开关 :ok_hand: :heavy_check_mark:
-        - 规则组数据云备份/共享 :fist: :heavy_check_mark:
+        - 本地规则组创建/管理 :ok_hand: :heavy_check_mark:
+        - 本地规则编辑/添加 :ok_hand: :heavy_check_mark:
+        - 本地规则组代理开关 :ok_hand: :heavy_check_mark:
+        - 规则组数据云备份/共享 :clock3: :x:
 
 + #### 设置面板 :clock3:
-    + 多网卡IP选择 :clock3: :soon:
-    + 本地服务端口自定义 :clock3: :x:
+    + 多网卡IP选择 :ok_hand: :heavy_check_mark:
+    + 本地代理服务端口自定义 :ok_hand: :heavy_check_mark:
+    + 本地推送端口自定义 :ok_hand: :heavy_check_mark:
+    + 本地长连代理服务端口自定义 :clock3: :soon:
 
 + #### 数据模型测试数据自动化生成 :clock3: :x:
 

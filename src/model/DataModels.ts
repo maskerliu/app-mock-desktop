@@ -1,6 +1,3 @@
-import "reflect-metadata"
-
-import { Expose, Type } from "class-transformer"
 
 export enum CMDCode {
     REQUEST = 5001,
@@ -40,71 +37,41 @@ export class Paged<T> {
 }
 
 export class ProxyRequestRecord {
-    @Expose()
     type?: number;
-    @Expose()
     id?: string;
-    @Expose()
     method: string;
-    @Expose()
     url: string;
-    @Expose()
     statusCode: number;
-    @Expose()
     time: number;
-    @Expose()
     isMock: boolean;
-    @Expose()
     headers: any;
-    @Expose()
     requestData: any;
-    @Expose()
     responseHeaders?: any;
-    @Expose()
     responseData?: any;
 }
 
 export class ProxyStatRecord {
-    @Expose()
     type?: number;
-    @Expose()
     id: number;
-    @Expose()
     app_id: string;
-    @Expose()
     app_version: string;
-    @Expose()
     os: string;
-    @Expose()
     rule: string;
-    @Expose()
     pageId: string;
-    @Expose()
     elementId: string;
-    @Expose()
     event_id: string;
-    @Expose()
     arg1: string;
-    @Expose()
     arg2: string;
-    @Expose()
     arg3: string;
-    @Expose()
     args: string;
-    @Expose()
     desc: string;
 
 }
 
 export class MockRule {
-    @Expose()
     _id: string;
-    @Expose()
     name: string;
-    @Expose()
     desc: string;
     isMock?: boolean = false;
-    @Type(() => ProxyRequestRecord)
     requests: ProxyRequestRecord[];
-
 }

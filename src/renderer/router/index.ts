@@ -22,25 +22,16 @@ export default new Router({
             path: '/proxy',
             name: 'Proxy',
             component: require('@/page/Proxy').default,
-            meta: {
-                keepAlive: true
-            }
         },
         {
             path: '/mockRuleMgr',
             name: 'MockRuleMgr',
             component: require('@/page/MockRuleMgr').default,
-            meta: {
-                keepAlive: true
-            }
         },
         {
             path: '/settings',
             name: 'Settings',
             component: require('@/page/Settings').default,
-            meta: {
-                keepAlive: true
-            }
         }
     ]
 })

@@ -50,20 +50,6 @@ export default class Proxy extends AbstractPage {
     scroll: any = null;
 
     mounted() {
-        this.init();
-    }
-
-    activated() {
-        this.init();
-    }
-
-    destoryed() {
-        if (!this.scroll) return;
-        this.scroll.destroy();
-        this.scroll = null;
-    }
-
-    init() {
         this.updateNavBarConfig({
             title: "代理",
             leftItem: false,
@@ -76,7 +62,18 @@ export default class Proxy extends AbstractPage {
         }, 1000);
     }
 
-    onItemClicked(item: ProxyRequestRecord | ProxyStatRecord) {
+    destroyed() {
+        try {
+            this.scroll.destroy();
+            this.scroll = null;
+        } catch (err) {
+
+        }
+
+        this.clearProxyRecrods();
+    }
+
+    public onItemClicked(item: ProxyRequestRecord | ProxyStatRecord): void {
         switch (item.type) {
             case CMDCode.REQUEST:
             case CMDCode.REQUEST_START:
@@ -93,7 +90,13 @@ export default class Proxy extends AbstractPage {
         }
     }
 
-    siftRecords() {
+    public clearProxyRecrods(): void {
+        this.filtedRecords = null;
+        this.curRecord = null;
+        this.clearRecords();
+    }
+
+    private siftRecords(): void {
         this.filtedRecords = this.records.filter((item: ProxyRequestRecord | ProxyStatRecord) => {
             switch (item.type) {
                 case CMDCode.REQUEST:
@@ -109,19 +112,14 @@ export default class Proxy extends AbstractPage {
         });
     }
 
-    clearProxyRecrods() {
-        this.curRecord = null;
-        this.clearRecords();
-    }
-
     @Watch("isDelay")
-    onSetDelayChanged() {
+    private onSetDelayChanged(): void {
         if (!this.isDelay) this.mockDelay = null;
         ipcRenderer.send("set-delay", { isDelay: this.isDelay, delay: this.mockDelay });
     }
 
     @Watch("records")
-    onRecordsChanged() {
+    private onRecordsChanged(): void {
         this.siftRecords();
         setTimeout(() => {
             this.scroll && this.scroll.refresh();
@@ -130,12 +128,12 @@ export default class Proxy extends AbstractPage {
     }
 
     @Watch("filterInput")
-    onFilterChanged() {
+    private onFilterChanged(): void {
         this.siftRecords();
     }
 
     @Watch("proxyTypes")
-    onProxyTypesChanged() {
+    private onProxyTypesChanged(): void {
         this.siftRecords();
     }
 }

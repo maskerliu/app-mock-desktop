@@ -118,8 +118,9 @@ export const mutations: MutationTree<CommonState> = {
         let uid = generateUid();
 
         state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/appmock/register?_=0__0&uid=${uid}`;
-        // state.registerUrl = ["http://", params.serverIP, ":", params.proxyHttpPort, "/appmock/register?_=0__0&uid=", uid].join("");
+        
         updateLocalDomain(state.localServerConfig);
+
         try {
             vm.$disconnect();
         } catch(err) {
