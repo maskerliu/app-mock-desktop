@@ -75,14 +75,12 @@ export default class Proxy extends AbstractPage {
 
     public onItemClicked(item: ProxyRequestRecord | ProxyStatRecord): void {
         switch (item.type) {
-            case CMDCode.REQUEST:
             case CMDCode.REQUEST_START:
             case CMDCode.REQUEST_END:
                 this.curRecord = item;
                 break;
             case CMDCode.STATISTICS:
                 this.curRecord = item;
-                console.log("ProxyStatRecord");
                 break;
             default:
                 Message({ message: "未知类型数据", type: "warning" });
@@ -99,10 +97,14 @@ export default class Proxy extends AbstractPage {
     private siftRecords(): void {
         this.filtedRecords = this.records.filter((item: ProxyRequestRecord | ProxyStatRecord) => {
             switch (item.type) {
-                case CMDCode.REQUEST:
                 case CMDCode.REQUEST_START:
                 case CMDCode.REQUEST_END:
-                    if (this.filterInput == null) return true;
+                    if (this.proxyTypes.indexOf[String(CMDCode.REQUEST)] == -1) {
+                        console.log(-1);
+                        return false;
+                    }
+                    if (this.filterInput == null)
+                        return true;
                     return (<ProxyRequestRecord>item).url.indexOf(this.filterInput) !== -1;
                 case CMDCode.STATISTICS:
                     return true;
@@ -115,7 +117,7 @@ export default class Proxy extends AbstractPage {
     @Watch("isDelay")
     private onSetDelayChanged(): void {
         if (!this.isDelay) this.mockDelay = null;
-        ipcRenderer.send("set-delay", { isDelay: this.isDelay, delay: this.mockDelay });
+        ipcRenderer.send("set-proxy-delay", { isDelay: this.isDelay, delay: this.mockDelay });
     }
 
     @Watch("records")

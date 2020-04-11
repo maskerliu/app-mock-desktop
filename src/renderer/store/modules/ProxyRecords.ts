@@ -25,34 +25,28 @@ export const actions: ActionTree<ProxyRecordState, any> = {
 // sync
 const mutations: MutationTree<ProxyRecordState> = {
 
-    requestStart(state, obj) {
+    requestStart(state, record: ProxyRequestRecord) {
         if (state.records.length > 20) {
             state.records.splice(0, 10);
         }
         try {
-            let record: ProxyRequestRecord = obj;
             state.records.push(record);
         } catch (err) {
             console.error(err);
         }
     },
-    requestEnd(state, obj) {
-        try {
-            let record: ProxyRequestRecord = obj;
-            for (let i = 0; i < state.records.length; ++i) {
-                let anchor: ProxyRequestRecord = <ProxyRequestRecord>state.records[i];
-                if (anchor != null && anchor.id === record.id) {
-                    Vue.set(state.records[i], "isMock", record.isMock);
-                    Vue.set(state.records[i], "type", record.type);
-                    Vue.set(state.records[i], "responseHeaders", record.responseHeaders);
-                    Vue.set(state.records[i], "responseData", JSON.parse(record.responseData));
-                    Vue.set(state.records[i], "statusCode", record.statusCode);
-                    Vue.set(state.records[i], "time", record.time);
-                    break;
-                }
+    requestEnd(state, record: ProxyRequestRecord) {
+        for (let i = 0; i < state.records.length; ++i) {
+            let anchor: ProxyRequestRecord = <ProxyRequestRecord>state.records[i];
+            if (anchor != null && anchor.id === record.id) {
+                Vue.set(state.records[i], "isMock", record.isMock);
+                Vue.set(state.records[i], "type", record.type);
+                Vue.set(state.records[i], "responseHeaders", record.responseHeaders);
+                Vue.set(state.records[i], "responseData", JSON.parse(record.responseData));
+                Vue.set(state.records[i], "statusCode", record.statusCode);
+                Vue.set(state.records[i], "time", record.time);
+                break;
             }
-        } catch (err) {
-            console.error(err);
         }
     },
     addStatistics(state, obj) {

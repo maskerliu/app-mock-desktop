@@ -5,11 +5,14 @@
         <el-checkbox-button label disabled>
           <i class="iconfont icon-filter" style="font-weight: blod;" />
         </el-checkbox-button>
-        <el-checkbox-button label="5001">
+        <el-checkbox-button label="5010">
           <i class="iconfont icon-network-data" style="font-weight: blod;" />
         </el-checkbox-button>
-        <el-checkbox-button label="5008">
+        <el-checkbox-button label="5020">
           <i class="iconfont icon-statistics" style="font-weight: blod;" />
+        </el-checkbox-button>
+        <el-checkbox-button label="5030">
+          <i class="iconfont icon-shuiguan" style="font-weight: blod;" />
         </el-checkbox-button>
       </el-checkbox-group>
 
@@ -36,17 +39,17 @@
         <div>
           <div v-for="(item, idx) in filtedRecords" :key="idx">
             <proxy-request-snap
-              v-loading="item.type !== 5004"
+              v-loading="item.type !== 5012"
               :reqRecord="item"
               :isSelected="curRecord != null && item.id === curRecord.id"
               @click.native="onItemClicked(item)"
-              v-if="item.type === 5002 || item.type === 5004"
+              v-if="item.type === 5011 || item.type === 5012"
             ></proxy-request-snap>
             <proxy-stat-snap
               :statRecord="item"
               :isSelected="curRecord != null && item.id === curRecord.id"
               @click.native="onItemClicked(item)"
-              v-if="item.type === 5008"
+              v-if="item.type === 5020"
             ></proxy-stat-snap>
           </div>
 

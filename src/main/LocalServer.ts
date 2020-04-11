@@ -26,7 +26,7 @@ class LocalServer {
     private httpApp: Application;
 
     constructor() {
-        this.serverIP = this.getDefaultLocalIP();
+        this.serverIP = LocalServer.getLocalIPs()[0].address;
         this.proxyHttpPort = 8885;
         this.proxySocketPort = 8886;
         this.pushSocketPort = 8887;
@@ -99,30 +99,14 @@ class LocalServer {
         return ips;
     }
 
-    private getDefaultLocalIP(): string {
-        let tempAddress = "127.0.0.1";
-        for (let devName in networkInterfaces()) {
-            let iface = networkInterfaces()[devName];
-            for (let i = 0; i < iface.length; i++) {
-                let alias = iface[i];
-                if (alias.family === "IPv4" && alias.address !== "127.0.0.1" && !alias.internal) {
-                    if (new RegExp("^192.168").test(alias.address)) {
-                        return alias.address;
-                    }
-                    tempAddress = alias.address;
-                }
-            }
-        }
-        return tempAddress;
-    }
-
     public getLocalServerConfig(): { serverIP: string, proxyHttpPort: number, proxySocketPort: number, pushSocketPort: number, ips: IP[] } {
         return {
-            serverIP: this.serverIP,
+            serverIP: LocalServer.getLocalIPs()[0].address,
             proxyHttpPort: this.proxyHttpPort,
             proxySocketPort: this.proxySocketPort,
             pushSocketPort: this.pushSocketPort,
-            ips: LocalServer.getLocalIPs()
+            ips: LocalServer.getLocalIPs(),
+            pbFiles: ProxyService.getProtoFiles()
         };
     }
 
@@ -174,8 +158,6 @@ class LocalServer {
                     console.log(`启动本地代理Http服务[${this.proxyHttpPort}]`);
                 });
             }
-
-
         } catch (err) {
             console.error(err);
         }
@@ -183,10 +165,11 @@ class LocalServer {
 
     public startProxySocketServer(): void {
         try {
-
+            
         } catch (err) {
 
         }
+        ProxyService.initProxySocketServer(this.proxySocketPort);
     }
 
     public startLocalPushServer(): void {

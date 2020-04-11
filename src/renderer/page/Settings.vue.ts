@@ -26,9 +26,10 @@ export default class Settings extends AbstractPage {
     public curProxySocketPort: number = null;
     private curPushSocketPort: number = null;
     private ruleSyncServer: string = null;
+    private pbFiles: any[] = null;
     private serialPlugin: number = 3;
 
-    created() {
+    public created(): void {
         this.updateNavBarConfig({
             title: "设置",
             leftItem: false,
@@ -41,6 +42,11 @@ export default class Settings extends AbstractPage {
         this.curProxySocketPort = this.localServerConfig.proxySocketPort;
         this.curPushSocketPort = this.localServerConfig.pushSocketPort;
         this.ruleSyncServer = this.localServerConfig.ruleSyncServer;
+        this.pbFiles = this.localServerConfig.pbFiles;
+    }
+
+    public destroyed(): void {
+        
     }
 
     public onOpenFileDialog(): void {

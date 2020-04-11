@@ -1,18 +1,14 @@
 'use strict';
 
-const electron = require("electron");
-const exec = require("child_process").exec;
-const os = require("os");
-const path = require("path");
-const platform = os.platform();
-const { spawn } = require("child_process");
-
 const chalk = require("chalk");
+const electron = require("electron");
+const path = require("path");
 const { say } = require("cfonts");
-
+const { spawn } = require("child_process");
 const webpack = require("webpack");
 const WebpackDevServer = require("webpack-dev-server");
 const webpackHotMiddleware = require("webpack-hot-middleware");
+
 const mainConfig = require("./webpack.main.config");
 const rendererConfig = require("./webpack.renderer.config");
 
@@ -20,24 +16,26 @@ let electronProcess = null;
 let manualRestart = false;
 let hotMiddleware;
 
+const exec = require("child_process").exec;
+const os = require("os");
+const platform = os.platform();
+
 function logStats(proc, data) {
     let log = "";
 
-    log += chalk.green(`┏ ${proc} Process ${new Array((19 - proc.length) + 1).join("-")}`);
+    log += chalk.yellow(`┏ ${proc} Process ${new Array((19 - proc.length) + 1).join("-")}`);
     log += "\n\n";
 
     if (typeof data === "object") {
-        data.toString({
-            colors: true,
-            chunks: false
-        }).split(/\r?\n/).forEach(line => {
-            log += "  " + line + "\n";
-        });
+        data.toString({ colors: true, chunks: false }).split(/\r?\n/)
+            .forEach(line => {
+                log += "  " + line + "\n";
+            });
     } else {
         log += `  ${data}\n`;
     }
 
-    log += "\n" + chalk.green(`┗ ${new Array(28 + 1).join("-")}`) + "\n";
+    log += "\n" + chalk.yellow(`┗ ${new Array(28 + 1).join("-")}`) + "\n";
 
     console.log(log);
 }
@@ -47,10 +45,7 @@ function startRenderer() {
         rendererConfig.entry.renderer = [path.join(__dirname, "dev-client")].concat(rendererConfig.entry.renderer);
         rendererConfig.mode = "development";
         const compiler = webpack(rendererConfig);
-        hotMiddleware = webpackHotMiddleware(compiler, {
-            log: false,
-            heartbeat: 2500
-        });
+        hotMiddleware = webpackHotMiddleware(compiler, { log: false, heartbeat: 2500 });
 
         compiler.hooks.compilation.tap("compilation", compilation => {
             compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync("html-webpack-plugin-after-emit", (data, cb) => {
@@ -108,7 +103,7 @@ function startMain() {
                     process.kill(electronProcess.pid);
                     electronProcess = null;
                     startElectron();
-    
+
                     setTimeout(() => {
                         manualRestart = false
                     }, 5000);
@@ -121,7 +116,7 @@ function startMain() {
                         startElectron();
                         manualRestart = false
                     });
-                }                
+                }
             }
 
             resolve();
@@ -167,7 +162,7 @@ function electronLog(data, color) {
         console.log(
             chalk[color]("┏ Electron -------------------") +
             "\n\n" +
-            log +
+            chalk[color](log) +
             chalk[color]("┗ ----------------------------") +
             "\n"
         );
@@ -189,7 +184,7 @@ function greeting() {
             space: false
         })
     } else
-        console.log(chalk.yellow("\n  electron-vue"));
+        console.log(chalk.green("\n  electron-vue"));
     console.log(chalk.blue("  getting ready...") + "\n");
 }
 

@@ -19,11 +19,7 @@ let appTray: Tray = null;
 const winURL: string = process.env.NODE_ENV === "development" ? `http://localhost:9080` : `file://${__dirname}/index.html`;
 const trayFloder: string = process.env.NODE_ENV === "development" ? path.join(__dirname, "../../static") : path.join(__dirname, "./static");
 
-if (process.platform === "win32") {
-    app.disableHardwareAcceleration();
-}
-
-function createMainWindow() {
+function createMainWindow(): void {
     let icon = nativeImage.createFromPath(path.join(trayFloder, "icon_tray.png"));
     Menu.setApplicationMenu(null);
     mainWindow = new BrowserWindow({
@@ -46,12 +42,16 @@ function createMainWindow() {
     mainWindow.loadURL(winURL);
     mainWindow.webContents.frameRate = 30;
 
+    mainWindow.webContents.on("paint", (event, dirty, image) => {
+
+    });
+
     mainWindow.on("closed", () => {
         mainWindow = null;
     });
 }
 
-function createTrayMenu() {
+function createTrayMenu(): void {
     //系统托盘右键菜单
     let trayMenuTemplate = [
         {
@@ -77,9 +77,9 @@ function createTrayMenu() {
         },
     ]
     if (process.platform === "darwin") {
-        appTray = new Tray(path.join(trayFloder, "icon_tray.png")) // app.ico是app目录下的ico文件
+        appTray = new Tray(path.join(trayFloder, "icon_tray.png"));
     } else {
-        appTray = new Tray(path.join(trayFloder, "icon.ico")) // app.ico是app目录下的ico文件
+        appTray = new Tray(path.join(trayFloder, "icon.ico"));
     }
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
     appTray.setToolTip("AppMock");
@@ -92,9 +92,14 @@ function createTrayMenu() {
     });
 }
 
+// if (process.platform === "win32") { app.disableHardwareAcceleration(); }
+// app.disableHardwareAcceleration();
+// app.commandLine.appendSwitch("disable-gpu");
+// app.commandLine.appendSwitch("disable-software-rasterizer");
+
 app.on("ready", () => {
     createMainWindow();
-    createTrayMenu();
+    // createTrayMenu();
     LocalServer.startProxyHttpServer();
     LocalServer.startLocalPushServer();
 });

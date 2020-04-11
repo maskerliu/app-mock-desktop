@@ -58,6 +58,29 @@ axios.interceptors.response.use(
 );
 
 export let BASE_LOCAL_URL = "http://localhost:8888";
+export let BASE_UPLOAD_URL = null;
+
+export function get(path: string, baseUrl?: string, params?: {}): AxiosPromise<BizResponse<any>> {
+    return axios({
+        baseURL: baseUrl !== null ? baseUrl : BASE_LOCAL_URL,
+        url: path,
+        method: "GET",
+        params: params,
+    }).then(resp => {
+        switch (resp.data.code) {
+            case BizCode.SUCCESS:
+                return resp;
+            case BizCode.FAIL:
+                Message({ message: resp.data.msg, type: "warning" });
+                return Promise.reject(resp);
+            case BizCode.ERROR:
+                Message({ message: resp.data.msg, type: "error" });
+                return Promise.reject(resp);
+            default:
+                return Promise.reject(resp);
+        }
+    })
+}
 
 export function post(path: string, baseUrl?: string, params?: {}, data?: {}): AxiosPromise<BizResponse<any>> {
     return axios({
@@ -82,28 +105,7 @@ export function post(path: string, baseUrl?: string, params?: {}, data?: {}): Ax
     })
 }
 
-export function get(path: string, baseUrl?: string, params?: {}): AxiosPromise<BizResponse<any>> {
-    return axios({
-        baseURL: baseUrl !== null ? baseUrl : BASE_LOCAL_URL,
-        url: path,
-        method: "GET",
-        params: params,
-    }).then(resp => {
-        switch (resp.data.code) {
-            case BizCode.SUCCESS:
-                return resp;
-            case BizCode.FAIL:
-                Message({ message: resp.data.msg, type: "warning" });
-                return Promise.reject(resp);
-            case BizCode.ERROR:
-                Message({ message: resp.data.msg, type: "error" });
-                return Promise.reject(resp);
-            default:
-                return Promise.reject(resp);
-        }
-    })
-}
-
 export function updateLocalDomain(localServerConfig: any) {
     BASE_LOCAL_URL = `http://${localServerConfig.serverIP}:${localServerConfig.proxyHttpPort}`;
+    BASE_UPLOAD_URL = `http://${localServerConfig.syncServerUrl}`;
 }

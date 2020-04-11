@@ -45,7 +45,7 @@ class WebService {
         if (uid) {
             resp.end();
             let data = {
-                code: CMDCode.REGISTER_SUCCESS,
+                type: CMDCode.REGISTER_SUCCESS,
                 data: uid
             };
             PushService.sendMessage(data);

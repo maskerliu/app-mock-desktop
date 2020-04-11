@@ -26,6 +26,7 @@ export interface CommonState {
     proxySocketPort: number;
     pushSocketPort: number;
     ips: Array<IP>;
+    pbFiles: Array<{ name: string, value: string }>;
   }
 }
 

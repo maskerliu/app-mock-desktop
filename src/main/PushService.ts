@@ -60,15 +60,13 @@ class PushService {
         }
 
         let data = {
-            code: CMDCode.REQUEST_START,
-            data: {
-                id: sessionId,
-                url: req.url,
-                method: req.method,
-                headers: req.headers,
-                proxyport: reqUrl.port,
-                requestData: requestData
-            }
+            id: sessionId,
+            type: CMDCode.REQUEST_START,
+            url: req.url,
+            method: req.method,
+            headers: req.headers,
+            proxyport: reqUrl.port,
+            requestData: requestData
         };
         if (!!this.wsServer.connections[0]) {
             this.wsServer.connections[0].sendText(JSON.stringify(data));
@@ -87,15 +85,13 @@ class PushService {
         }
 
         let data = {
-            code: CMDCode.REQUEST_END,
-            data: {
-                id: sessionId,
-                statusCode: statusCode,
-                headers: !!respHeaders ? respHeaders : null,
-                responseData: !!respData ? JSON.stringify(respData) : null,
-                time: new Date().getTime() - startTime,
-                isMock: isMock,
-            }
+            id: sessionId,
+            type: CMDCode.REQUEST_END,
+            statusCode: statusCode,
+            headers: !!respHeaders ? respHeaders : null,
+            responseData: !!respData ? JSON.stringify(respData) : null,
+            time: new Date().getTime() - startTime,
+            isMock: isMock,
         };
         if (!!this.wsServer.connections[0]) {
             this.wsServer.connections[0].sendText(JSON.stringify(data));
@@ -107,11 +103,9 @@ class PushService {
             return;
         }
         let data = {
-            code: CMDCode.STATISTICS,
-            data: {
-                id: sessionId,
-                statistics: statistics
-            }
+            id: sessionId,
+            type: CMDCode.STATISTICS,
+            statistics: statistics
         };
         if (!!this.wsServer.connections[0]) {
             this.wsServer.connections[0].sendText(JSON.stringify(data));

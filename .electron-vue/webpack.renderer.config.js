@@ -1,14 +1,16 @@
-'use strict';
+"use strict";
+
+process.env.BABEL_ENV = "renderer";
 
 const path = require("path");
 const { dependencies } = require("../package.json");
 const webpack = require("webpack");
+
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
-
-process.env.BABEL_ENV = "renderer";
+const TerserPlugin = require("terser-webpack-plugin");
 
 let whiteListedModules = ["vue"];
 
@@ -113,9 +115,7 @@ let rendererConfig = {
                 removeAttributeQuotes: true,
                 removeComments: true
             },
-            nodeModules: process.env.NODE_ENV !== "production"
-                ? path.resolve(__dirname, "../node_modules")
-                : false
+            nodeModules: process.env.NODE_ENV !== "production" ? path.resolve(__dirname, "../node_modules") : false
         }),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoEmitOnErrorsPlugin()
@@ -134,7 +134,17 @@ let rendererConfig = {
     },
     optimization: {
         minimizer: [
-            
+            new TerserPlugin({
+                extractComments: true,
+                cache: true,
+                parallel: true,
+                sourceMap: true, // Must be set to true if using source-maps in production
+                terserOptions: {
+                    // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+                    extractComments: "all",
+                    compress: { drop_console: true, },
+                }
+            }),
         ],
     },
     target: "electron-renderer"

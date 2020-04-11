@@ -1,10 +1,11 @@
 
 export enum CMDCode {
-    REQUEST = 5001,
-    REQUEST_START = 5002,
-    REQUEST_END = 5004,
-    STATISTICS = 5008,
-    REGISTER_SUCCESS = 5005,
+    REQUEST= 5010,
+    REQUEST_START = 5011,
+    REQUEST_END = 5012,
+    STATISTICS = 5020,
+    SOCKET = 5030,
+    REGISTER_SUCCESS = 6000,
 }
 
 export enum BizCode {

@@ -20,6 +20,14 @@ if problem try electron-rebuild for sqlite3.
 
 ```
 
+### 接入指南
+> 您的应用需对网络请求框架做一个简单改造，在所有需要接入AppMock的请求URL的Host的改为AppMock提供的Host，同时将需代理请求的源Host加入请求Header的Host（某些端由于http协议实现限制可能不允许修改header中的host字段）或者X-Host字段，即完成应用端改造。
+> #### AppMock代理服务的地址获取方案
+> + 移动端提供扫码获取Host SDK方便在研发过程中接入； :clock3: :x:
+>     - android扫码组件； :clock3: :x:
+>     - iOS扫码组件； :clock3: :x:
+> + 桌面应用或Web应用需要研发同学根据自己的实际工程特点集成，一般建议在工程全局debug面板中添加集成入口统一替换；
+
 ### ***主体产品功能开发roadmap***
 ---
 + #### 工程框架重构 

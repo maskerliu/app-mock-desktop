@@ -26,26 +26,17 @@
     "files": [
       "dist/electron/**/*"
     ],
-    "dmg": {
-      "contents": [
-        {
-          "x": 410,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        },
-        {
-          "x": 130,
-          "y": 150,
-          "type": "file"
-        }
-      ]
+    "extraResources": [
+      
+    ],
+    "pkg": {
+      "installLocation": "/Applications"
     },
     "mac": {
       "icon": "build/icons/icon.icns",
       "target": [
         "zip",
-        "dmg"
+        "pkg"
       ]
     },
     "win": {
@@ -56,11 +47,12 @@
     }
   },
   "dependencies": {
-    "json-bigint": "^0.3.0",
     "pouchdb": "^7.2.1",
-    "pouchdb-find": "^7.2.1"
+    "json-bigint": "^0.3.0",
+    "protobufjs": "^6.8.9"
   },
   "devDependencies": {
+    "pouchdb-find": "^7.2.1",
     "@types/node": "13.7.2",
     "@types/cors": "^2.8.6",
     "@types/compression": "^1.7.0",

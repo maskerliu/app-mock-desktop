@@ -1,8 +1,9 @@
 import { AxiosPromise } from "axios"
 
-import { get, post } from "./BasicLocalAPI"
+import { get, post, BASE_UPLOAD_URL } from "./BasicLocalAPI"
 
 import { BizResponse, Paged, MockRule } from "./DataModels"
+import { fchown } from "fs";
 
 
 export function searchMockRules(keyword: string): AxiosPromise<BizResponse<Array<MockRule>>> {
@@ -23,5 +24,5 @@ export function deleteMockRule(ruleId: string): AxiosPromise<BizResponse<string>
 
 export function uploadMockRule(ruleId: string): AxiosPromise<BizResponse<string>> {
     console.log(ruleId);
-    return post("/appmock/uploadMockRule", null, { ruleId });
+    return post("/appmock/uploadMockRule", BASE_UPLOAD_URL, { ruleId });
 }

@@ -7,7 +7,7 @@ import { Message } from "element-ui"
 import store from "../"
 import { CommonState, IP } from "../types"
 import { CMDCode } from "../../../model/DataModels"
-import {updateLocalDomain} from "../../../model/BasicLocalAPI"
+import { updateLocalDomain } from "../../../model/BasicLocalAPI"
 
 const SocketConfig = {
     reconnection: true,
@@ -34,7 +34,8 @@ const state: CommonState = {
         proxyHttpPort: null,
         proxySocketPort: null,
         pushSocketPort: null,
-        ips: []
+        ips: [],
+        pbFiles: []
     },
 };
 
@@ -50,23 +51,20 @@ function generateUid() {
 
 function handleMsg(data: any) {
     let msg = JSON.parse(data);
-    switch (msg.code) {
+    switch (msg.type) {
         case CMDCode.REGISTER_SUCCESS:
             store.commit("updateShowQrCodeDialog", false);
             Message({ message: "设备[" + msg.data + "]注册成功", type: "success" });
             break;
         case CMDCode.REQUEST_START:
-            msg.data.type = CMDCode.REQUEST_START;
-            store.commit("ProxyRecords/requestStart", msg.data);
+            store.commit("ProxyRecords/requestStart", msg);
             break;
         case CMDCode.REQUEST_END:
-            msg.data.type = CMDCode.REQUEST_END;
-            store.commit("ProxyRecords/requestEnd", msg.data);
+            store.commit("ProxyRecords/requestEnd", msg);
             break;
         case CMDCode.STATISTICS:
-            msg.data.type = CMDCode.STATISTICS;
-            for (let i = 0; i != msg.data.statistics.bps.length; i++) {
-                let temp = this.clone(msg.data)
+            for (let i = 0; i != msg.statistics.bps.length; i++) {
+                let temp = this.clone(msg)
                 temp.statistics.bps = []
                 temp.statistics.bps.push(msg.data.statistics.bps[i])
                 store.commit("ProxyRecords/addStatistics", temp);
@@ -85,8 +83,15 @@ export const getters: GetterTree<CommonState, any> = {
 // async
 export const actions: ActionTree<CommonState, any> = {
     init(context: { commit: Commit }): void {
-        ipcRenderer.on("get-local-server-config", (event: any, data: any)=>{
+        ipcRenderer.on("get-local-server-config", (event: any, data: any) => {
             store.commit("updateLocalServerConfig", data);
+        });
+        ipcRenderer.on("on-selected-files", (event: any, data: any) => {
+            console.log("on select files");
+            // data.files.forEach((item: string) => {
+            //     var strs = item.split("/");
+            //     this.pbFiles.push({ name: strs[strs.length - 1], value: item });
+            // });
         });
         ipcRenderer.send("get-local-server-config");
     },
@@ -115,18 +120,17 @@ export const mutations: MutationTree<CommonState> = {
         state.localServerConfig.proxySocketPort = params.proxySocketPort;
         state.localServerConfig.pushSocketPort = params.pushSocketPort;
         state.localServerConfig.ips = params.ips;
-        let uid = generateUid();
+        state.localServerConfig.pbFiles = params.pbFiles;
+        state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/appmock/register?_=0__0&uid=${generateUid()}`;
 
-        state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/appmock/register?_=0__0&uid=${uid}`;
-        
         updateLocalDomain(state.localServerConfig);
 
         try {
             vm.$disconnect();
-        } catch(err) {
+        } catch (err) {
             console.log(err);
         }
-        
+
         vm.$connect(`ws://${params.serverIP}:${params.pushSocketPort}`, SocketConfig);
         Vue.prototype.$socket.onmessage = (stream: any) => {
             handleMsg(stream.data);
