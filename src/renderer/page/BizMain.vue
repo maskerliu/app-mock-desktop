@@ -6,22 +6,18 @@
         :collapse="false"
         style="width: 100%; height: 100%;"
       >
-        <el-menu-item index="0" style="padding-left: 10px;margin-top: 50px;">
-          <el-popover placement="right" title width="260" height="400" trigger="manual" v-model="showQrCodeDialog">
-            <div id="register">
-              扫描二维码或者手机访问：
-              <br />
-              <qrcode-vue :value="registerUrl" size="256" style="margin-top: 5px;"></qrcode-vue>
-              <div>
-                <span style="color: #777;" @click="click2Reg">{{registerUrl}}</span>
-              </div>
-            </div>
-            <el-button circle slot="reference" @click="onShowQrCode">
-              <i class="iconfont icon-qrcode" style="font-size: 1.5rem; color: grey;"></i>
-            </el-button>
-          </el-popover>
+        <el-menu-item
+          index="0"
+          style="padding-left: 20px;margin-top: 50px;"
+          @click="onShowQrCode"
+        >
+          <i class="iconfont icon-qrcode" style="font-size: 1.8rem;"></i>
         </el-menu-item>
-        <el-menu-item index="Proxy" style="padding-left: 20px;" @click="onNavTabClick('Proxy')">
+        <el-menu-item
+          index="Proxy"
+          style="padding-left: 20px;"
+          @click="onNavTabClick('Proxy')"
+        >
           <i class="iconfont icon-mock" style="font-size: 1.8rem;"></i>
         </el-menu-item>
         <el-menu-item
@@ -43,15 +39,21 @@
         </el-menu-item>
       </el-menu>
     </el-col>
-    <el-col style="width: calc(100vw - 70px); height: calc(100vh - 10px); background: transparent;">
+    <el-col
+      style="width: calc(100vw - 70px); height: calc(100vh - 10px); background: transparent;"
+    >
       <div class="header">
         <div class="header-title" @click="leftNavBarItemClick">
           <i class="el-icon-back" v-if="navBarConfig.leftItem"></i>
-          <span class="navbar-btn">{{navBarConfig.title}}</span>
+          <span class="navbar-btn">{{ navBarConfig.title }}</span>
         </div>
         <div class="header-content"></div>
         <div class="header-right">
-          <span class="el-icon-minus header-right-btn" style="color: #f39c12;" @click="onMinus()"></span>
+          <span
+            class="el-icon-minus header-right-btn"
+            style="color: #f39c12;"
+            @click="onMinus()"
+          ></span>
           <span
             class="el-icon-full-screen header-right-btn"
             style="color: #2ecc71;"
@@ -66,6 +68,20 @@
       </div>
       <router-view></router-view>
     </el-col>
+
+    <el-dialog title="扫描二维码或者手机访问：" :visible.sync="showQrCodeDialog" width="300px">
+      <div id="register">
+        <qrcode-vue
+          :value="registerUrl"
+          size="256"
+          style="margin-top: 5px;"
+        ></qrcode-vue>
+        <br />
+        <div>
+          <span style="color: #777;" @click="click2Reg">{{ registerUrl }}</span>
+        </div>
+      </div>
+    </el-dialog>
   </el-row>
 </template>
 

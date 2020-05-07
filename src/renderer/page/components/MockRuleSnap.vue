@@ -1,20 +1,20 @@
 <template>
-  <div class="rule-snap-item">
+  <div class="rule-snap-item" @click="setCurRule(source)">
     <span class="item-selected" v-if="isSelected"></span>
-    <span class="rule-snap-name">[{{rule.name}}]</span>
-    <span class="iconfont icon-edit" style="color: #3498db; padding: 0 5px;" v-on:click="$emit('edit')"></span>
-    <span class="iconfont icon-delete" style="color: red; padding: 0 5px;" v-on:click="$emit('delete')"></span>
-    <span class="iconfont icon-upload" style="color: red; padding: 0 5px;" v-on:click="$emit('upload')"></span>
+    <span class="rule-snap-name">[{{source.name}}]</span>
+    <span class="iconfont icon-edit" style="color: #3498db; padding: 0 5px;" @click="onEdit()"></span>
+    <span class="iconfont icon-delete" style="color: red; padding: 0 5px;" @click="onDelete()"></span>
+    <span class="iconfont icon-upload" style="color: red; padding: 0 5px;" @click="onUpload()"></span>
     <br />
-    <span class="rule-snap-desc">{{rule.desc}}</span>
+    <span class="rule-snap-desc">{{source.desc}}</span>
     <br />
     <span class="rule-snap-status">
       <b style="color: #2980b9;">请求数:</b>
-      {{rule.requests != null ? rule.requests.length : 0}}
+      {{source.requests != null ? source.requests.length : 0}}
     </span>
     <span style="position: absolute; bottom: 12px; right: 50px;">
       <span style="font-size: 0.6rem; color: #34495e;">启用Mock:</span>
-      <el-switch style="margin-top: 3px;" v-model="rule.isMock" v-on:change="$emit('open-mock')"></el-switch>
+      <el-switch style="margin-top: 3px;" v-model="source.isMock" @change="onMockSwitchChanged()"></el-switch>
     </span>
     <i
       class="el-icon-arrow-right"

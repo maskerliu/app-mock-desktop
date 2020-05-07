@@ -40,10 +40,11 @@ export interface NavBarConfig {
 
 export interface ProxyRecordState {
   records: Array<ProxyRequestRecord | ProxyStatRecord>;
+  curRecord: ProxyRequestRecord
 }
 
-export class MockRuleState {
-  pagedRules: Array<MockRule>;
-  searchResults: Array<MockRule>;
-  rules: Array<MockRule>;
+export interface MockRuleState {
+  showEditMockRuleDialog: boolean;
+  showDeleteMockRuleDialog: boolean;
+  curRule: MockRule;
 }

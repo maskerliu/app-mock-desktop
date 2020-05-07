@@ -1,37 +1,39 @@
 <template>
   <div
     class="request-snap-item"
-    v-bind:style="{background: reqRecord.isMock ? '#ffeaa755' : 'white'}"
+    v-bind:style="{background: source.isMock ? '#ffeaa755' : 'white'}"
+    v-loading="source.type !== 5012"
+    @click="setCurRecord(source)"
   >
-    <span class="item-selected" v-if="isSelected"></span>
+    <span class="item-selected" v-if="curRecord != null && curRecord.id == source.id"></span>
     <div style="display: block;">
-      <strong class="request-snap-method">[{{reqRecord.method}}]</strong>
-      <span class="request-snap-url">{{reqRecord.url}}</span>
+      <strong class="request-snap-method">[{{source.method}}]</strong>
+      <span class="request-snap-url">{{source.url}}</span>
     </div>
 
     <div style="width: 100%; margin-top: 10px;">
-      <el-tag size="mini" :type="reqRecord.statusCode === 200 ? 'success': 'danger'" effect="plain">
+      <el-tag size="mini" :type="source.statusCode === 200 ? 'success': 'danger'" effect="plain">
         <span class="request-snap-status">
           <b style="color: #2980b9;">[HTTP]</b>
-          {{reqRecord.statusCode}}
+          {{source.statusCode}}
         </span>
       </el-tag>
       <el-tag
         size="mini"
-        :type="parseInt(reqRecord.responseData.code) === 8000 ? 'success': 'danger'"
+        :type="parseInt(source.responseData.code) === 8000 ? 'success': 'danger'"
         effect="plain"
-        v-if="reqRecord.responseData != null"
+        v-if="source.responseData != null"
       >
         <span class="request-snap-status">
           <b style="color: #2980b9;">[BIZ]</b>
-          {{reqRecord.responseData.code}}
+          {{source.responseData.code}}
         </span>
       </el-tag>
       <span class="request-snap-status">
         <b style="color: #2980b9;">耗时:</b>
         <span
-          v-bind:style="{ color: reqRecord.time > 500 ? '#e74c3c' : '#2ecc71'}"
-        >{{reqRecord.time ? reqRecord.time : '--'}} ms</span>
+          v-bind:style="{ color: source.time > 500 ? '#e74c3c' : '#2ecc71'}"
+        >{{source.time ? source.time : '--'}} ms</span>
       </span>
     </div>
     <i

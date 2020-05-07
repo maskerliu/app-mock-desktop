@@ -22,7 +22,6 @@ export function deleteMockRule(ruleId: string): AxiosPromise<BizResponse<string>
     return post("/appmock/deleteMockRule", null, { ruleId });
 }
 
-export function uploadMockRule(ruleId: string): AxiosPromise<BizResponse<string>> {
-    console.log(ruleId);
-    return post("/appmock/uploadMockRule", BASE_UPLOAD_URL, { ruleId });
+export function uploadMockRule(rule: MockRule): AxiosPromise<BizResponse<string>> {
+    return post("/appmock/uploadMockRule", BASE_UPLOAD_URL, { rule });
 }

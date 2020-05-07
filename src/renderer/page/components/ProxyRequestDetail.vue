@@ -1,68 +1,84 @@
 <template>
   <div class="inspector-panel" v-if="wrapperRecord != null">
     <div class="request-path">
-      <span class="request-url">Path:{{wrapperRecord.url}}</span>
+      <span class="request-url">Path:{{ wrapperRecord.url }}</span>
       <el-button
         style="flex:1; margin: 0 5px;"
         size="small"
         type="primary"
         @click="addToMock"
-      >一键添加mock</el-button>
+        >一键添加mock</el-button
+      >
     </div>
-    <div class="inspector-row" style="height: 46vh; margin-top: 70px;">
+    <div class="inspector-row" style="margin-top: 70px; padding-bottom: 15px;">
       <h3 style="margin-left: 20px;">请求头</h3>
-      <v-json-editor
-        style="height: calc(46vh - 50px);"
-        :options="headerOption"
-        :plus="false"
-        v-model="wrapperRecord.headers"
-      />
+      <json-viewer
+        :closed="true"
+        :data="wrapperRecord.headers == null ? {} : wrapperRecord.headers"
+      ></json-viewer>
     </div>
-    <div class="inspector-row" style="height: 25vh;">
+    <div class="inspector-row" style="padding-bottom: 15px;">
       <h3 style="margin-left: 20px;">请求参数</h3>
-      <v-json-editor
-        style="height: calc(25vh - 60px);"
-        :options="headerOption"
-        :plus="false"
-        v-model="wrapperRecord.requestData"
-      />
+      <json-viewer
+        :data="
+          wrapperRecord.requestData == null ? {} : wrapperRecord.requestData
+        "
+      ></json-viewer>
     </div>
-    <div class="inspector-row" style="height: 25vh;">
+    <div class="inspector-row" style="padding-bottom: 15px;">
       <h3 style="margin-left: 20px;">响应头</h3>
-      <v-json-editor
-        style="height: calc(25vh - 60px);"
-        :options="headerOption"
-        :plus="false"
-        v-model="wrapperRecord.responseHeaders"
-      />
+      <json-viewer
+        :data="
+          wrapperRecord.responseHeaders == null
+            ? {}
+            : wrapperRecord.responseHeaders
+        "
+      ></json-viewer>
     </div>
     <div class="inspector-row" style="height: calc(100vh - 65px);">
       <div style="position: relative; height: 40px;">
         <h3 style="margin-left: 20px;">响应数据</h3>
       </div>
-      <v-json-editor
-        ref="respJsonEditor"
-        :options="responseOption"
-        v-model="wrapperRecord.responseData"
-        style="height: calc(100vh - 120px);"
-      />
+      <json-viewer
+        :data="wrapperRecord.responseData"
+        v-on:click="onItemClick"
+        :onItemClick="onItemClick"
+        :deep="5"
+      ></json-viewer>
     </div>
 
-    <el-dialog title="AddMockRule" :visible.sync="showAddMockRule" width="90%" top="20px">
-      <add-mock-rule :show="showAddMockRule" :record="wrapperRecord"></add-mock-rule>
+    <el-dialog
+      title="AddMockRule"
+      :visible.sync="showAddMockRule"
+      width="90%"
+      top="20px"
+    >
+      <add-mock-rule
+        :show="showAddMockRule"
+        :record="wrapperRecord"
+      ></add-mock-rule>
     </el-dialog>
 
-    <el-dialog title="预览" :visible.sync="showPreview" width="40%" top="100px">
-      <img style="width: 100%; border-radius: 8px;" :src="curImgSrc" v-show="!!curImgSrc" />
+    <el-dialog
+      title="预览"
+      :visible.sync="showPreview"
+      top="100px"
+      align="center"
+    >
+      <img
+        style="max-width: 100%; max-height: 60vh; border-radius: 8px;"
+        :src="curImgSrc"
+        v-show="!!curImgSrc"
+      />
       <audio
         id="audioPlayer"
-        style="width: 100%;"
+        style="width: 100%; max-width:100%; max-height: 60vh;"
         :src="curAudioSrc"
         controls="controls"
         v-show="!!curAudioSrc"
       ></audio>
       <video
-        style="width:100%; object-fit: contain;"
+        style="max-width:100%; max-height: 60vh; object-fit: contain;"
         :src="curVideoSrc"
         v-show="!!curVideoSrc"
         controls="controls"
@@ -93,7 +109,7 @@
   padding: 0 5px;
   font-size: 0.8rem;
   overflow-x: hidden;
-  overflow-y: hidden;
+  user-select: text;
 }
 
 .request-path {

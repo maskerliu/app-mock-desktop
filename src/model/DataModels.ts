@@ -38,7 +38,7 @@ export class Paged<T> {
 }
 
 export class ProxyRequestRecord {
-    type?: number;
+    type?: string;
     id?: string;
     method: string;
     url: string;

@@ -6,7 +6,8 @@ import { CMDCode, ProxyStatRecord, ProxyRequestRecord } from "../../../model/Dat
 
 
 const state: ProxyRecordState = {
-    records: []
+    records: [],
+    curRecord: null
 };
 
 const getters: GetterTree<ProxyRecordState, any> = {
@@ -26,19 +27,21 @@ export const actions: ActionTree<ProxyRecordState, any> = {
 const mutations: MutationTree<ProxyRecordState> = {
 
     requestStart(state, record: ProxyRequestRecord) {
-        if (state.records.length > 20) {
+        if (state.records.length > 40) {
             state.records.splice(0, 10);
         }
         try {
-            state.records.push(record);
+            record.id = record.id + "";
+            state.records.unshift(record);
         } catch (err) {
             console.error(err);
         }
     },
     requestEnd(state, record: ProxyRequestRecord) {
+        record.id = record.id + "";
         for (let i = 0; i < state.records.length; ++i) {
             let anchor: ProxyRequestRecord = <ProxyRequestRecord>state.records[i];
-            if (anchor != null && anchor.id === record.id) {
+            if (anchor != null && anchor.id == record.id) {
                 Vue.set(state.records[i], "isMock", record.isMock);
                 Vue.set(state.records[i], "type", record.type);
                 Vue.set(state.records[i], "responseHeaders", record.responseHeaders);
@@ -71,6 +74,9 @@ const mutations: MutationTree<ProxyRecordState> = {
     },
     clearRecords(state, params?: any): void {
         state.records.splice(0, state.records.length);
+    },
+    setCurRecord(state, params: ProxyRequestRecord) {
+        state.curRecord = params;
     }
 };
 

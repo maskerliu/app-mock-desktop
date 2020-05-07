@@ -9,7 +9,7 @@ const DEFAULT_HEADER = { "Content-Type": "text/html" };
 class WebService {
 
     constructor() {
-        
+
     }
 
     filter(req: Request, resp: Response) {
@@ -29,14 +29,21 @@ class WebService {
     }
 
     private parseUrl(url: string) {
-        if (/^\/appmock\//.test(url)) {
+        if (/^\/mw\//.test(url)) {
+            let path = url.substring(4).split("?")[0];	// remove /mw/
+            return {
+                path: path,
+                type: "cgi"
+            };
+        } else if (/^\/appmock\//.test(url)) {
             let path = url.substring(9).split("?")[0];	// remove /mw/
             return {
                 path: path,
                 type: "cgi"
             };
+        } else {
+            return null;
         }
-        return null;
     }
 
     private register(req: Request, resp: Response) {

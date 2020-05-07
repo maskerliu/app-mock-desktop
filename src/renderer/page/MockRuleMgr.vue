@@ -9,39 +9,62 @@
           clearable
           style="margin-top: 10px;"
         >
-          <i slot="prefix" class="el-input__icon iconfont icon-search" style="font-size: 1.0rem;"></i>
-          <el-button slot="append" size="mini" type="success" icon="el-icon-plus" @click="onEditMockRule(null)"></el-button>
+          <i
+            slot="prefix"
+            class="el-input__icon iconfont icon-search"
+            style="font-size: 1.0rem;"
+          ></i>
+          <el-button
+            slot="append"
+            size="mini"
+            type="success"
+            icon="el-icon-plus"
+            @click="onEditMockRule(null)"
+          ></el-button>
         </el-input>
 
-        <div class="rule-snap-panel" ref="wrapper">
-          <mock-rule-snap
-            v-for="(item, idx) in rules"
-            :key="idx"
-            :rule="item"
-            :isSelected="curRule!== null && item._id === curRule._id"
-            @click.native="onRuleClicked(item)"
-            v-on:edit="onEditMockRule(item)"
-            v-on:delete="onDeleteMockRule(item._id)"
-            v-on:upload="onUploadMockRule(item._id)"
-            v-on:open-mock="onMockSwitchChanged(item)"
-          />
-        </div>
+        <virtual-list
+          class="rule-snap-panel"
+          :size="50"
+          :keeps="10"
+          :data-key="'_id'"
+          :data-sources="rules"
+          :data-component="mockRuleSnap"
+        />
       </el-col>
       <el-col class="border-panel" style="width: calc(100vw - 400px);">
-        <mock-rule-detail :rule-id="curRule._id" :is-mock="curRule.isMock" v-if="curRule != null" />
+        <mock-rule-detail
+          :rule-id="curRule._id"
+          :is-mock="curRule.isMock"
+          v-if="curRule != null"
+        />
       </el-col>
     </el-row>
 
-    <el-dialog title="Waring" :visible.sync="showDeleteMockRuleDialog" width="30%">
-      <span>确定删除[{{curRule != null ? curRule.name : ""}}]这条Mock规则吗?</span>
+    <el-dialog title="Waring" :visible="showDeleteMockRuleDialog" width="30%">
+      <span
+        >确定删除[{{
+          curRule != null ? curRule.name : ""
+        }}]这条Mock规则吗?</span
+      >
       <span slot="footer" class="dialog-footer">
-        <el-button @click="showDeleteMockRuleDialog = false">取 消</el-button>
-        <el-button type="danger" @click="onDeleteMockRuleConfirmed()">确 定</el-button>
+        <el-button @click="setShowDeleteMockRuleDialog(false)">取 消</el-button>
+        <el-button type="danger" @click="onDeleteMockRuleConfirmed()"
+          >确 定</el-button>
       </span>
     </el-dialog>
 
-    <el-dialog title="Mock规则详情" :visible.sync="showEditMockRuleDialog" width="50%">
-      <el-form ref="form" :model="curRule" label-width="90px" v-if="curRule != null">
+    <el-dialog
+      title="Mock规则详情"
+      :visible.sync="showEditMockRuleDialog"
+      width="50%"
+    >
+      <el-form
+        ref="form"
+        :model="curRule"
+        label-width="90px"
+        v-if="curRule != null"
+      >
         <el-form-item label="规则组名">
           <el-input v-model="curRule.name" placeholder="规则组名"></el-input>
         </el-form-item>
@@ -50,7 +73,7 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="showEditMockRuleDialog = false">取 消</el-button>
+        <el-button @click="setShowEditMockRuleDialog(false)">取 消</el-button>
         <el-button type="primary" @click="onSaveMockRule()">保 存</el-button>
       </span>
     </el-dialog>
@@ -70,12 +93,12 @@
 .rule-snap-panel {
   height: calc(100vh - 140px);
   margin-top: 15px;
-  overflow-y: scroll;
+  /* overflow-y: scroll; */
   overflow-x: hidden;
   margin-bottom: 5px;
 }
 
-.rule-snap-panel::-webkit-scrollbar {
+/* .rule-snap-panel::-webkit-scrollbar {
   display: none;
-}
+} */
 </style>

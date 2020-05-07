@@ -1,23 +1,11 @@
-import Vue from "vue"
 import { ActionTree, Commit, GetterTree, MutationTree, Store } from "vuex"
 import { ipcRenderer } from "electron"
-import VueNativeSocket from "vue-native-websocket"
-import { Message } from "element-ui"
 
+
+import PushService from "../../common/PushService"
 import store from "../"
 import { CommonState, IP } from "../types"
-import { CMDCode } from "../../../model/DataModels"
 import { updateLocalDomain } from "../../../model/BasicLocalAPI"
-
-const SocketConfig = {
-    reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 3000,
-    format: "json",
-    connectManually: true,
-};
-Vue.use(VueNativeSocket, 'ws://localhost:8887', SocketConfig);
-const vm = new Vue();
 
 const state: CommonState = {
     showQrCodeDialog: false,
@@ -47,33 +35,6 @@ function generateUid() {
     }
     res.push(new Date().getTime() + "o");
     return res.join("");
-}
-
-function handleMsg(data: any) {
-    let msg = JSON.parse(data);
-    switch (msg.type) {
-        case CMDCode.REGISTER_SUCCESS:
-            store.commit("updateShowQrCodeDialog", false);
-            Message({ message: "设备[" + msg.data + "]注册成功", type: "success" });
-            break;
-        case CMDCode.REQUEST_START:
-            store.commit("ProxyRecords/requestStart", msg);
-            break;
-        case CMDCode.REQUEST_END:
-            store.commit("ProxyRecords/requestEnd", msg);
-            break;
-        case CMDCode.STATISTICS:
-            for (let i = 0; i != msg.statistics.bps.length; i++) {
-                let temp = this.clone(msg)
-                temp.statistics.bps = []
-                temp.statistics.bps.push(msg.data.statistics.bps[i])
-                store.commit("ProxyRecords/addStatistics", temp);
-            }
-
-            break;
-        default:
-            Message({ message: "unhandled code:" + msg.code, type: "warning" });
-    }
 }
 
 export const getters: GetterTree<CommonState, any> = {
@@ -121,20 +82,11 @@ export const mutations: MutationTree<CommonState> = {
         state.localServerConfig.pushSocketPort = params.pushSocketPort;
         state.localServerConfig.ips = params.ips;
         state.localServerConfig.pbFiles = params.pbFiles;
-        state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/appmock/register?_=0__0&uid=${generateUid()}`;
+        state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/mw/register?_=0__0&uid=${generateUid()}`;
 
         updateLocalDomain(state.localServerConfig);
 
-        try {
-            vm.$disconnect();
-        } catch (err) {
-            console.log(err);
-        }
-
-        vm.$connect(`ws://${params.serverIP}:${params.pushSocketPort}`, SocketConfig);
-        Vue.prototype.$socket.onmessage = (stream: any) => {
-            handleMsg(stream.data);
-        };
+        PushService.start(params.serverIP, params.pushSocketPort);
     },
 }
 

@@ -1,7 +1,11 @@
 <template>
   <el-row :gutter="20">
     <el-col class="bg-border" style="width: 300px; margin-left: 15px;">
-      <el-checkbox-group size="mini" v-model="proxyTypes" style="width: 100%; padding: 10px 0;">
+      <el-checkbox-group
+        size="mini"
+        v-model="proxyTypes"
+        style="width: 100%; padding: 10px 0;"
+      >
         <el-checkbox-button label disabled>
           <i class="iconfont icon-filter" style="font-weight: blod;" />
         </el-checkbox-button>
@@ -30,32 +34,23 @@
         style="margin-top: 10px;"
       >
         <i slot="prefix" class="el-input__icon iconfont icon-search"></i>
-        <el-button slot="append" icon="iconfont icon-clear" @click="clearProxyRecrods()"></el-button>
+        <el-button
+          slot="append"
+          icon="iconfont icon-clear"
+          @click="clearProxyRecrods()"
+        ></el-button>
       </el-input>
 
       <el-divider />
 
-      <div class="record-snap-panel" ref="wrapper">
-        <div>
-          <div v-for="(item, idx) in filtedRecords" :key="idx">
-            <proxy-request-snap
-              v-loading="item.type !== 5012"
-              :reqRecord="item"
-              :isSelected="curRecord != null && item.id === curRecord.id"
-              @click.native="onItemClicked(item)"
-              v-if="item.type === 5011 || item.type === 5012"
-            ></proxy-request-snap>
-            <proxy-stat-snap
-              :statRecord="item"
-              :isSelected="curRecord != null && item.id === curRecord.id"
-              @click.native="onItemClicked(item)"
-              v-if="item.type === 5020"
-            ></proxy-stat-snap>
-          </div>
-
-          <div ref="bottom"></div>
-        </div>
-      </div>
+      <virtual-list
+        class="record-snap-panel"
+        :size="50"
+        :keeps="10"
+        :data-key="'id'"
+        :data-sources="filtedRecords"
+        :data-component="proxyRequestSnap"
+      />
     </el-col>
     <el-col style="width: calc(100vw - 400px); margin: 5px;">
       <proxy-request-detail :record="curRecord" v-show="curRecord !== null" />
@@ -79,7 +74,4 @@
   margin-bottom: 5px;
 }
 
-.record-snap-panel::-webkit-scrollbar {
-  display: none;
-}
 </style>

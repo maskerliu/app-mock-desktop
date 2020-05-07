@@ -1,9 +1,8 @@
 import { Component, Vue, Watch } from "vue-property-decorator"
-import { Action, namespace, Getter, Mutation } from "vuex-class"
+import { Action, namespace, Getter, Mutation, State } from "vuex-class"
 
 import { ipcRenderer } from "electron"
-import { Message } from "element-ui"
-import BScroll from "better-scroll"
+import VirtualList from "vue-virtual-scroll-list"
 
 import { CMDCode, ProxyRequestRecord, ProxyStatRecord } from "../../model/DataModels"
 
@@ -18,7 +17,7 @@ const ProxyRecords = namespace("ProxyRecords")
 @Component({
     name: "Proxy",
     components: {
-        ProxyRequestSnap,
+        VirtualList,
         ProxyRequestDetail,
         ProxyStatSnap,
         ProxyStatDetail
@@ -26,11 +25,19 @@ const ProxyRecords = namespace("ProxyRecords")
 })
 export default class Proxy extends AbstractPage {
 
+    private proxyRequestSnap: any = ProxyRequestSnap;
+
     @ProxyRecords.Getter("proxyRecords")
     private records: Array<ProxyRequestRecord | ProxyStatRecord>;
 
+    @ProxyRecords.Mutation("setCurRecord")
+    private setCurRecord!: Function;
+
     @ProxyRecords.Action("clearRecords")
     private clearRecords!: Function;
+
+    @State(state => state.ProxyRecords.curRecord)
+    private curRecord: ProxyRequestRecord | ProxyStatRecord;
 
 
     public $refs!: {
@@ -45,8 +52,8 @@ export default class Proxy extends AbstractPage {
     activeTab: string = "0";
 
     throttleRecords: Array<ProxyRequestRecord | ProxyStatRecord> = null;
-    filtedRecords: Array<ProxyRequestRecord | ProxyStatRecord> = null;
-    curRecord: ProxyRequestRecord | ProxyStatRecord = null;
+    filtedRecords: Array<ProxyRequestRecord | ProxyStatRecord> = [];
+
     scroll: any = null;
 
     mounted() {
@@ -55,43 +62,16 @@ export default class Proxy extends AbstractPage {
             leftItem: false,
             rightItem: false,
         });
-        setTimeout(() => {
-            this.scroll = new BScroll(this.$refs.wrapper, {
-                mouseWheel: true,
-            });
-        }, 1000);
     }
 
     destroyed() {
-        try {
-            this.scroll.destroy();
-            this.scroll = null;
-        } catch (err) {
-
-        }
-
         this.clearProxyRecrods();
     }
 
-    public onItemClicked(item: ProxyRequestRecord | ProxyStatRecord): void {
-        switch (item.type) {
-            case CMDCode.REQUEST_START:
-            case CMDCode.REQUEST_END:
-                this.curRecord = item;
-                break;
-            case CMDCode.STATISTICS:
-                this.curRecord = item;
-                break;
-            default:
-                Message({ message: "未知类型数据", type: "warning" });
-                break;
-        }
-    }
-
     public clearProxyRecrods(): void {
-        this.filtedRecords = null;
-        this.curRecord = null;
+        this.filtedRecords = [];
         this.clearRecords();
+        this.setCurRecord(null);
     }
 
     private siftRecords(): void {
@@ -123,10 +103,6 @@ export default class Proxy extends AbstractPage {
     @Watch("records")
     private onRecordsChanged(): void {
         this.siftRecords();
-        setTimeout(() => {
-            this.scroll && this.scroll.refresh();
-            this.scroll && this.scroll.scrollToElement(this.$refs.bottom, 200);
-        }, 50);
     }
 
     @Watch("filterInput")

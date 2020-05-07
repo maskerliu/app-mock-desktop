@@ -66,7 +66,7 @@ class LocalServer {
         this.httpApp.use(bodyParser.urlencoded({ extended: true }));
         this.httpApp.use(bodyParser.text({ type: "application/json" }));
         this.httpApp.all("*", (req: Request, resp: Response, next: any) => {
-            if (req.url === "/" || /^\/appmock\//.test(req.url) || /^\/burying-point\//.test(req.url)) {
+            if (req.url === "/" || /^\/mw\//.test(req.url) || /^\/appmock\//.test(req.url) || /^\/burying-point\//.test(req.url)) {
                 WebService.filter(req, resp);
             } else if (req.url !== "/favicon.ico") {
                 ProxyService.handleRequest(req, resp);

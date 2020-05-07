@@ -1,8 +1,9 @@
 import { Component, Vue, Watch } from "vue-property-decorator"
-import { Action, Mutation, namespace } from "vuex-class"
+import { Action, Mutation, namespace, State } from "vuex-class"
 import { webFrame } from "electron"
 import { throttle } from 'lodash'
 import { Message } from "element-ui"
+import VirtualList from "vue-virtual-scroll-list"
 
 import AbstractPage from "./AbstractPage.vue"
 import MockRuleSnap from "./components/MockRuleSnap.vue"
@@ -11,21 +12,42 @@ import MockRuleDetail from "./components/MockRuleDetail.vue"
 import { MockRule, ProxyRequestRecord, BizCode } from "../../model/DataModels"
 import { saveMockRule, deleteMockRule, searchMockRules, uploadMockRule } from "../../model/LocaAPIs"
 
+const MockRules = namespace("MockRules");
+
 @Component({
     name: "MockRuleMgr",
     components: {
+        VirtualList,
         MockRuleSnap,
-        MockRuleDetail
+        MockRuleDetail,
     }
 })
 export default class MockRuleMgr extends AbstractPage {
-
+    private mockRuleSnap: any = MockRuleSnap;
     private rules: Array<MockRule> = [];
-    private showEditMockRuleDialog: boolean = false;
-    private showDeleteMockRuleDialog: boolean = false;
     private searchKeyword: string = null;
-    private curRule: MockRule = null;
-    private curPageKey: string = null;
+
+    @MockRules.Mutation("setShowEditMockRuleDialog")
+    private setShowEditMockRuleDialog!: Function;
+
+    @MockRules.Mutation("setShowDeleteMockRuleDialog")
+    private setShowDeleteMockRuleDialog!: Function;
+
+    @MockRules.Mutation("setCurRule")
+    private setCurRule!: Function;
+
+    @State(state => state.MockRules.showEditMockRuleDialog)
+    private showEditMockRuleDialog: boolean;
+
+    @State(state => state.MockRules.showDeleteMockRuleDialog)
+    private showDeleteMockRuleDialog: boolean;
+
+    @State(state => state.MockRules.curRule)
+    private curRule: MockRule;
+
+    
+
+    
 
     created() {
 
@@ -49,23 +71,7 @@ export default class MockRuleMgr extends AbstractPage {
     }
 
     onRuleClicked(rule: MockRule) {
-        this.curRule = rule;
-    }
-
-    onEditMockRule(rule: MockRule) {
-        if (rule == null) {
-            this.curRule = new MockRule();
-        } else {
-            this.curRule = rule;
-        }
-
-        this.showEditMockRuleDialog = true;
-    }
-
-    onDeleteMockRule(rule: MockRule) {
-        if (rule == null) return;
-        this.curRule = rule;
-        this.showDeleteMockRuleDialog = true;
+        this.setCurRule(rule);
     }
 
     onDeleteMockRuleConfirmed() {
@@ -75,14 +81,6 @@ export default class MockRuleMgr extends AbstractPage {
         }).catch((err: any) => {
             console.log(err);
         });
-    }
-
-    onUploadMockRule(ruleId: string) {
-        uploadMockRule(ruleId).then((result: any) => {
-            console.log("upload mock rule");
-        }).catch((err: any) => {
-            console.log(err);
-        })
     }
 
     onSaveMockRule() {
@@ -96,15 +94,6 @@ export default class MockRuleMgr extends AbstractPage {
                 Message({ message: err.message, type: "error" });
             });
         this.showEditMockRuleDialog = false;
-    }
-
-    onMockSwitchChanged(rule: MockRule) {
-        saveMockRule(rule, true).then(result => {
-            Message({ message: "规则更新成功", type: "success" });
-            this.fetchPagedMockRules();
-        }).catch(err => {
-            Message({ message: err.message, type: "error" });
-        });
     }
 
     @Watch('searchKeyword', { immediate: false, deep: true })
