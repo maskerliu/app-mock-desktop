@@ -1,33 +1,42 @@
 <template>
   <div class="inspector-panel" v-if="wrapperRecord != null">
     <div class="request-path">
-      <span class="request-url">Path:{{ wrapperRecord.url }}</span>
+      <span class="request-url"><b>Path:</b> {{ wrapperRecord.url }}</span>
       <el-button
-        style="flex:1; margin: 0 5px;"
+        style="margin: 0 5px;"
+        size="small"
+        icon="el-icon-copy-document"
+        @click="copyLink"
+      ></el-button>
+      <el-button
+        style="margin: 0 5px;"
         size="small"
         type="primary"
-        @click="addToMock"
-        >一键添加mock</el-button
-      >
+        icon="el-icon-plus"
+        @click="addToMockRule"
+      ></el-button>
     </div>
     <div class="inspector-row" style="margin-top: 70px; padding-bottom: 15px;">
-      <h3 style="margin-left: 20px;">请求头</h3>
+      <h3>请求头</h3>
       <json-viewer
+        style="margin-top: 40px;"
         :closed="true"
         :data="wrapperRecord.headers == null ? {} : wrapperRecord.headers"
       ></json-viewer>
     </div>
     <div class="inspector-row" style="padding-bottom: 15px;">
-      <h3 style="margin-left: 20px;">请求参数</h3>
+      <h3>请求参数</h3>
       <json-viewer
+        style="margin-top: 40px;"
         :data="
           wrapperRecord.requestData == null ? {} : wrapperRecord.requestData
         "
       ></json-viewer>
     </div>
     <div class="inspector-row" style="padding-bottom: 15px;">
-      <h3 style="margin-left: 20px;">响应头</h3>
+      <h3>响应头</h3>
       <json-viewer
+        style="margin-top: 40px;"
         :data="
           wrapperRecord.responseHeaders == null
             ? {}
@@ -36,10 +45,9 @@
       ></json-viewer>
     </div>
     <div class="inspector-row" style="height: calc(100vh - 65px);">
-      <div style="position: relative; height: 40px;">
-        <h3 style="margin-left: 20px;">响应数据</h3>
-      </div>
+      <h3>响应数据</h3>
       <json-viewer
+        style="margin-top: 40px; height: calc(100vh - 105px);"
         :data="wrapperRecord.responseData"
         v-on:click="onItemClick"
         :onItemClick="onItemClick"
@@ -48,15 +56,12 @@
     </div>
 
     <el-dialog
-      title="AddMockRule"
+      title="添加Mock规则"
       :visible.sync="showAddMockRule"
       width="90%"
-      top="20px"
+      top="50px"
     >
-      <add-mock-rule
-        :show="showAddMockRule"
-        :record="wrapperRecord"
-      ></add-mock-rule>
+      <add-mock-rule :record="wrapperRecord"></add-mock-rule>
     </el-dialog>
 
     <el-dialog
@@ -112,6 +117,15 @@
   user-select: text;
 }
 
+.inspector-row h3 {
+  position: absolute;
+  padding: 10px 20px;
+  z-index: 99;
+  margin: 0 0 0 -5px;
+  width: 100%;
+  background: #f1f1f180;
+}
+
 .request-path {
   display: flex;
   background: #f1f1f180;
@@ -135,29 +149,7 @@
   display: inline;
   overflow: hidden;
   text-overflow: ellipsis;
+  user-select: text;
   flex: 5;
-}
-
-.jsoneditor {
-  border: 0 solid #e9e9ef;
-}
-.jsoneditor-menu {
-  background-color: #3498db;
-  border-bottom: 0;
-}
-.jsoneditor-box ::-webkit-scrollbar {
-  display: none;
-}
-.jsoneditor-schema-error,
-div.jsoneditor td,
-div.jsoneditor textarea,
-div.jsoneditor th,
-div.jsoneditor-field,
-div.jsoneditor-value {
-  font-family: "Arial", "Microsoft YaHei", "黑体", "宋体", sans-serif;
-}
-
-.ace-jsoneditor .ace_gutter {
-  /* visibility: hidden; */
 }
 </style>

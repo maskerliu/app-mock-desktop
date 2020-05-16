@@ -26,7 +26,7 @@
         <virtual-list
           class="rule-snap-panel"
           :size="50"
-          :keeps="10"
+          :keeps="30"
           :data-key="'_id'"
           :data-sources="rules"
           :data-component="mockRuleSnap"
@@ -41,7 +41,7 @@
       </el-col>
     </el-row>
 
-    <el-dialog title="Waring" :visible="showDeleteMockRuleDialog" width="30%">
+    <el-dialog title="警告" :visible="showDeleteMockRuleDialog" width="30%" @close="setShowDeleteMockRuleDialog(false)">
       <span
         >确定删除[{{
           curRule != null ? curRule.name : ""
@@ -50,15 +50,12 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="setShowDeleteMockRuleDialog(false)">取 消</el-button>
         <el-button type="danger" @click="onDeleteMockRuleConfirmed()"
-          >确 定</el-button>
+          >确 定</el-button
+        >
       </span>
     </el-dialog>
 
-    <el-dialog
-      title="Mock规则详情"
-      :visible.sync="showEditMockRuleDialog"
-      width="50%"
-    >
+    <el-dialog title="规则详情" :visible="showEditMockRuleDialog" width="50%" @close="setShowEditMockRuleDialog(false)">
       <el-form
         ref="form"
         :model="curRule"

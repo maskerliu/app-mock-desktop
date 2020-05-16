@@ -1,4 +1,8 @@
-import { ProxyRequestRecord, ProxyStatRecord, MockRule } from "../../model/DataModels"
+import {
+  MockRule,
+  ProxyRequestRecord,
+  ProxyStatRecord,
+} from "../../model/DataModels";
 
 export interface EnvState {
   env: string;
@@ -26,8 +30,8 @@ export interface CommonState {
     proxySocketPort: number;
     pushSocketPort: number;
     ips: Array<IP>;
-    pbFiles: Array<{ name: string, value: string }>;
-  }
+    pbFiles: Array<{ name: string; value: string }>;
+  };
 }
 
 export interface NavBarConfig {
@@ -40,7 +44,7 @@ export interface NavBarConfig {
 
 export interface ProxyRecordState {
   records: Array<ProxyRequestRecord | ProxyStatRecord>;
-  curRecord: ProxyRequestRecord
+  curRecord: ProxyRequestRecord;
 }
 
 export interface MockRuleState {

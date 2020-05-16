@@ -1,6 +1,6 @@
 <template>
-  <div class="rule-snap-item" @click="setCurRule(source)">
-    <span class="item-selected" v-if="isSelected"></span>
+  <div class="rule-snap-item" @click="onClick()">
+    <span class="item-selected" v-if="curRule != null && curRule._id == source._id"></span>
     <span class="rule-snap-name">[{{source.name}}]</span>
     <span class="iconfont icon-edit" style="color: #3498db; padding: 0 5px;" @click="onEdit()"></span>
     <span class="iconfont icon-delete" style="color: red; padding: 0 5px;" @click="onDelete()"></span>

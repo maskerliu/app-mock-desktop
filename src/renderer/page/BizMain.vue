@@ -78,7 +78,7 @@
         ></qrcode-vue>
         <br />
         <div>
-          <span style="color: #777;" @click="click2Reg">{{ registerUrl }}</span>
+          <span style="color: #777; user-select: text;" @click="click2Reg">{{ registerUrl }}</span>
         </div>
       </div>
     </el-dialog>

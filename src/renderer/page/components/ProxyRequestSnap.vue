@@ -6,6 +6,9 @@
     @click="setCurRecord(source)"
   >
     <span class="item-selected" v-if="curRecord != null && curRecord.id == source.id"></span>
+    <span class="item-timeline" v-bind:style="{background: timelineColor}"></span>
+    
+   
     <div style="display: block;">
       <strong class="request-snap-method">[{{source.method}}]</strong>
       <span class="request-snap-url">{{source.url}}</span>
@@ -91,7 +94,15 @@
   width: 6px;
   height: 100%;
   background: #16a085;
-  left: 0;
+  left: -1px;
+  top: 0;
+}
+
+.item-timeline {
+  position: absolute;
+  width: 4px;
+  height: 100%;
+  left: 5px;
   top: 0;
 }
 </style>

@@ -46,8 +46,8 @@
       <virtual-list
         class="record-snap-panel"
         :size="50"
-        :keeps="10"
-        :data-key="'id'"
+        :keeps="20"
+        :data-key="'_idx'"
         :data-sources="filtedRecords"
         :data-component="proxyRequestSnap"
       />

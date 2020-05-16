@@ -1,4 +1,4 @@
-import { ModuleTree } from "vuex"
+import { ModuleTree } from "vuex";
 
 /**
  * The file enables `@/store/index.ts` to import all vuex modules
@@ -8,8 +8,8 @@ const files = require["context"](".", false, /\.ts$/);
 const modules: ModuleTree<any> = {};
 
 files.keys().forEach((key: string) => {
-    if (key === "./index.ts") return;
-    modules[key.replace(/(\.\/|\.ts)/g, "")] = files(key).default
+  if (key === "./index.ts") return;
+  modules[key.replace(/(\.\/|\.ts)/g, "")] = files(key).default;
 });
 
-export default modules
+export default modules;

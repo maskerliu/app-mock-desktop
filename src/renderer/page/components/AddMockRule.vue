@@ -1,6 +1,8 @@
 <template>
-  <el-row style="width: 100%; height: calc(100vh - 185px);">
-    <el-row style="padding: 10px; margin:-30px 0 10px 0; box-shadow: 2px 4px 6px #00000080;">
+  <el-row style="width: 100%; height: calc(100vh - 190px);">
+    <el-row
+      style="padding: 10px; margin:-30px 0 10px 0; box-shadow: 2px 4px 6px #00000080;"
+    >
       <el-col :span="12">
         <el-select
           v-model="keyword"
@@ -32,14 +34,16 @@
           :disable-transitions="false"
           @close="handleClose(tag)"
           v-if="curRule != null && curRule.name != null"
-        >{{curRule.name}}</el-tag>
+          >{{ curRule.name }}</el-tag
+        >
         <el-button
           type="primary"
           style="position: absolute; right: 5px;"
           size="mini"
           :loading="isSaving"
           @click.native="onSave()"
-        >保存</el-button>
+          >保存</el-button
+        >
       </el-col>
     </el-row>
 
@@ -61,7 +65,9 @@
           @click.native="addRule()"
         ></el-button>
       </el-col>
-      <el-col style="width: 471px; height: 100%; box-shadow: 2px 4px 6px #00000080;">
+      <el-col
+        style="width: 471px; height: 100%; box-shadow: 2px 4px 6px #00000080;"
+      >
         <el-table
           style="margin-bottom: 20px;"
           border
@@ -73,11 +79,20 @@
             <template slot-scope="scope">
               <span
                 style="font-size: 0.7rem; color: #2980b9; font-style: italic; font-weight: bold;"
-              >{{scope.row.url}}</span>
+                >{{ scope.row.url }}</span
+              >
             </template>
           </el-table-column>
-          <el-table-column prop="statusCode" label="请求状态" width="85"></el-table-column>
-          <el-table-column prop="responseData.code" label="业务状态" width="85"></el-table-column>
+          <el-table-column
+            prop="statusCode"
+            label="请求状态"
+            width="85"
+          ></el-table-column>
+          <el-table-column
+            prop="responseData.code"
+            label="业务状态"
+            width="85"
+          ></el-table-column>
           <el-table-column label="操作" width="60">
             <template slot-scope="scope">
               <el-button
@@ -97,5 +112,4 @@
 
 <script lang="ts" src="./AddMockRule.vue.ts"></script>
 
-<style>
-</style>
+<style></style>

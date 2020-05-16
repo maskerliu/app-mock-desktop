@@ -1,4 +1,3 @@
-
 import { app } from "electron";
 import { Request, Response } from "express";
 import path from "path";
@@ -7,236 +6,282 @@ import PouchDBFind from "pouchdb-find";
 import { BizCode, BizResponse, MockRule } from "../model/DataModels";
 import PushService from "./PushService";
 
-
 const JSONBigInt = require("json-bigint");
 
 class MockService {
-    private localDB: any;
-    private isMock: boolean;
-    private curMockRule: MockRule;
+  private localDB: any;
+  private isMock: boolean;
+  private curMockRule: MockRule;
 
-    constructor() {
-        this.isMock = false;
-        this.curMockRule = null;
+  constructor() {
+    this.isMock = false;
+    this.curMockRule = null;
 
-        this.initDB();
+    this.initDB();
+  }
+
+  private initDB() {
+    PouchDB.plugin(PouchDBFind);
+    this.localDB = new PouchDB(path.join(app.getPath("userData"), "AppMockDB"));
+    this.localDB
+      .createIndex({
+        index: { fields: ["name"] },
+      })
+      .then((result: any) => {
+        // console.log(result);
+      })
+      .catch((err: any) => {
+        console.log(err);
+      });
+    this.updateMockSettings();
+  }
+
+  public mockRequestData(
+    sessionId: number,
+    req: Request,
+    resp: Response,
+    startTime: number,
+    proxyDelay: number
+  ): boolean {
+    if (
+      !this.isMock ||
+      this.curMockRule == null ||
+      this.curMockRule.requests == null
+    )
+      return false;
+
+    for (let i: number = 0; i < this.curMockRule.requests.length; ++i) {
+      if (this.curMockRule.requests[i].url === req.url) {
+        let record = this.curMockRule.requests[i];
+        try {
+          setTimeout(() => {
+            let statusCode: number = record.statusCode || 200;
+            resp.status(statusCode);
+            resp.json(record.responseData);
+            resp.end();
+            PushService.sendRequestEndMessage(
+              sessionId,
+              startTime,
+              statusCode,
+              record.responseHeaders,
+              record.responseData,
+              true
+            );
+          }, proxyDelay);
+          return true;
+        } catch (err) {
+          console.error(err);
+          console.error(record);
+          return false;
+        }
+      }
+    }
+    return false;
+  }
+
+  private searchMockRules(req: Request, resp: Response): void {
+    let keyword: string = req.query["keyword"];
+    let selector = { _id: { $ne: /_design\/idx/ } };
+    if (keyword == null) {
+      selector = Object.assign(selector, { name: { $ne: keyword } });
+    } else {
+      selector = Object.assign(selector, {
+        name: { $regex: new RegExp(`${keyword}`) },
+      });
     }
 
-    private initDB() {
-        PouchDB.plugin(PouchDBFind);
-        this.localDB = new PouchDB(path.join(app.getPath('userData'), 'AppMockDB'));
-        this.localDB.createIndex({
-            index: { fields: ['name'] }
-        }).then((result: any) => {
-            // console.log(result);
-        }).catch((err: any) => {
-            console.log(err);
+    let bizResp: BizResponse<Array<MockRule>> = new BizResponse<
+      Array<MockRule>
+    >();
+    this.localDB
+      .find({
+        selector: selector,
+        limit: 15,
+        fields: ["_id", "name", "desc", "isMock"],
+        sort: ["name"],
+      })
+      .then((result: any) => {
+        let rules: Array<MockRule> = [];
+        for (let i: number = 0; i < result.docs.length; ++i) {
+          try {
+            let rule: MockRule = result.docs[i];
+            rules.push(rule);
+          } catch (err) {
+            console.error(err);
+          }
+        }
+        bizResp.code = BizCode.SUCCESS;
+        bizResp.data = rules;
+        resp.json(bizResp);
+        resp.end();
+      })
+      .catch((err: any) => {
+        console.log(err);
+        bizResp.code = BizCode.ERROR;
+        bizResp.msg = err;
+        resp.json(bizResp);
+        resp.end();
+      });
+  }
+
+  private getMockRuleDetail(req: Request, resp: Response): void {
+    let ruleId: string = req.query["ruleId"];
+    let bizResp: BizResponse<Array<MockRule>> = new BizResponse<
+      Array<MockRule>
+    >();
+    this.localDB
+      .get(ruleId, { attachments: true })
+      .then((result: any) => {
+        bizResp.code = BizCode.SUCCESS;
+        bizResp.data = result;
+        resp.json(bizResp);
+        resp.end();
+      })
+      .catch((err: any) => {
+        bizResp.code = BizCode.ERROR;
+        bizResp.msg = err;
+        resp.json(bizResp);
+        resp.end();
+      });
+  }
+
+  private saveMockRule(req: Request, resp: Response): void {
+    let onlySnap: boolean = req.query["onlySnap"] == "true";
+    let rule: MockRule = JSONBigInt.parse(req.body);
+
+    if (rule.isMock) {
+      this.localDB
+        .find({
+          selector: {
+            isMock: true,
+            _id: { $ne: rule._id },
+          },
+        })
+        .then((result: any) => {
+          if (result.docs.length > 0) {
+            result.docs[0].isMock = false;
+            return this.localDB.put(result.docs[0]);
+          }
+        })
+        .catch((err: any) => {
+          console.log(err);
         });
-        this.updateMockSettings();
     }
 
-    public mockRequestData(sessionId: number, req: Request, resp: Response, startTime: number, proxyDelay: number): boolean {
-
-        if (!this.isMock || this.curMockRule == null || this.curMockRule.requests == null) return false;
-
-        for (let i: number = 0; i < this.curMockRule.requests.length; ++i) {
-            if (this.curMockRule.requests[i].url === req.url) {
-                let record = this.curMockRule.requests[i];
-                try {
-                    setTimeout(() => {
-                        let statusCode: number = record.statusCode || 200;
-                        resp.status(statusCode);
-                        resp.json(record.responseData);
-                        resp.end();
-                        PushService.sendRequestEndMessage(sessionId, startTime, statusCode, record.responseHeaders, record.responseData, true);
-                    }, proxyDelay);
-                    return true;
-                } catch (err) {
-                    console.error(err);
-                    console.error(record);
-                    return false;
-                }
-
-            }
-        }
-        return false;
-    }
-
-    private searchMockRules(req: Request, resp: Response): void {
-        let keyword: string = req.query['keyword'];
-        let selector = { _id: { $ne: /_design\/idx/ } };
-        if (keyword == null) {
-            selector = Object.assign(selector, { name: { $ne: keyword } });
-        } else {
-            selector = Object.assign(selector, { name: { $regex: new RegExp(`${keyword}`) } });
-        }
-
-        let bizResp: BizResponse<Array<MockRule>> = new BizResponse<Array<MockRule>>();
-        this.localDB.find({
-            selector: selector,
-            limit: 15,
-            fields: ["_id", "name", "desc", "isMock"],
-            sort: ["name"]
-        }).then((result: any) => {
-            let rules: Array<MockRule> = [];
-            for (let i: number = 0; i < result.docs.length; ++i) {
-                try {
-                    let rule: MockRule = result.docs[i];
-                    rules.push(rule);
-                } catch (err) {
-                    console.error(err);
-                }
-            }
-            bizResp.code = BizCode.SUCCESS;
-            bizResp.data = rules;
-            resp.json(bizResp);
-            resp.end();
-        }).catch((err: any) => {
-            console.log(err);
-            bizResp.code = BizCode.ERROR;
-            bizResp.msg = err;
-            resp.json(bizResp);
-            resp.end();
-        });
-
-    }
-
-    private getMockRuleDetail(req: Request, resp: Response): void {
-        let ruleId: string = req.query['ruleId'];
-        let bizResp: BizResponse<Array<MockRule>> = new BizResponse<Array<MockRule>>();
-        this.localDB.get(ruleId, { attachments: true }).then((result: any) => {
-            bizResp.code = BizCode.SUCCESS;
-            bizResp.data = result;
-            resp.json(bizResp);
-            resp.end();
-        }).catch((err: any) => {
-            bizResp.code = BizCode.ERROR;
-            bizResp.msg = err;
-            resp.json(bizResp);
-            resp.end();
-        });
-    }
-
-    private saveMockRule(req: Request, resp: Response): void {
-        let onlySnap: boolean = req.query['onlySnap'] == "true";
-        let rule: MockRule = JSONBigInt.parse(req.body);
-
-        if (rule.isMock) {
-            this.localDB.find({
-                selector: {
-                    isMock: true,
-                    _id: { $ne: rule._id }
-                },
-            }).then((result: any) => {
-                if (result.docs.length > 0) {
-                    result.docs[0].isMock = false;
-                    return this.localDB.put(result.docs[0]);
-                }
-            }).catch((err: any) => {
-                console.log(err);
-            });
-        }
-
-        let bizResp: BizResponse<string> = new BizResponse<string>();
-        if (rule._id === null || rule._id === undefined) {
-            this.localDB.post(rule).then((result: any) => {
-                if (result.ok) {
-                    this.updateMockSettings();
-                    bizResp.code = BizCode.SUCCESS;
-                    bizResp.data = result.id;
-                } else {
-                    bizResp.code = BizCode.FAIL;
-                    bizResp.msg = "插入失败";
-                }
-                resp.json(bizResp);
-                resp.end();
-                return null;
-            }).catch((err: any) => {
-                bizResp.code = BizCode.ERROR;
-                bizResp.msg = err;
-                resp.json(bizResp);
-                resp.end();
-            });
-        } else {
-            this.localDB.get(rule._id).then((doc: any) => {
-                let newRule = Object.assign(rule, { _rev: doc._rev });
-                if (onlySnap) newRule.requests = doc.requests;
-                return this.localDB.put(newRule);
-            }).then((result: any) => {
-                if (result.ok) {
-                    this.updateMockSettings();
-                    bizResp.code = BizCode.SUCCESS;
-                    bizResp.data = result.id;
-                } else {
-                    bizResp.code = BizCode.FAIL;
-                    bizResp.msg = "插入失败";
-                }
-                resp.json(bizResp);
-                resp.end();
-                return null;
-            }).catch((err: any) => {
-                bizResp.code = BizCode.ERROR;
-                bizResp.msg = err;
-                resp.json(bizResp);
-                resp.end();
-            });
-        }
-    }
-
-    private deleteMockRule(req: Request, resp: Response): void {
-        let ruleId: string = JSON.parse(req.body)['ruleId'];
-        let bizResp: BizResponse<string> = new BizResponse<string>();
-        this.localDB.get(ruleId).then((doc: any) => {
-            return this.localDB.remove(doc);
-        }).then((result: any) => {
+    let bizResp: BizResponse<string> = new BizResponse<string>();
+    if (rule._id === null || rule._id === undefined) {
+      this.localDB
+        .post(rule)
+        .then((result: any) => {
+          if (result.ok) {
             this.updateMockSettings();
-            if (result.ok) {
-                bizResp.code = BizCode.SUCCESS;
-                bizResp.data = "成功删除记录";
-            } else {
-                bizResp.code = BizCode.FAIL;
-                bizResp.msg = "Mock规则删除失败";
-            }
-            resp.json(bizResp);
-            resp.end;
-            return null;
-        }).catch((err: any) => {
-            bizResp.code = BizCode.ERROR;
-            bizResp.msg = err;
-            resp.json(bizResp);
-            resp.end;
-        });
-    }
-
-    private uploadMockRule(req: Request, resp: Response): void {
-        let ruleId: string = req.query["ruleId"];
-        let bizResp: BizResponse<string> = new BizResponse<string>();
-        this.localDB.get(ruleId, { attachments: true }).then((result: any) => {
             bizResp.code = BizCode.SUCCESS;
-            bizResp.data = "上传成功";
-            resp.json(bizResp);
-            resp.end();
-        }).catch((err: any) => {
-            bizResp.code = BizCode.ERROR;
-            bizResp.msg = err;
-            resp.json(bizResp);
-            resp.end();
+            bizResp.data = result.id;
+          } else {
+            bizResp.code = BizCode.FAIL;
+            bizResp.msg = "插入失败";
+          }
+          resp.json(bizResp);
+          resp.end();
+          return null;
+        })
+        .catch((err: any) => {
+          bizResp.code = BizCode.ERROR;
+          bizResp.msg = err;
+          resp.json(bizResp);
+          resp.end();
+        });
+    } else {
+      this.localDB
+        .get(rule._id)
+        .then((doc: any) => {
+          let newRule = Object.assign(rule, { _rev: doc._rev });
+          if (onlySnap) newRule.requests = doc.requests;
+          return this.localDB.put(newRule);
+        })
+        .then((result: any) => {
+          if (result.ok) {
+            this.updateMockSettings();
+            bizResp.code = BizCode.SUCCESS;
+            bizResp.data = result.id;
+          } else {
+            bizResp.code = BizCode.FAIL;
+            bizResp.msg = "插入失败";
+          }
+          resp.json(bizResp);
+          resp.end();
+          return null;
+        })
+        .catch((err: any) => {
+          bizResp.code = BizCode.ERROR;
+          bizResp.msg = err;
+          resp.json(bizResp);
+          resp.end();
         });
     }
+  }
 
-    private updateMockSettings(): void {
-        this.localDB.find({
-            selector: { isMock: true }
-        }).then((result: any) => {
-            if (result.docs != null) {
-                this.isMock = true;
-                this.curMockRule = result.docs[0];
-            }
-        }).catch((err: any) => {
+  private deleteMockRule(req: Request, resp: Response): void {
+    let ruleId: string = JSON.parse(req.body)["ruleId"];
+    let bizResp: BizResponse<string> = new BizResponse<string>();
+    this.localDB
+      .get(ruleId)
+      .then((doc: any) => {
+        return this.localDB.remove(doc);
+      })
+      .then((result: any) => {
+        this.updateMockSettings();
+        if (result.ok) {
+          bizResp.code = BizCode.SUCCESS;
+          bizResp.data = "成功删除记录";
+        } else {
+          bizResp.code = BizCode.FAIL;
+          bizResp.msg = "Mock规则删除失败";
+        }
+        resp.json(bizResp);
+        resp.end;
+        return null;
+      })
+      .catch((err: any) => {
+        bizResp.code = BizCode.ERROR;
+        bizResp.msg = err;
+        resp.json(bizResp);
+        resp.end;
+      });
+  }
 
-        });
-    }
+  private uploadMockRule(req: Request, resp: Response): void {
+    let ruleId: string = req.query["ruleId"];
+    let bizResp: BizResponse<string> = new BizResponse<string>();
+    this.localDB
+      .get(ruleId, { attachments: true })
+      .then((result: any) => {
+        bizResp.code = BizCode.SUCCESS;
+        bizResp.data = "上传成功";
+        resp.json(bizResp);
+        resp.end();
+      })
+      .catch((err: any) => {
+        bizResp.code = BizCode.ERROR;
+        bizResp.msg = err;
+        resp.json(bizResp);
+        resp.end();
+      });
+  }
 
+  private updateMockSettings(): void {
+    this.localDB
+      .find({
+        selector: { isMock: true },
+      })
+      .then((result: any) => {
+        if (result.docs != null) {
+          this.isMock = true;
+          this.curMockRule = result.docs[0];
+        }
+      })
+      .catch((err: any) => {});
+  }
 }
 
 export default new MockService();

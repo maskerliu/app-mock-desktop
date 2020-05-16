@@ -1,35 +1,33 @@
-import { Component, Vue } from "vue-property-decorator"
-import BizMain from "./page/BizMain.vue"
-import { namespace, Action, State } from "vuex-class"
+import { Component, Vue } from "vue-property-decorator";
+import { Action, namespace } from "vuex-class";
+import BizMain from "./page/BizMain.vue";
 
-import { updateLocalDomain } from "../model/BasicLocalAPI"
-
-const Env = namespace("Env")
+const Env = namespace("Env");
 
 @Component({
-    name: "App",
-    components: {
-        BizMain,
-    },
+  name: "App",
+  components: {
+    BizMain,
+  },
 })
 export default class App extends Vue {
-    @Action("init") init: Function;
+  @Action("init") init: Function;
 
-    canRender: boolean = false;
+  canRender: boolean = false;
 
-    created() {
-        this.canRender = true;
-        this.init();
+  created() {
+    this.canRender = true;
+    this.init();
 
-        // this.init().then(res => {
-        //     console.log(res)
+    // this.init().then(res => {
+    //     console.log(res)
 
-        // }).catch(() => {
-        //     this.canRender = true
-        // })
-    }
+    // }).catch(() => {
+    //     this.canRender = true
+    // })
+  }
 
-    destroyed() {
-        console.log("destroy");
-    }
+  destroyed() {
+    console.log("destroy");
+  }
 }

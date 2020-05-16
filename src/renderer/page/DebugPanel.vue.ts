@@ -1,27 +1,22 @@
-import { Component, Vue } from "vue-property-decorator"
-import { namespace } from "vuex-class"
+import { webFrame } from "electron";
+import { Component, Vue } from "vue-property-decorator";
+import { namespace } from "vuex-class";
 
-const Env = namespace("Env")
+const Env = namespace("Env");
 
 @Component({
-    name: "DebugPanel",
+  name: "DebugPanel",
 })
 export default class DebugPanel extends Vue {
-    private env: string = null;
+  private env: string = null;
 
-    mounted() {
+  mounted() {}
 
-    }
+  createCrash() {}
 
-    createCrash() {
+  changeEnv() {}
 
-    }
-
-    changeEnv() {
-
-    }
-
-    clearCache() {
-
-    }
+  clearCache() {
+    webFrame.clearCache();
+  }
 }

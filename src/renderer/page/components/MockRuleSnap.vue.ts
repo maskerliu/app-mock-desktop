@@ -1,64 +1,68 @@
-import { Component, Vue, Prop } from "vue-property-decorator"
-import { namespace } from "vuex-class"
-
-import { Message } from "element-ui"
-
-import { MockRule } from "../../../model/DataModels"
-import { saveMockRule, deleteMockRule, searchMockRules, uploadMockRule } from "../../../model/LocaAPIs"
+import { Message } from "element-ui";
+import { Component, Prop, Vue } from "vue-property-decorator";
+import { namespace } from "vuex-class";
+import { MockRule } from "../../../model/DataModels";
+import { saveMockRule, uploadMockRule } from "../../../model/LocaAPIs";
+import { eventBus } from "../../common/EventBus";
 
 const MockRules = namespace("MockRules");
 
 @Component({
-    name: "MockRuleSnap",
-    components: {
-
-    },
+  name: "MockRuleSnap",
+  components: {},
 })
 export default class MockRuleSnap extends Vue {
+  @Prop()
+  source: MockRule;
 
-    @Prop()
-    source: MockRule;
+  @MockRules.State("curRule")
+  private curRule: MockRule;
 
-    @Prop()
-    isSelected: boolean;
+  @MockRules.Mutation("setCurRule")
+  private setCurRule!: Function;
 
-    @MockRules.Mutation("setCurRule")
-    private setCurRule!: Function;
+  @MockRules.Mutation("setShowEditMockRuleDialog")
+  private setShowEditMockRuleDialog!: Function;
 
-    @MockRules.Mutation("setShowEditMockRuleDialog")
-    private setShowEditMockRuleDialog!: Function;
+  @MockRules.Mutation("setShowDeleteMockRuleDialog")
+  private setShowDeleteMockRuleDialog!: Function;
 
-    @MockRules.Mutation("setShowDeleteMockRuleDialog")
-    private setShowDeleteMockRuleDialog!: Function;
+  created() {}
 
-    created() {
+  onClick() {
+    this.setCurRule(this.source);
+    console.log(this.curRule.name, this.curRule._id);
+  }
 
-    }
+  onEdit() {
+    this.setCurRule(this.source);
+    this.setShowEditMockRuleDialog(true);
+  }
 
-    onEdit() {
-        this.setCurRule(this.source);
-        this.setShowEditMockRuleDialog(true);
-    }
+  onDelete() {
+    this.setCurRule(this.source);
+    this.setShowDeleteMockRuleDialog(true);
+  }
 
-    onDelete() {
-        this.setCurRule(this.source);
-        this.setShowDeleteMockRuleDialog(true);
-    }
+  onUpload() {
+    uploadMockRule(this.source)
+      .then((result: any) => {
+        console.log("upload mock rule");
+      })
+      .catch((err: any) => {
+        console.log(err);
+      });
+  }
 
-    onUpload() {
-        uploadMockRule(this.source).then((result: any) => {
-            console.log("upload mock rule");
-        }).catch((err: any) => {
-            console.log(err);
-        })
-    }
-
-    onMockSwitchChanged() {
-        saveMockRule(this.source, true).then(result => {
-            Message({ message: "规则更新成功", type: "success" });
-            // this.fetchPagedMockRules();
-        }).catch(err => {
-            Message({ message: err.message, type: "error" });
-        });
-    }
+  onMockSwitchChanged() {
+    saveMockRule(this.source, true)
+      .then((result) => {
+        Message({ message: "规则更新成功", type: "success" });
+        // this.fetchPagedMockRules();
+        eventBus.$emit("updateMockRules");
+      })
+      .catch((err) => {
+        Message({ message: err.message, type: "error" });
+      });
+  }
 }
