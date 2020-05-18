@@ -41,10 +41,8 @@ class PushClient {
         Message({ message: "设备[" + msg.data + "]注册成功", type: "success" });
         break;
       case CMDCode.REQUEST_START:
-        store.commit("ProxyRecords/requestStart", msg);
-        break;
       case CMDCode.REQUEST_END:
-        store.commit("ProxyRecords/requestEnd", msg);
+        store.commit("ProxyRecords/updateProxyRequestState", msg);
         break;
       case CMDCode.STATISTICS:
         for (let i = 0; i != msg.statistics.bps.length; i++) {

@@ -54,9 +54,11 @@ export default class MockRuleMgr extends AbstractPage {
     });
     this.fetchPagedMockRules();
 
-    eventBus.$on("updateMockRules", () => {
-      this.fetchPagedMockRules();
-    });
+    eventBus.$on("updateMockRules", this.fetchPagedMockRules);
+  }
+
+  destroyed() {
+    eventBus.$off("updateMockRules", this.fetchPagedMockRules);
   }
 
   fetchPagedMockRules() {
@@ -78,10 +80,6 @@ export default class MockRuleMgr extends AbstractPage {
       .catch((err: any) => {
         Message({ message: err.message, type: "error" });
       });
-  }
-
-  onClose() {
-    console.log("heeee");
   }
 
   onSaveMockRule() {

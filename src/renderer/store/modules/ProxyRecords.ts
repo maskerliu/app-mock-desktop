@@ -32,32 +32,46 @@ export const actions: ActionTree<ProxyRecordState, any> = {
 
 // sync
 const mutations: MutationTree<ProxyRecordState> = {
-  requestStart(state, record: ProxyRequestRecord) {
-    if (state.records.length > 40) {
-      state.records.splice(0, 10);
-    }
-    try {
-      record._idx = record.id + "";
-      state.records.unshift(record);
-    } catch (err) {
-      console.error(err);
-    }
-  },
-  requestEnd(state, record: ProxyRequestRecord) {
-    for (let i = 0; i < state.records.length; ++i) {
-      let anchor: ProxyRequestRecord = <ProxyRequestRecord>state.records[i];
-      if (anchor != null && anchor.id == record.id) {
-        Vue.set(state.records[i], "isMock", record.isMock);
-        Vue.set(state.records[i], "type", record.type);
-        Vue.set(state.records[i], "responseHeaders", record.responseHeaders);
-        Vue.set(
-          state.records[i],
-          "responseData",
-          JSON.parse(record.responseData)
-        );
-        Vue.set(state.records[i], "statusCode", record.statusCode);
-        Vue.set(state.records[i], "time", record.time);
-        break;
+  updateProxyRequestState(state, record: ProxyRequestRecord) {
+    if (record.type == CMDCode.REQUEST_START) {
+      if (state.records.length > 40) {
+        state.records.splice(0, 10);
+      }
+      try {
+        record._idx = record.id + "";
+        state.records.unshift(record);
+      } catch (err) {
+        console.error(err);
+      }
+
+      let isExist = false;
+
+      if (state.curRecord == null) return;
+
+      for (let i = 0; i < state.records.length; ++i) {
+        if (state.records[i].id === state.curRecord.id) {
+          isExist = true;
+          break;
+        }
+      }
+
+      if (!isExist) state.curRecord = null;
+    } else {
+      for (let i = 0; i < state.records.length; ++i) {
+        let anchor: ProxyRequestRecord = <ProxyRequestRecord>state.records[i];
+        if (anchor != null && anchor.id == record.id) {
+          Vue.set(state.records[i], "isMock", record.isMock);
+          Vue.set(state.records[i], "type", record.type);
+          Vue.set(state.records[i], "responseHeaders", record.responseHeaders);
+          Vue.set(
+            state.records[i],
+            "responseData",
+            JSON.parse(record.responseData)
+          );
+          Vue.set(state.records[i], "statusCode", record.statusCode);
+          Vue.set(state.records[i], "time", record.time);
+          break;
+        }
       }
     }
   },
