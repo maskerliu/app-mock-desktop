@@ -3,7 +3,7 @@ import Url from "url";
 import MockService from "./MockService";
 import PushService from "./PushService";
 import protobuf from "protobufjs";
-import { CMDCode, ProxyRequestRecord } from "../model/DataModels";
+import { CMDCode, ProxyRequestRecord, ProxyStatRecord } from "../model/DataModels";
 
 const JSONBigInt = require("json-bigint");
 const axios = require("axios");
@@ -11,6 +11,8 @@ const websocket = require("nodejs-websocket");
 
 class ProxyService {
   private static PROXY_DEF_TIMEOUT: number = 1000 * 15; // 15s
+  private isProxyRequest: boolean = true;
+  private isProxyStatistics: boolean = false;
   private _sessionId: number;
   private proxyDealy: number;
   private proxySocketServer: any = null;
@@ -33,7 +35,7 @@ class ProxyService {
         conn.on("close", (code: number, reason: any) => {
           console.log("关闭连接");
         });
-        conn.on("connect", function(code: number) {
+        conn.on("connect", function (code: number) {
           console.log("开启连接", code);
         });
         conn.on("error", (code: number, reason: any) => {
@@ -51,11 +53,19 @@ class ProxyService {
     }
   }
 
+  public handleStatRequest(data: any) {
+    let record: ProxyStatRecord = {
+      id: ++this._sessionId,
+      type: CMDCode.STATISTICS,
+      timestamp: new Date().getSeconds(),
+      statistics: data,
+    };
+    PushService.sendMessage(record);
+  }
+
   public handleRequest(req: Request, resp: Response) {
     let startTime = new Date().getTime();
     let sessionId = ++this._sessionId;
-    // PushService.sendRequestStartMessage(req, sessionId);
-
     let reqUrl = Url.parse(req.header("host"));
     let requestData = null;
     if (req.method === "GET") {
@@ -77,17 +87,8 @@ class ProxyService {
 
     PushService.sendMessage(data);
 
-    if (
-      MockService.mockRequestData(
-        sessionId,
-        req,
-        resp,
-        startTime,
-        this.proxyDealy
-      )
-    )
-      return;
-    this.proxyRequestData(sessionId, req, resp, startTime);
+    if (!MockService.mockRequestData(sessionId, req, resp, startTime, this.proxyDealy))
+      this.proxyRequestData(sessionId, req, resp, startTime);
   }
 
   public setProtoFiles(files: string[]) {
@@ -96,7 +97,7 @@ class ProxyService {
       this.pbFiles.push({ name: strs[strs.length - 1], value: item });
     });
 
-    protobuf.load(files, function(err: Error, root: any) {
+    protobuf.load(files, function (err: Error, root: any) {
       if (err) throw err;
 
       var MatchQueryMsgReq = root.lookupType("MatchQueryMsgReq");
@@ -112,12 +113,7 @@ class ProxyService {
     return this.pbFiles;
   }
 
-  private proxyRequestData(
-    sessionId: number,
-    req: Request,
-    proxyResp: Response,
-    startTime: number
-  ) {
+  private proxyRequestData(sessionId: number, req: Request, proxyResp: Response, startTime: number) {
     let originHost = req.header("x-host");
     if (originHost == null) {
       originHost = req.header("host");
@@ -143,8 +139,8 @@ class ProxyService {
           try {
             return JSONBigInt.parse(data);
           } catch (err) {
-            console.log(data);
-            console.log(err);
+            console.error("proxyRequestData", err);
+            console.error(data);
             return null;
           }
         },
@@ -163,13 +159,11 @@ class ProxyService {
       .then((resp: any) => {
         try {
           setTimeout(() => {
-            // PushService.sendRequestEndMessage(sessionId, startTime, resp.status, resp.headers, resp.data, false);
-
             let data: ProxyRequestRecord = {
               id: sessionId,
               type: CMDCode.REQUEST_END,
               statusCode: resp.status,
-              headers: !!resp.headers ? resp.headers : null,
+              responseHeaders: !!resp.headers ? resp.headers : null,
               responseData: !!resp.data ? JSON.stringify(resp.data) : null,
               time: new Date().getTime() - startTime,
               isMock: false,
@@ -180,34 +174,24 @@ class ProxyService {
             proxyResp.end();
           }, this.proxyDealy);
         } catch (err) {
-          console.log(err);
+          console.error("proxyRequestData", err);
         }
       })
       .catch((err: any) => {
         let resp = err.response;
-        if (!!resp) {
-          PushService.sendRequestEndMessage(
-            sessionId,
-            startTime,
-            -100,
-            resp.headers,
-            resp.data,
-            false
-          );
-          proxyResp.send(resp.data);
-          proxyResp.end();
-        } else {
-          PushService.sendRequestEndMessage(
-            sessionId,
-            startTime,
-            -100,
-            null,
-            err.message,
-            false
-          );
-          proxyResp.send(err.message);
-          proxyResp.end();
-        }
+        let respData = !!resp ? resp.data : err.message;
+        let data: ProxyRequestRecord = {
+          id: sessionId,
+          type: CMDCode.REQUEST_END,
+          statusCode: -100,
+          headers: !!resp.headers ? resp.headers : null,
+          responseData: !!respData ? JSON.stringify(respData) : null,
+          time: new Date().getTime() - startTime,
+          isMock: false,
+        };
+        PushService.sendMessage(data);
+        proxyResp.send(err.message);
+        proxyResp.end();
       });
   }
 }

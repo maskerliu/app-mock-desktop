@@ -6,6 +6,7 @@ import {
   ProxyStatRecord,
 } from "../../../model/DataModels";
 import { ProxyRecordState } from "../types";
+import store from "..";
 
 const state: ProxyRecordState = {
   records: [],
@@ -32,47 +33,47 @@ export const actions: ActionTree<ProxyRecordState, any> = {
 
 // sync
 const mutations: MutationTree<ProxyRecordState> = {
-  updateProxyRequestState(state, record: ProxyRequestRecord) {
-    if (record.type == CMDCode.REQUEST_START) {
-      if (state.records.length > 40) {
-        state.records.splice(0, 10);
-      }
-      try {
+  updateProxyRecords(state, record: ProxyRequestRecord) {
+    switch (record.type) {
+      case CMDCode.REQUEST_START:
+      case CMDCode.STATISTICS:
+        if (state.records.length > 40) {
+          state.records.splice(state.records.length - 10, 10);
+        }
         record._idx = record.id + "";
         state.records.unshift(record);
-      } catch (err) {
-        console.error(err);
-      }
 
-      let isExist = false;
+        if (state.curRecord == null) return;
 
-      if (state.curRecord == null) return;
-
-      for (let i = 0; i < state.records.length; ++i) {
-        if (state.records[i].id === state.curRecord.id) {
-          isExist = true;
-          break;
+        let isExist = false;
+        for (let i = 0; i < state.records.length; ++i) {
+          if (state.records[i].id === state.curRecord.id) {
+            isExist = true;
+            break;
+          }
         }
-      }
-
-      if (!isExist) state.curRecord = null;
-    } else {
-      for (let i = 0; i < state.records.length; ++i) {
-        let anchor: ProxyRequestRecord = <ProxyRequestRecord>state.records[i];
-        if (anchor != null && anchor.id == record.id) {
-          Vue.set(state.records[i], "isMock", record.isMock);
-          Vue.set(state.records[i], "type", record.type);
-          Vue.set(state.records[i], "responseHeaders", record.responseHeaders);
-          Vue.set(
-            state.records[i],
-            "responseData",
-            JSON.parse(record.responseData)
-          );
-          Vue.set(state.records[i], "statusCode", record.statusCode);
-          Vue.set(state.records[i], "time", record.time);
-          break;
+        if (!isExist) state.curRecord = null;
+        break;
+      case CMDCode.REQUEST_END:
+        for (let i = 0; i < state.records.length; ++i) {
+          let anchor: ProxyRequestRecord = <ProxyRequestRecord>state.records[i];
+          if (anchor != null && anchor.id == record.id) {
+            Vue.set(state.records[i], "isMock", record.isMock);
+            Vue.set(state.records[i], "type", record.type);
+            Vue.set(state.records[i], "responseHeaders", record.responseHeaders);
+            Vue.set(
+              state.records[i],
+              "responseData",
+              JSON.parse(record.responseData)
+            );
+            Vue.set(state.records[i], "statusCode", record.statusCode);
+            Vue.set(state.records[i], "time", record.time);
+            break;
+          }
         }
-      }
+        break;
+      default:
+        console.log("unsupport record type");
     }
   },
   addStatistics(state, obj) {

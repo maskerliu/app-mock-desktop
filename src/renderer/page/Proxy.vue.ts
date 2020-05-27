@@ -1,17 +1,16 @@
-import { ipcRenderer, webFrame } from "electron";
-import { Component, Watch } from "vue-property-decorator";
-import VirtualList from "vue-virtual-scroll-list";
-import { namespace, State } from "vuex-class";
+import { ipcRenderer, webFrame } from "electron"
+import { Component, Watch } from "vue-property-decorator"
+import VirtualList from "vue-virtual-scroll-list"
+import { namespace } from "vuex-class"
 import {
   CMDCode,
   ProxyRequestRecord,
   ProxyStatRecord,
-} from "../../model/DataModels";
-import AbstractPage from "./AbstractPage.vue";
-import ProxyRequestDetail from "./components/ProxyRequestDetail.vue";
-import ProxyRequestSnap from "./components/ProxyRequestSnap.vue";
-import ProxyStatDetail from "./components/ProxyStatDetail.vue";
-import ProxyStatSnap from "./components/ProxyStatSnap.vue";
+} from "../../model/DataModels"
+import AbstractPage from "./AbstractPage.vue"
+import ProxyRequestDetail from "./components/ProxyRequestDetail.vue"
+import ProxyRecordSnap from "./components/ProxyRecordSnap.vue"
+import ProxyStatDetail from "./components/ProxyStatDetail.vue"
 
 const ProxyRecords = namespace("ProxyRecords");
 
@@ -20,24 +19,24 @@ const ProxyRecords = namespace("ProxyRecords");
   components: {
     VirtualList,
     ProxyRequestDetail,
-    ProxyStatSnap,
     ProxyStatDetail,
   },
 })
 export default class Proxy extends AbstractPage {
-  private proxyRequestSnap: any = ProxyRequestSnap;
 
-  @ProxyRecords.Getter("proxyRecords")
+  public proxyRecordSnap: any = ProxyRecordSnap;
+
+  @ProxyRecords.State("records")
   private records: Array<ProxyRequestRecord | ProxyStatRecord>;
+
+  @ProxyRecords.State("curRecord")
+  private curRecord: ProxyRequestRecord | ProxyStatRecord;
 
   @ProxyRecords.Mutation("setCurRecord")
   private setCurRecord!: Function;
 
   @ProxyRecords.Action("clearRecords")
   private clearRecords!: Function;
-
-  @State((state) => state.ProxyRecords.curRecord)
-  private curRecord: ProxyRequestRecord | ProxyStatRecord;
 
   public $refs!: {
     wrapper: any;
@@ -80,16 +79,13 @@ export default class Proxy extends AbstractPage {
         switch (item.type) {
           case CMDCode.REQUEST_START:
           case CMDCode.REQUEST_END:
-            if (this.proxyTypes.indexOf[String(CMDCode.REQUEST)] == -1) {
-              console.log(-1);
+            if (this.proxyTypes.indexOf(String(CMDCode.REQUEST)) == -1) {
               return false;
             }
             if (this.filterInput == null) return true;
-            return (
-              (<ProxyRequestRecord>item).url.indexOf(this.filterInput) !== -1
-            );
+            return (<ProxyRequestRecord>item).url.indexOf(this.filterInput) !== -1;
           case CMDCode.STATISTICS:
-            return true;
+            return this.proxyTypes.indexOf(String(CMDCode.STATISTICS)) != -1;
           default:
             return false;
         }

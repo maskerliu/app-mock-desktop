@@ -34,7 +34,7 @@ export default class MockRuleDetail extends Vue {
   private showEditor: boolean = false;
   private showDeleteConfirm: boolean = false;
 
-  created() {}
+  created() { }
 
   mounted() {
     this.fetchMockRuleDetail();
@@ -48,7 +48,7 @@ export default class MockRuleDetail extends Vue {
       .then((result) => {
         this.rule = result.data.data;
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }
 
   onEditClicked(request: ProxyRequestRecord) {
@@ -94,7 +94,7 @@ export default class MockRuleDetail extends Vue {
           Message({ message: "删除成功", type: "success" });
         })
         .catch((err) => {
-          console.log(err);
+          console.error("onDeleteConfirm", err);
         });
     }
   }

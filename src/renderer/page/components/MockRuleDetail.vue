@@ -45,15 +45,15 @@
           style="height: calc(100vh - 300px);"
         />
       <span slot="footer" class="dialog-footer">
-        <el-button size="mini" @click="showEditor = false">取消</el-button>
-        <el-button type="primary" size="mini" @click="onSaveClicked()">保存</el-button>
+        <el-button size="small" @click="showEditor = false">取消</el-button>
+        <el-button type="primary" size="small" @click="onSaveClicked()">保存</el-button>
       </span>
     </el-dialog>
     <el-dialog title="警告" :visible.sync="showDeleteConfirm" width="30%">
       <span>确认要删除这条请求数据？</span>
       <span slot="footer" class="dialog-footer">
-        <el-button size="mini" @click="showDeleteConfirm = false">取消</el-button>
-        <el-button type="primary" size="mini" @click="onDeleteConfirm()">确定</el-button>
+        <el-button size="small" @click="showDeleteConfirm = false">取消</el-button>
+        <el-button type="danger" size="small" @click="onDeleteConfirm()">确定</el-button>
       </span>
     </el-dialog>
   </div>

@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import path from "path";
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
-import { BizCode, BizResponse, MockRule } from "../model/DataModels";
+import { CMDCode, BizCode, BizResponse, MockRule, ProxyRequestRecord } from "../model/DataModels";
 import PushService from "./PushService";
 
 const JSONBigInt = require("json-bigint");
@@ -31,18 +31,12 @@ class MockService {
         // console.log(result);
       })
       .catch((err: any) => {
-        console.log(err);
+        console.error("initDB", err);
       });
     this.updateMockSettings();
   }
 
-  public mockRequestData(
-    sessionId: number,
-    req: Request,
-    resp: Response,
-    startTime: number,
-    proxyDelay: number
-  ): boolean {
+  public mockRequestData(sessionId: number, req: Request, resp: Response, startTime: number, proxyDelay: number): boolean {
     if (
       !this.isMock ||
       this.curMockRule == null ||
@@ -59,18 +53,21 @@ class MockService {
             resp.status(statusCode);
             resp.json(record.responseData);
             resp.end();
-            PushService.sendRequestEndMessage(
-              sessionId,
-              startTime,
-              statusCode,
-              record.responseHeaders,
-              record.responseData,
-              true
-            );
+
+            let data: ProxyRequestRecord = {
+              id: sessionId,
+              type: CMDCode.REQUEST_END,
+              statusCode: -100,
+              headers: !!record.responseHeaders ? record.responseHeaders : null,
+              responseData: !!record.responseData ? JSON.stringify(record.responseData) : null,
+              time: new Date().getTime() - startTime,
+              isMock: true,
+            };
+            PushService.sendMessage(data);
           }, proxyDelay);
           return true;
         } catch (err) {
-          console.error(err);
+          console.error("mockRequestData", err);
           console.error(record);
           return false;
         }
@@ -79,7 +76,7 @@ class MockService {
     return false;
   }
 
-  private searchMockRules(req: Request, resp: Response): void {
+  public searchMockRules(req: Request, resp: Response): void {
     let keyword: string = req.query["keyword"];
     let selector = { _id: { $ne: /_design\/idx/ } };
     if (keyword == null) {
@@ -90,9 +87,7 @@ class MockService {
       });
     }
 
-    let bizResp: BizResponse<Array<MockRule>> = new BizResponse<
-      Array<MockRule>
-    >();
+    let bizResp: BizResponse<Array<MockRule>> = new BizResponse<Array<MockRule>>();
     this.localDB
       .find({
         selector: selector,
@@ -107,7 +102,7 @@ class MockService {
             let rule: MockRule = result.docs[i];
             rules.push(rule);
           } catch (err) {
-            console.error(err);
+            console.error("searchMockRules", err);
           }
         }
         bizResp.code = BizCode.SUCCESS;
@@ -116,7 +111,7 @@ class MockService {
         resp.end();
       })
       .catch((err: any) => {
-        console.log(err);
+        console.error("searchMockRules", err);
         bizResp.code = BizCode.ERROR;
         bizResp.msg = err;
         resp.json(bizResp);
@@ -124,11 +119,9 @@ class MockService {
       });
   }
 
-  private getMockRuleDetail(req: Request, resp: Response): void {
+  public getMockRuleDetail(req: Request, resp: Response): void {
     let ruleId: string = req.query["ruleId"];
-    let bizResp: BizResponse<Array<MockRule>> = new BizResponse<
-      Array<MockRule>
-    >();
+    let bizResp: BizResponse<Array<MockRule>> = new BizResponse<Array<MockRule>>();
     this.localDB
       .get(ruleId, { attachments: true })
       .then((result: any) => {
@@ -145,7 +138,7 @@ class MockService {
       });
   }
 
-  private saveMockRule(req: Request, resp: Response): void {
+  public saveMockRule(req: Request, resp: Response): void {
     let onlySnap: boolean = req.query["onlySnap"] == "true";
     let rule: MockRule = JSONBigInt.parse(req.body);
 
@@ -221,7 +214,7 @@ class MockService {
     }
   }
 
-  private deleteMockRule(req: Request, resp: Response): void {
+  public deleteMockRule(req: Request, resp: Response): void {
     let ruleId: string = JSON.parse(req.body)["ruleId"];
     let bizResp: BizResponse<string> = new BizResponse<string>();
     this.localDB
@@ -250,11 +243,10 @@ class MockService {
       });
   }
 
-  private uploadMockRule(req: Request, resp: Response): void {
+  public uploadMockRule(req: Request, resp: Response): void {
     let ruleId: string = req.query["ruleId"];
     let bizResp: BizResponse<string> = new BizResponse<string>();
-    this.localDB
-      .get(ruleId, { attachments: true })
+    this.localDB.get(ruleId, { attachments: true })
       .then((result: any) => {
         bizResp.code = BizCode.SUCCESS;
         bizResp.data = "上传成功";
@@ -270,17 +262,14 @@ class MockService {
   }
 
   private updateMockSettings(): void {
-    this.localDB
-      .find({
-        selector: { isMock: true },
-      })
+    this.localDB.find({ selector: { isMock: true } })
       .then((result: any) => {
         if (result.docs != null) {
           this.isMock = true;
           this.curMockRule = result.docs[0];
         }
       })
-      .catch((err: any) => {});
+      .catch((err: any) => { });
   }
 }
 

@@ -41,10 +41,6 @@ let rendererConfig = {
                 use: ["vue-style-loader", "css-loader"]
             },
             {
-                test: /\.html$/,
-                use: "vue-html-loader"
-            },
-            {
                 test: /\.tsx?$/,
                 loader: "ts-loader",
                 exclude: /node_modules/,

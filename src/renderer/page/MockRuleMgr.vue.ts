@@ -28,6 +28,7 @@ export default class MockRuleMgr extends AbstractPage {
   private mockRuleSnap: any = MockRuleSnap;
   private rules: Array<MockRule> = [];
   private searchKeyword: string = null;
+  private wrapperRule: MockRule = null;
 
   @MockRules.Mutation("setShowEditMockRuleDialog")
   private setShowEditMockRuleDialog!: Function;
@@ -44,7 +45,7 @@ export default class MockRuleMgr extends AbstractPage {
   @MockRules.State("curRule")
   private curRule: MockRule;
 
-  created() {}
+  created() { }
 
   mounted() {
     this.updateNavBarConfig({
@@ -71,6 +72,11 @@ export default class MockRuleMgr extends AbstractPage {
       });
   }
 
+  onAddMockRule() {
+    this.wrapperRule = new MockRule();
+    this.setShowEditMockRuleDialog(true);
+  }
+
   onDeleteMockRuleConfirmed() {
     this.setShowDeleteMockRuleDialog(false);
     deleteMockRule(this.curRule._id)
@@ -83,9 +89,9 @@ export default class MockRuleMgr extends AbstractPage {
   }
 
   onSaveMockRule() {
-    if (this.curRule == null) return;
-    saveMockRule(this.curRule, true)
-      .then((result) => {
+    if (this.wrapperRule == null) return;
+    saveMockRule(this.wrapperRule, true)
+      .then((result: any) => {
         Message({ message: "规则更新成功", type: "success" });
         this.fetchPagedMockRules();
       })
@@ -95,8 +101,13 @@ export default class MockRuleMgr extends AbstractPage {
     this.setShowEditMockRuleDialog(false);
   }
 
+  @Watch("curRule")
+  onCurRuleChanged() {
+    this.wrapperRule = this.curRule;
+  }
+
   @Watch("searchKeyword", { immediate: false, deep: true })
-  throttlesearchKeywordChange = throttle(function(val: string) {
+  throttlesearchKeywordChange = throttle(function (val: string) {
     this.fetchPagedMockRules();
   }, 1000);
 }

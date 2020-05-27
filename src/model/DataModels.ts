@@ -25,7 +25,8 @@ export interface IP {
 
 export class BizResponse<T> {
   code: number;
-  msg: string;
+  msg?: string;
+  message?: string;
   data: T;
 }
 
@@ -34,6 +35,21 @@ export class Paged<T> {
   page: any;
   totalPage: number;
   isEnd: boolean;
+}
+
+export interface StatisticRecord {
+  app_id: string;
+  app_version: string;
+  os: string;
+  rule: string;
+  pageId: string;
+  elementId: string;
+  event_id: string;
+  arg1: string;
+  arg2: string;
+  arg3: string;
+  args: string;
+  desc: string;
 }
 
 export class ProxyRequestRecord {
@@ -55,18 +71,11 @@ export class ProxyRequestRecord {
 export class ProxyStatRecord {
   type?: number;
   id: number;
-  app_id: string;
-  app_version: string;
-  os: string;
-  rule: string;
-  pageId: string;
-  elementId: string;
-  event_id: string;
-  arg1: string;
-  arg2: string;
-  arg3: string;
-  args: string;
-  desc: string;
+  _idx?: string;
+  timestamp?: number; // 请求发起时间
+  statistics: {
+    bps: StatisticRecord[];
+  }
 }
 
 export class MockRule {

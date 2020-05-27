@@ -21,6 +21,7 @@
       <json-viewer
         style="margin-top: 40px;"
         :closed="true"
+        :onItemClick="null"
         :data="wrapperRecord.headers == null ? {} : wrapperRecord.headers"
       ></json-viewer>
     </div>
@@ -28,6 +29,7 @@
       <h3>请求参数</h3>
       <json-viewer
         style="margin-top: 40px;"
+        :onItemClick="null"
         :data="
           wrapperRecord.requestData == null ? {} : wrapperRecord.requestData
         "
@@ -37,6 +39,7 @@
       <h3>响应头</h3>
       <json-viewer
         style="margin-top: 40px;"
+        :onItemClick="null"
         :data="
           wrapperRecord.responseHeaders == null
             ? {}

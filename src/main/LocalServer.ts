@@ -57,7 +57,7 @@ class LocalServer {
         zlib.unzip(data, (err: any, buffer: any) => {
           if (!err) {
             // TODO
-            PushService.sendStatisticsMessage(0, JSON.parse(buffer.toString()));
+            ProxyService.handleStatRequest(JSON.parse(buffer.toString()));
           } else {
             console.log(err);
           }
@@ -186,7 +186,7 @@ class LocalServer {
         );
       }
     } catch (err) {
-      console.error(err);
+      console.error("startProxyHttpServer", err);
     }
   }
 
@@ -202,7 +202,7 @@ class LocalServer {
         console.log(`关闭本地推送服务`);
       });
     } catch (err) {
-      console.log(err);
+      console.log("startLocalPushServer", err);
     }
     PushService.initWebSocket(this.pushSocketPort);
   }

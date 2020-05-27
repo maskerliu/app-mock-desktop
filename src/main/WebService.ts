@@ -6,7 +6,7 @@ import PushService from "./PushService";
 const DEFAULT_HEADER = { "Content-Type": "text/html" };
 
 class WebService {
-  constructor() {}
+  constructor() { }
 
   filter(req: Request, resp: Response) {
     let props = this.parseUrl(req.url);
@@ -24,25 +24,14 @@ class WebService {
     }
   }
 
-  private parseUrl(url: string) {
-    if (/^\/mw\//.test(url)) {
-      let path = url.substring(4).split("?")[0]; // remove /mw/
-      return {
-        path: path,
-        type: "cgi",
-      };
-    } else if (/^\/appmock\//.test(url)) {
-      let path = url.substring(9).split("?")[0]; // remove /mw/
-      return {
-        path: path,
-        type: "cgi",
-      };
-    } else {
-      return null;
-    }
+  public parseUrl(url: string): { path: string, type: string } {
+    let length = /^\/mw\//.test(url) ? 4 : 0;
+    length = /^\/appmock\//.test(url) ? 9 : length;
+    let path = url.substring(length).split("?")[0]; // remove /mw/
+    return { path: path, type: "cgi" };
   }
 
-  private register(req: Request, resp: Response) {
+  public register(req: Request, resp: Response): void {
     resp.writeHead(200, DEFAULT_HEADER);
     let uid = req.query["uid"];
     if (uid) {

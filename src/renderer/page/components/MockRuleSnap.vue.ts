@@ -31,7 +31,6 @@ export default class MockRuleSnap extends Vue {
 
   onClick() {
     this.setCurRule(this.source);
-    console.log(this.curRule.name, this.curRule._id);
   }
 
   onEdit() {

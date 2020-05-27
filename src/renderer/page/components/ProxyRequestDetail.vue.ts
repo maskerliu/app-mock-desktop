@@ -1,8 +1,8 @@
-import { clipboard, remote } from "electron";
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import { ProxyRequestRecord } from "../../../model/DataModels";
-import AddMockRule from "./AddMockRule.vue";
-import JsonViewer from "./JsonViewer.vue";
+import { clipboard, remote } from "electron"
+import { Component, Prop, Vue, Watch } from "vue-property-decorator"
+import { ProxyRequestRecord } from "../../../model/DataModels"
+import AddMockRule from "./AddMockRule.vue"
+import JsonViewer from "./JsonViewer.vue"
 
 const { Menu, MenuItem } = remote;
 const AUDIO_RGX = new RegExp("(.mp3|.ogg|.wav|.m4a|.aac)$");
@@ -18,7 +18,7 @@ const IMG_RGX = new RegExp("(.jpg|.jpeg|.png|.JPG|.gif|.GIF|.webp)$");
 })
 export default class ProxyRequestDetail extends Vue {
   @Prop()
-  record: ProxyRequestRecord = null;
+  record: ProxyRequestRecord;
 
   wrapperRecord: ProxyRequestRecord = null;
 
@@ -74,6 +74,7 @@ export default class ProxyRequestDetail extends Vue {
   }
 
   mounted() {
+    this.wrapperRecord = Object.assign({}, this.record);
     this.audioPlayer = document.getElementById("audioPlayer");
   }
 

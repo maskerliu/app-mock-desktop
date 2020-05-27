@@ -16,10 +16,10 @@
           ></i>
           <el-button
             slot="append"
-            size="mini"
+            size="small"
             type="success"
             icon="el-icon-plus"
-            @click="onEditMockRule(null)"
+            @click="onAddMockRule"
           ></el-button>
         </el-input>
 
@@ -41,37 +41,51 @@
       </el-col>
     </el-row>
 
-    <el-dialog title="警告" :visible="showDeleteMockRuleDialog" width="30%" @close="setShowDeleteMockRuleDialog(false)">
+    <el-dialog
+      title="警告"
+      :visible="showDeleteMockRuleDialog"
+      width="30%"
+      @close="setShowDeleteMockRuleDialog(false)"
+    >
       <span
         >确定删除[{{
           curRule != null ? curRule.name : ""
         }}]这条Mock规则吗?</span
       >
       <span slot="footer" class="dialog-footer">
-        <el-button @click="setShowDeleteMockRuleDialog(false)">取 消</el-button>
-        <el-button type="danger" @click="onDeleteMockRuleConfirmed()"
+        <el-button size="small" @click="setShowDeleteMockRuleDialog(false)">取 消</el-button>
+        <el-button type="danger" size="small" @click="onDeleteMockRuleConfirmed()"
           >确 定</el-button
         >
       </span>
     </el-dialog>
 
-    <el-dialog title="规则详情" :visible="showEditMockRuleDialog" width="50%" @close="setShowEditMockRuleDialog(false)">
+    <el-dialog
+      title="规则详情"
+      :visible="showEditMockRuleDialog"
+      width="50%"
+      @close="setShowEditMockRuleDialog(false)"
+    >
       <el-form
         ref="form"
-        :model="curRule"
+        :model="wrapperRule"
         label-width="90px"
-        v-if="curRule != null"
+        v-if="wrapperRule != null"
       >
         <el-form-item label="规则组名">
-          <el-input v-model="curRule.name" placeholder="规则组名"></el-input>
+          <el-input v-model="wrapperRule.name" placeholder="规则组名"></el-input>
         </el-form-item>
         <el-form-item label="规则组描述">
-          <el-input v-model="curRule.desc" placeholder="规则组描述"></el-input>
+          <el-input v-model="wrapperRule.desc" placeholder="规则组描述"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="setShowEditMockRuleDialog(false)">取 消</el-button>
-        <el-button type="primary" @click="onSaveMockRule()">保 存</el-button>
+        <el-button size="small" @click="setShowEditMockRuleDialog(false)"
+          >取 消</el-button
+        >
+        <el-button type="primary" size="small" @click="onSaveMockRule()"
+          >保 存</el-button
+        >
       </span>
     </el-dialog>
   </div>

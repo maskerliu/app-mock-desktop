@@ -18,16 +18,9 @@ export default class App extends Vue {
   created() {
     this.canRender = true;
     this.init();
-
-    // this.init().then(res => {
-    //     console.log(res)
-
-    // }).catch(() => {
-    //     this.canRender = true
-    // })
   }
 
   destroyed() {
-    console.log("destroy");
+    
   }
 }

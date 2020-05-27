@@ -42,16 +42,10 @@ class PushClient {
         break;
       case CMDCode.REQUEST_START:
       case CMDCode.REQUEST_END:
-        store.commit("ProxyRecords/updateProxyRequestState", msg);
+        store.commit("ProxyRecords/updateProxyRecords", msg);
         break;
       case CMDCode.STATISTICS:
-        for (let i = 0; i != msg.statistics.bps.length; i++) {
-          let temp = msg;
-          temp.statistics.bps = [];
-          temp.statistics.bps.push(msg.data.statistics.bps[i]);
-          store.commit("ProxyRecords/addStatistics", temp);
-        }
-
+        store.commit("ProxyRecords/updateProxyRecords", msg);
         break;
       default:
         Message({ message: "unhandled code:" + msg.code, type: "warning" });

@@ -49,11 +49,15 @@
         :keeps="20"
         :data-key="'_idx'"
         :data-sources="filtedRecords"
-        :data-component="proxyRequestSnap"
+        :data-component="proxyRecordSnap"
       />
     </el-col>
-    <el-col style="width: calc(100vw - 400px); margin: 5px;">
-      <proxy-request-detail :record="curRecord" v-show="curRecord !== null" />
+    <el-col
+      style="width: calc(100vw - 400px); margin: 5px;"
+      v-if="curRecord !== null"
+    >
+      <proxy-request-detail :record="curRecord" v-if="curRecord.type != 5020" />
+      <proxy-stat-detail :record="curRecord" v-else />
     </el-col>
   </el-row>
 </template>
@@ -73,5 +77,4 @@
   overflow-x: hidden;
   margin-bottom: 5px;
 }
-
 </style>

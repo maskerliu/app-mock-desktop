@@ -1,20 +1,42 @@
 <template>
-  <div class="rule-snap-item" @click="onClick()">
-    <span class="item-selected" v-if="curRule != null && curRule._id == source._id"></span>
-    <span class="rule-snap-name">[{{source.name}}]</span>
-    <span class="iconfont icon-edit" style="color: #3498db; padding: 0 5px;" @click="onEdit()"></span>
-    <span class="iconfont icon-delete" style="color: red; padding: 0 5px;" @click="onDelete()"></span>
-    <span class="iconfont icon-upload" style="color: red; padding: 0 5px;" @click="onUpload()"></span>
+  <div
+    class="rule-snap-item"
+    @click="onClick()"
+    v-bind:style="{
+      background:
+        curRule != null && curRule._id == source._id ? '#00000010' : 'white',
+    }"
+  >
+    <span class="rule-snap-name">[{{ source.name }}]</span>
+    <span
+      class="iconfont icon-edit"
+      style="color: #3498db; padding: 0 5px;"
+      @click="onEdit()"
+    ></span>
+    <span
+      class="iconfont icon-delete"
+      style="color: red; padding: 0 5px;"
+      @click="onDelete()"
+    ></span>
+    <span
+      class="iconfont icon-upload"
+      style="color: red; padding: 0 5px;"
+      @click="onUpload()"
+    ></span>
     <br />
-    <span class="rule-snap-desc">{{source.desc}}</span>
+    <span class="rule-snap-desc">{{ source.desc }}</span>
     <br />
     <span class="rule-snap-status">
       <b style="color: #2980b9;">请求数:</b>
-      {{source.requests != null ? source.requests.length : 0}}
+      {{ source.requests != null ? source.requests.length : 0 }}
     </span>
     <span style="position: absolute; bottom: 12px; right: 50px;">
       <span style="font-size: 0.6rem; color: #34495e;">启用Mock:</span>
-      <el-switch style="margin-top: 3px;" v-model="source.isMock" @change="onMockSwitchChanged()"></el-switch>
+      <el-switch
+        style="margin-top: 3px;"
+        v-model="source.isMock"
+        @change="onMockSwitchChanged()"
+      ></el-switch>
     </span>
     <i
       class="el-icon-arrow-right"
@@ -71,12 +93,4 @@
   color: #34495e;
 }
 
-.item-selected {
-  position: absolute;
-  width: 6px;
-  height: 100%;
-  background: #16a085;
-  left: 0;
-  top: 0;
-}
 </style>

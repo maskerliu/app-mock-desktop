@@ -12,15 +12,15 @@ const COLORS: string[] = [
   "#e84118",
   "#7f8fa6",
   "#273c75",
-  "#353b48",
   "#dcdde1",
+  "#636e72"
 ];
 
 @Component({
-  name: "ProxyRequestSnap",
+  name: "ProxyRecordSnap",
   components: {},
 })
-export default class ProxyRequestSnap extends Vue {
+export default class ProxyRecordSnap extends Vue {
   @Prop()
   source: ProxyRequestRecord;
 
