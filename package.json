@@ -35,7 +35,6 @@
     "mac": {
       "icon": "build/icons/icon.icns",
       "target": [
-        "zip",
         "pkg"
       ]
     },
@@ -75,7 +74,7 @@
     "css-loader": "^3.4.2",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^9.0.0",
+    "electron": "^8.3.3",
     "electron-builder": "^22.6.1",
     "electron-debug": "^3.1.0",
     "electron-devtools-installer": "^3.0.0",

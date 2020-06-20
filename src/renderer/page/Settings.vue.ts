@@ -1,8 +1,8 @@
-import { ipcRenderer } from "electron";
-import { Component } from "vue-property-decorator";
-import { Action, State } from "vuex-class";
-import { IP } from "../../model/DataModels";
-import AbstractPage from "./AbstractPage.vue";
+import { ipcRenderer } from "electron"
+import { Component } from "vue-property-decorator"
+import { Action, State } from "vuex-class"
+import { IP } from "../../model/DataModels"
+import AbstractPage from "./AbstractPage.vue"
 
 @Component({
   name: "Settings",

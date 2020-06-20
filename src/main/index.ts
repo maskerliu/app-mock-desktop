@@ -1,8 +1,8 @@
-import { app, BrowserWindow, Menu, nativeImage, shell, Tray } from "electron";
-import path from "path";
-import LocalServer from "./LocalServer";
+import { app, BrowserWindow, Menu, nativeImage, shell, Tray } from "electron"
+import path from "path"
+import LocalServer from "./LocalServer"
 
-require("./IPCService");
+require("./IPCService")
 
 if (process.env.NODE_ENV !== "development") {
   (<any>global).__static = require("path")

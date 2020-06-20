@@ -1,9 +1,9 @@
-import { Message } from "element-ui";
-import { throttle } from "lodash";
-import { Component, Watch } from "vue-property-decorator";
-import VirtualList from "vue-virtual-scroll-list";
-import { namespace } from "vuex-class";
-import { MockRule } from "../../model/DataModels";
+import { Message } from "element-ui"
+import { throttle } from "lodash"
+import { Component, Watch } from "vue-property-decorator"
+import VirtualList from "vue-virtual-scroll-list"
+import { namespace } from "vuex-class"
+import { MockRule } from "../../model/DataModels"
 import {
   deleteMockRule,
   saveMockRule,

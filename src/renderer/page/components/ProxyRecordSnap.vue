@@ -9,9 +9,9 @@
       class="item-selected"
       v-if="curRecord != null && curRecord.id == source.id"
     ></span>
-    <div class="item-timeline" v-bind:style="{ background: timelineColor }">{{
-      source.timestamp
-    }}</div>
+    <div class="item-timeline" v-bind:style="{ background: timelineColor }">
+      {{ source.timestamp }}
+    </div>
     <div v-if="source.type == 5020">
       <strong class="request-snap-method">[打点]</strong>
       <div
@@ -19,12 +19,16 @@
         v-for="(item, idx) in source.statistics.bps.slice(0, 2)"
         :key="idx"
       >
-        <span class="stat-snap-pid">{{ item.pageId }}</span>
-        <span v-if="item.elementId != ''" class="stat-snap-eid"
-          ><br />{{ item.elementId }}</span
+        <span class="stat-snap-pid">{{
+          item.pageId == "" ? item.page : item.pageId
+        }}</span>
+        <span
+          class="stat-snap-eid"
+          v-if="item.elementId != '' || item.arg1 != ''"
+          ><br />{{ item.elementId == "" ? item.arg1 : item.elementId }}</span
         >
         <strong class="stat-snap-type"
-          >[{{ item.elementId == "" ? "PV" : "事件" }}]</strong
+          >[{{ item.elementId == '' && item.arg1 == '' ? "PV" : "事件" }}]</strong
         >
       </div>
     </div>

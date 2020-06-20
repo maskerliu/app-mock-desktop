@@ -29,6 +29,11 @@ export default new Router({
             component: require('@/page/MockRuleMgr').default,
         },
         {
+            path: '/spider',
+            name: 'Spider',
+            component: require('@/page/Spider').default,
+        },
+        {
             path: '/settings',
             name: 'Settings',
             component: require('@/page/Settings').default,

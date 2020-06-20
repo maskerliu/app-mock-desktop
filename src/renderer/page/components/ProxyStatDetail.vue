@@ -1,31 +1,43 @@
 <template>
   <div>
     <el-table
+      ref="statsTable"
       :data="record.statistics.bps"
       style="width: 100%"
-      row-key="id"
       lazy
       stripe
       :row-class-name="rowClassName"
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
       v-if="record != null"
+      @expand-change="onExpandChagned"
     >
       <el-table-column type="expand">
         <template slot-scope="props">
-          <el-form
-            label-position="right"
-            label-width="130px"
-            class="table-expand"
-          >
-            <el-form-item
-              :label="`${key} :`"
-              style="width: 50%"
-              v-for="(value, key) in props.row"
-              :key="key"
+          <el-row>
+            <el-col :span="15">
+              <el-form
+                label-position="right"
+                label-width="130px"
+                class="table-expand"
+              >
+                <el-form-item
+                  :label="`${key} :`"
+                  v-for="(value, key) in props.row"
+                  :key="key"
+                >
+                  <div class="preview">{{ value }}</div>
+                </el-form-item>
+              </el-form>
+            </el-col>
+            <el-col
+              :span="9"
+              v-if="statRule != null"
+              style="overflow-y: scroll; padding: 15px;"
             >
-              <div style="width: 100%; word-wrap:break-word; word-break:break-all;user-select: text;">{{ value }}</div>
-            </el-form-item>
-          </el-form>
+              <pre class="preview">{{ statRule.desc }}</pre>
+              <pre class="preview">{{ statRule.rule }}</pre>
+              <pre class="preview">{{ statRule.ruleDesc }}</pre>
+            </el-col>
+          </el-row>
         </template>
       </el-table-column>
       <el-table-column
@@ -51,42 +63,22 @@
       <el-table-column
         prop="elementId"
         label="elementId"
-        width="150"
+        width="160"
       ></el-table-column>
       <el-table-column label="参数">
         <template slot-scope="scope">
-          <div style="max-height: 100px;">{{ scope.row.args }}</div>
+          <div style="max-height: 60px;">{{ scope.row.args }}</div>
         </template>
       </el-table-column>
       <el-table-column label="检查" fixed="right" width="60">
         <template slot-scope="scope">
-          <el-popover
-            placement="bottom"
-            :title="statRule == null ? '' : statRule.desc"
-            width="380"
-            trigger="manual"
-            v-model="visible"
-          >
-            <el-button type="primary" size="small" @click="visible = false" style="position: absolute; top: 5px; right: 35px;">关闭</el-button>
-            <div
-              style="max-height: 400px; overflow-y: scroll;"
-              v-if="statRule != null"
-            >
-              <pre style="color:#2c3e50">{{ statRule.rule }}</pre>
-              <br />
-              <pre
-                style="color: #2980b9; width: 100%;white-space: pre-wrap;word-wrap: break-word;"
-                >{{ statRule.ruleDesc }}</pre
-              >
-            </div>
-            <el-button
-              icon="iconfont icon-check"
-              size="small"
-              circle
-              slot="reference"
-              @click="onClicked(scope.row)"
-            ></el-button>
-          </el-popover>
+          <el-button
+            icon="iconfont icon-check"
+            size="small"
+            circle
+            slot="reference"
+            @click="onClicked(scope.row)"
+          ></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -97,20 +89,26 @@
 
 <style>
 .el-table .normal-row {
-  max-height: 100px;
+  max-height: 60px;
   font-size: 0.7rem;
   user-select: text;
 }
-
 .el-table .warning-row {
-  max-height: 100px;
+  max-height: 60px;
+  font-size: 0.7rem;
+  user-select: text;
+  background: #eccc6858;
+}
+
+.el-table .error-row {
+  max-height: 60px;
   font-size: 0.7rem;
   user-select: text;
   background: #ff767558;
 }
 
 .el-table .success-row {
-  max-height: 100px;
+  max-height: 60px;
   font-size: 0.7rem;
   user-select: text;
   background: #55efc458;
@@ -139,7 +137,12 @@
 .el-table__expanded-cell[class*="cell"] {
   padding: 0;
 }
-.el-popover {
-  margin-top: 80px;
+
+.preview {
+  font-size: 0.7rem;
+  color: #2980b9;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  user-select: text;
 }
 </style>

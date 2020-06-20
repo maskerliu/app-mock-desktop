@@ -1,10 +1,10 @@
-import { app } from "electron";
-import { Request, Response } from "express";
-import path from "path";
-import PouchDB from "pouchdb";
-import PouchDBFind from "pouchdb-find";
-import { CMDCode, BizCode, BizResponse, MockRule, ProxyRequestRecord } from "../model/DataModels";
-import PushService from "./PushService";
+import { app } from "electron"
+import { Request, Response } from "express"
+import path from "path"
+import PouchDB from "pouchdb"
+import PouchDBFind from "pouchdb-find"
+import { CMDCode, BizCode, BizResponse, MockRule, ProxyRequestRecord } from "../model/DataModels"
+import PushService from "./PushService"
 
 const JSONBigInt = require("json-bigint");
 
@@ -77,7 +77,7 @@ class MockService {
   }
 
   public searchMockRules(req: Request, resp: Response): void {
-    let keyword: string = req.query["keyword"];
+    let keyword: any = req.query["keyword"];
     let selector = { _id: { $ne: /_design\/idx/ } };
     if (keyword == null) {
       selector = Object.assign(selector, { name: { $ne: keyword } });
@@ -120,7 +120,7 @@ class MockService {
   }
 
   public getMockRuleDetail(req: Request, resp: Response): void {
-    let ruleId: string = req.query["ruleId"];
+    let ruleId: any = req.query["ruleId"];
     let bizResp: BizResponse<Array<MockRule>> = new BizResponse<Array<MockRule>>();
     this.localDB
       .get(ruleId, { attachments: true })
@@ -244,7 +244,7 @@ class MockService {
   }
 
   public uploadMockRule(req: Request, resp: Response): void {
-    let ruleId: string = req.query["ruleId"];
+    let ruleId: any = req.query["ruleId"];
     let bizResp: BizResponse<string> = new BizResponse<string>();
     this.localDB.get(ruleId, { attachments: true })
       .then((result: any) => {
