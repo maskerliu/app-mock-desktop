@@ -21,7 +21,6 @@
       <json-viewer
         style="margin-top: 40px;"
         :closed="true"
-        :onItemClick="null"
         :data="wrapperRecord.headers == null ? {} : wrapperRecord.headers"
       ></json-viewer>
     </div>
@@ -29,7 +28,6 @@
       <h3>请求参数</h3>
       <json-viewer
         style="margin-top: 40px;"
-        :onItemClick="null"
         :data="
           wrapperRecord.requestData == null ? {} : wrapperRecord.requestData
         "
@@ -39,7 +37,7 @@
       <h3>响应头</h3>
       <json-viewer
         style="margin-top: 40px;"
-        :onItemClick="null"
+        :closed="true"
         :data="
           wrapperRecord.responseHeaders == null
             ? {}
@@ -52,8 +50,6 @@
       <json-viewer
         style="margin-top: 40px; height: calc(100vh - 105px);"
         :data="wrapperRecord.responseData"
-        v-on:click="onItemClick"
-        :onItemClick="onItemClick"
         :deep="5"
       ></json-viewer>
     </div>
@@ -64,7 +60,7 @@
       width="90%"
       top="50px"
     >
-      <add-mock-rule :record="wrapperRecord"></add-mock-rule>
+      <add-mock-rule :record="wrapperRecord" :lock-scroll="true"></add-mock-rule>
     </el-dialog>
 
     <el-dialog

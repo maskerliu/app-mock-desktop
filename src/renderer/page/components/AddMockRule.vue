@@ -1,5 +1,5 @@
 <template>
-  <el-row style="width: 100%; height: calc(100vh - 190px);">
+  <el-row style="width: 100%; height: calc(100vh - 220px);">
     <el-row
       style="padding: 10px; margin:-30px 0 10px 0; box-shadow: 2px 4px 6px #00000080;"
     >

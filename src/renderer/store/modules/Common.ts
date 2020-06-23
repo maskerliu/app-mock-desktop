@@ -82,9 +82,7 @@ export const mutations: MutationTree<CommonState> = {
     state.localServerConfig.pushSocketPort = params.pushSocketPort;
     state.localServerConfig.ips = params.ips;
     state.localServerConfig.pbFiles = params.pbFiles;
-    state.registerUrl = `http://${params.serverIP}:${
-      params.proxyHttpPort
-    }/mw/register?_=0__0&uid=${generateUid()}`;
+    state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/mw/register?_=0__0&uid=${generateUid()}`;
 
     updateLocalDomain(state.localServerConfig);
 

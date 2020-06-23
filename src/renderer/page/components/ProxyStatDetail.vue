@@ -6,9 +6,8 @@
       style="width: 100%"
       lazy
       stripe
-      :row-class-name="rowClassName"
+      :row-class-name="tableRowClassName"
       v-if="record != null"
-      @expand-change="onExpandChagned"
     >
       <el-table-column type="expand">
         <template slot-scope="props">
@@ -30,12 +29,12 @@
             </el-col>
             <el-col
               :span="9"
-              v-if="statRule != null"
-              style="overflow-y: scroll; padding: 15px;"
+              v-if="rows[props.$index].statRule != null"
+              style="height: 400px; overflow-y: scroll; padding: 15px;"
             >
-              <pre class="preview">{{ statRule.desc }}</pre>
-              <pre class="preview">{{ statRule.rule }}</pre>
-              <pre class="preview">{{ statRule.ruleDesc }}</pre>
+              <pre class="preview">{{ rows[props.$index].statRule.desc }}</pre>
+              <pre class="preview">{{ rows[props.$index].statRule.rule }}</pre>
+              <pre class="preview">{{ rows[props.$index].statRule.ruleDesc }}</pre>
             </el-col>
           </el-row>
         </template>
@@ -55,29 +54,29 @@
         label="类型"
         width="60"
       ></el-table-column>
-      <el-table-column
-        prop="pageId"
-        label="pageId"
-        width="140"
-      ></el-table-column>
-      <el-table-column
-        prop="elementId"
-        label="elementId"
-        width="160"
-      ></el-table-column>
-      <el-table-column label="参数">
+      <el-table-column label="pageId" width="140">
         <template slot-scope="scope">
-          <div style="max-height: 60px;">{{ scope.row.args }}</div>
+          <div style="max-height: 50px;">{{ scope.row.pageId }}</div>
         </template>
       </el-table-column>
-      <el-table-column label="检查" fixed="right" width="60">
+      <el-table-column label="elementId" width="160">
+        <template slot-scope="scope">
+          <div style="max-height: 50px;">{{ scope.row.elementId }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column label="参数">
+        <template slot-scope="scope">
+          <div style="max-height: 50px;">{{ scope.row.args }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column label="检查" width="60">
         <template slot-scope="scope">
           <el-button
             icon="iconfont icon-check"
             size="small"
             circle
             slot="reference"
-            @click="onClicked(scope.row)"
+            @click="onClicked(scope.row, scope.$index)"
           ></el-button>
         </template>
       </el-table-column>
@@ -89,26 +88,30 @@
 
 <style>
 .el-table .normal-row {
-  max-height: 60px;
+  height: 70px;
+  max-height: 70px;
   font-size: 0.7rem;
   user-select: text;
 }
 .el-table .warning-row {
-  max-height: 60px;
+  height: 70px;
+  max-height: 70px;
   font-size: 0.7rem;
   user-select: text;
   background: #eccc6858;
 }
 
 .el-table .error-row {
-  max-height: 60px;
+  height: 70px;
+  max-height: 70px;
   font-size: 0.7rem;
   user-select: text;
   background: #ff767558;
 }
 
 .el-table .success-row {
-  max-height: 60px;
+  height: 70px;
+  max-height: 70px;
   font-size: 0.7rem;
   user-select: text;
   background: #55efc458;

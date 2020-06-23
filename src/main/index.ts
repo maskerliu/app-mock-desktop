@@ -99,6 +99,9 @@ function createTrayMenu(): void {
 if (process.platform === "win32") {
   app.disableHardwareAcceleration();
 }
+
+app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
+
 // app.commandLine.appendSwitch("disable-gpu");
 // app.commandLine.appendSwitch("disable-software-rasterizer");
 

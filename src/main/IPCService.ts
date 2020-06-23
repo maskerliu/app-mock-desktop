@@ -62,12 +62,3 @@ ipcMain.on("on-open-folder", (event: IpcMainEvent, args?: any) => {
       event.sender.send("on-selected-files", { files: result.filePaths });
     });
 });
-
-ipcMain.on("on-get-stat-rule", (event: IpcMainEvent, args?: Map<string, string>) => {
-  let url: string = `https://app.yupaopao.com/api/stat/queryStats`;
-  axios.get(url, {
-    params: args
-  }).then(resp => {
-    event.sender.send("on-get-stat-rule", resp.data);
-  })
-});

@@ -9,8 +9,8 @@
       class="item-selected"
       v-if="curRecord != null && curRecord.id == source.id"
     ></span>
-    <div class="item-timeline" v-bind:style="{ background: timelineColor }">
-      {{ source.timestamp }}
+    <div class="item-timeline" v-bind:style="{ background: source.timelineColor }">
+      <br>{{ source.timestamp }}
     </div>
     <div v-if="source.type == 5020">
       <strong class="request-snap-method">[打点]</strong>
@@ -90,11 +90,11 @@
 
 .item-selected {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  background: #89898948;
-  left: 0;
-  top: 0;
+  width: calc(100% - 12px);
+  height: calc(100% - 1px);
+  background: #A1A1A148;
+  left: 10;
+  top: -1px;
   z-index: 99;
 }
 
@@ -106,7 +106,7 @@
   top: 0;
   font-size: 0.5rem;
   font-weight: bold;
-  padding-top: 10px;
+  padding-left: 2px;
   color: white;
 }
 

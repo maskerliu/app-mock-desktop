@@ -36,16 +36,29 @@
       <el-form-item label="本地推送服务端口">
         <el-input v-model="curPushSocketPort" size="small"></el-input>
       </el-form-item>
-      <el-form-item label="规则数据同步地址">
+      <el-form-item label="埋点规则同步地址">
         <el-input
-          v-model="ruleSyncServer"
+          v-model="statRuleSyncServer"
           size="small"
           placeholder="http://sync.xxx.com/sync:xxxx"
         >
           <el-button
             slot="append"
             icon="iconfont icon-cloud-sync"
-            :loading="true"
+            @click="updateStatRuleServer"
+          ></el-button>
+        </el-input>
+      </el-form-item>
+      <el-form-item label="规则数据同步地址">
+        <el-input
+          v-model="mockRuleSyncServer"
+          size="small"
+          placeholder="http://sync.xxx.com/sync:xxxx"
+        >
+          <el-button
+            slot="append"
+            icon="iconfont icon-cloud-sync"
+            @click="updateMockRuleServer"
           ></el-button>
         </el-input>
       </el-form-item>
@@ -84,7 +97,7 @@
           <el-radio :label="10" style="height: 34px; margin-top: 15px;"
             >自定义
             <el-input
-              v-model="ruleSyncServer"
+              v-model="mockRuleSyncServer"
               size="small"
               placeholder="选择自定义序列化协议的JS实现插件"
               v-show="serialPlugin == 10"

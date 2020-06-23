@@ -51,8 +51,6 @@
           <template v-for="(item, index) in items">
             <json-viewer
               v-if="item.isJSON"
-              v-on:click="onItemClick"
-              :onItemClick="onItemClick"
               :closed="isClose(templateDeep + 1)"
               :key="index"
               :data="item.value"
@@ -72,7 +70,6 @@
               </span>
               <span
                 :class="['json-value', getDataType(item.value)]"
-                @click="$emit('click', item.value)"
               >
                 {{
                   `

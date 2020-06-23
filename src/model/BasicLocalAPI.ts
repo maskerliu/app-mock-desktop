@@ -59,7 +59,6 @@ axios.interceptors.response.use(
 
 export let BASE_LOCAL_URL = "http://localhost:8888";
 export let BASE_UPLOAD_URL = null;
-export let BASE_REMOTE_URL = "https://app.yupaopao.com";
 
 export function get(
   path: string,

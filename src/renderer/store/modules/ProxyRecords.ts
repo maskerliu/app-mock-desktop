@@ -13,6 +13,19 @@ const state: ProxyRecordState = {
   curRecord: null,
 };
 
+const COLORS: string[] = [
+  "#00a8ff",
+  "#9c88ff",
+  "#fbc531",
+  "#4cd137",
+  "#487eb0",
+  "#e84118",
+  "#7f8fa6",
+  "#273c75",
+  "#dcdde1",
+  "#636e72"
+];
+
 const getters: GetterTree<ProxyRecordState, any> = {
   proxyRecords(
     state: ProxyRecordState
@@ -41,6 +54,7 @@ const mutations: MutationTree<ProxyRecordState> = {
           state.records.splice(state.records.length - 10, 10);
         }
         record._idx = record.id + "";
+        record.timelineColor = COLORS[record.timestamp % 10];
         state.records.unshift(record);
 
         if (state.curRecord == null) return;
@@ -75,26 +89,6 @@ const mutations: MutationTree<ProxyRecordState> = {
       default:
         console.log("unsupport record type");
     }
-  },
-  addStatistics(state, obj) {
-    let recordJson = {
-      type: CMDCode.STATISTICS,
-      id: "00000123",
-      app_id: "string",
-      app_version: "string",
-      os: "string",
-      rule: "string",
-      pageId: "string",
-      elementId: "string",
-      event_id: "string",
-      arg1: "string",
-      arg2: "string",
-      arg3: "string",
-      args: "string",
-      desc: "string",
-    };
-    // let record: ProxyStatRecord = plainToClass(ProxyStatRecord, recordJson, { excludeExtraneousValues: true });
-    // state.records.push(record);
   },
   clearRecords(state, params?: any): void {
     state.records.splice(0, state.records.length);
