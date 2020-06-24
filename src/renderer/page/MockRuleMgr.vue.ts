@@ -7,12 +7,12 @@ import { MockRule } from "../../model/DataModels"
 import {
   deleteMockRule,
   saveMockRule,
-  searchMockRules,
-} from "../../model/LocaAPIs";
-import { eventBus } from "../common/EventBus";
-import AbstractPage from "./AbstractPage.vue";
-import MockRuleDetail from "./components/MockRuleDetail.vue";
-import MockRuleSnap from "./components/MockRuleSnap.vue";
+  searchMockRules
+} from "../../model/LocaAPIs"
+import { eventBus } from "../common/EventBus"
+import AbstractPage from "./AbstractPage.vue"
+import MockRuleDetail from "./components/MockRuleDetail.vue"
+import MockRuleSnap from "./components/MockRuleSnap.vue"
 
 const MockRules = namespace("MockRules");
 

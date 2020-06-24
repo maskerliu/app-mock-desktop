@@ -1,5 +1,9 @@
 <template>
-  <div class="inspector-panel" v-if="wrapperRecord != null">
+  <div
+    class="inspector-panel"
+    v-if="wrapperRecord != null"
+    ref="inspectorPanel"
+  >
     <div class="request-path">
       <span class="request-url"><b>Path:</b> {{ wrapperRecord.url }}</span>
       <el-button
@@ -8,13 +12,15 @@
         icon="el-icon-copy-document"
         @click="copyLink"
       ></el-button>
-      <el-button
-        style="margin: 0 5px;"
-        size="small"
-        type="primary"
-        icon="el-icon-plus"
-        @click="addToMockRule"
-      ></el-button>
+      <el-tooltip effect="dark" content="添加Mock数据" placement="bottom">
+        <el-button
+          style="margin: 0 5px;"
+          size="small"
+          type="primary"
+          icon="el-icon-plus"
+          @click="addToMockRule"
+        ></el-button>
+      </el-tooltip>
     </div>
     <div class="inspector-row" style="margin-top: 70px; padding-bottom: 15px;">
       <h3>请求头</h3>
@@ -45,10 +51,14 @@
         "
       ></json-viewer>
     </div>
-    <div class="inspector-row" style="height: calc(100vh - 65px);">
-      <h3>响应数据</h3>
+    <div
+      class="inspector-row"
+      style="height: calc(100vh - 65px);"
+      ref="respDataDiv"
+    >
+      <h3 style="padding: 15px 20px;">响应数据</h3>
       <json-viewer
-        style="margin-top: 40px; height: calc(100vh - 105px);"
+        style="margin-top: 50px; height: calc(100vh - 105px);"
         :data="wrapperRecord.responseData"
         :deep="5"
       ></json-viewer>
@@ -60,7 +70,10 @@
       width="90%"
       top="50px"
     >
-      <add-mock-rule :record="wrapperRecord" :lock-scroll="true"></add-mock-rule>
+      <add-mock-rule
+        :record="wrapperRecord"
+        :lock-scroll="true"
+      ></add-mock-rule>
     </el-dialog>
 
     <el-dialog

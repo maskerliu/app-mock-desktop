@@ -10,11 +10,11 @@ const Env = namespace("Env");
 export default class DebugPanel extends Vue {
   private env: string = null;
 
-  mounted() {}
+  mounted() { }
 
-  createCrash() {}
+  createCrash() { }
 
-  changeEnv() {}
+  changeEnv() { }
 
   clearCache() {
     webFrame.clearCache();

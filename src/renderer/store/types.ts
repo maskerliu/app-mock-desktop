@@ -32,6 +32,10 @@ export interface CommonState {
     ips: Array<IP>;
     pbFiles: Array<{ name: string; value: string }>;
   };
+  mockRuleSyncServer: string;
+  statRuleSyncServer: string;
+  dataProxyServer: string;
+  dataProxyStatus: boolean;
 }
 
 export interface NavBarConfig {
@@ -43,6 +47,7 @@ export interface NavBarConfig {
 }
 
 export interface ProxyRecordState {
+  proxyTypes: string[];
   records: Array<ProxyRequestRecord | ProxyStatRecord>;
   curRecord: ProxyRequestRecord;
 }

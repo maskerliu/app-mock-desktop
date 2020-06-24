@@ -63,7 +63,6 @@
     <el-dialog
       title="规则详情"
       :visible="showEditMockRuleDialog"
-      width="50%"
       @close="setShowEditMockRuleDialog(false)"
     >
       <el-form
@@ -73,10 +72,10 @@
         v-if="wrapperRule != null"
       >
         <el-form-item label="规则组名">
-          <el-input v-model="wrapperRule.name" placeholder="规则组名"></el-input>
+          <el-input size="small" v-model="wrapperRule.name" placeholder="规则组名"></el-input>
         </el-form-item>
-        <el-form-item label="规则组描述">
-          <el-input v-model="wrapperRule.desc" placeholder="规则组描述"></el-input>
+        <el-form-item label="规则组描述" style="margin-top: 15px;">
+          <el-input size="small" rows="4" type="textarea" v-model="wrapperRule.desc" placeholder="规则组描述"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">

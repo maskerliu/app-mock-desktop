@@ -28,7 +28,7 @@
           <i class="iconfont icon-rule" style="font-size: 1.8rem;"></i>
         </el-menu-item>
         <el-menu-item
-          index="MockRuleMgr"
+          index="Spider"
           style="padding-left: 20px;"
           @click="onNavTabClick('Spider')"
         >

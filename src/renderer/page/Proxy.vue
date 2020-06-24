@@ -3,21 +3,29 @@
     <el-col class="bg-border" style="width: 300px; margin-left: 15px;">
       <el-checkbox-group
         size="mini"
-        v-model="proxyTypes"
-        style="width: 100%; padding: 10px 0;"
+        v-model="filterTypes"
+        style="width: 100%; padding: 5px 5px; boder: 1px solid grey;"
       >
-        <el-checkbox-button label disabled>
-          <i class="iconfont icon-filter" style="font-weight: blod;" />
-        </el-checkbox-button>
-        <el-checkbox-button label="5010">
-          <i class="iconfont icon-api" style="font-weight: blod;" />
-        </el-checkbox-button>
-        <el-checkbox-button label="5020">
-          <i class="iconfont icon-maidian" style="font-weight: blod;" />
-        </el-checkbox-button>
-        <el-checkbox-button label="5030">
-          <i class="iconfont icon-shuiguan" style="font-weight: blod;" />
-        </el-checkbox-button>
+        <i
+          class="iconfont icon-filter"
+          style="font-weight: blod; color: grey;"
+        />
+        <el-tooltip effect="dark" content="请求" placement="bottom">
+          <el-checkbox label="5010" style="padding: 5px 10px;">
+            <i class="iconfont icon-api" style="font-weight: blod;" />
+          </el-checkbox>
+        </el-tooltip>
+
+        <el-tooltip effect="dark" content="埋点" placement="bottom">
+          <el-checkbox label="5020" style="padding: 5px 10px;">
+            <i class="iconfont icon-maidian" style="font-weight: blod;" />
+          </el-checkbox>
+        </el-tooltip>
+        <el-tooltip effect="dark" content="长连通道" placement="bottom">
+          <el-checkbox label="5030" style="padding: 5px 10px;">
+            <i class="iconfont icon-shuiguan" style="font-weight: blod;" />
+          </el-checkbox>
+        </el-tooltip>
       </el-checkbox-group>
 
       <el-input size="small" placeholder="延时时长" v-model="mockDelay">

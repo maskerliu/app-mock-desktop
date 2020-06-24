@@ -1,14 +1,10 @@
 import { ipcRenderer } from "electron"
+import { Message } from "element-ui"
 import { Component } from "vue-property-decorator"
-import { Action, State } from "vuex-class"
+import { Action, Mutation, State } from "vuex-class"
 import { IP } from "../../model/DataModels"
 import AbstractPage from "./AbstractPage.vue"
 
-import PouchDB from "pouchdb"
-import { Message } from "element-ui"
-
-
-let db = new PouchDB('sharePerferences', { adapter: 'leveldb' });
 
 @Component({
   name: "Settings",
@@ -18,17 +14,39 @@ export default class Settings extends AbstractPage {
   @State((state) => state.Common.localServerConfig)
   private localServerConfig: any;
 
+  @State((state) => state.Common.mockRuleSyncServer)
+  private mockRuleSyncServer: string;
+
+  @State((state) => state.Common.statRuleSyncServer)
+  private statRuleSyncServer: string;
+
+  @State((state) => state.Common.dataProxyServer)
+  private dataProxyServer: string;
+
+  @State((state) => state.Common.dataProxyStatus)
+  private dataProxyStatus: boolean;
+
   @Action("saveLocalServerConfig")
   private saveLocalServerConfig: Function;
 
-  private form: any = null;
+  @Mutation("updateMockRuleSyncServer")
+  private updateMockRuleSyncServer: Function;
+
+  @Mutation("updateStatRuleSyncServer")
+  private updateStatRuleSyncServer: Function;
+
+  @Mutation("updateDataProxyServer")
+  private updateDataProxyServer: Function;
+
   private ips: Array<IP>;
   private curServerIP: string = null;
   private curProxyHttpPort: number = null;
-  public curProxySocketPort: number = null;
+  private curProxySocketPort: number = null;
   private curPushSocketPort: number = null;
-  private statRuleSyncServer: string = null;
-  private mockRuleSyncServer: string = null;
+  private srsUrl: string = null;
+  private mrsUrl: string = null;
+  private dpUrl: string = null;
+  private dpStatus: boolean = false;
   private pbFiles: any[] = null;
   private serialPlugin: number = 3;
 
@@ -38,21 +56,16 @@ export default class Settings extends AbstractPage {
       leftItem: false,
       rightItem: false,
     });
-
-    db.get('statRuleSyncServer').then((result: any) => {
-      this.statRuleSyncServer = result.url;
-    }).catch(err => { })
-
-    db.get('mockRuleSyncServer').then((result: any) => {
-      this.mockRuleSyncServer = result.url;
-    }).catch(err => { })
-
     this.ips = this.localServerConfig.ips;
     this.curServerIP = this.localServerConfig.serverIP;
     this.curProxyHttpPort = this.localServerConfig.proxyHttpPort;
     this.curProxySocketPort = this.localServerConfig.proxySocketPort;
     this.curPushSocketPort = this.localServerConfig.pushSocketPort;
     this.pbFiles = this.localServerConfig.pbFiles;
+    this.srsUrl = this.statRuleSyncServer;
+    this.mrsUrl = this.mockRuleSyncServer;
+    this.dpUrl = this.dataProxyServer;
+    this.dpStatus = this.dataProxyStatus;
   }
 
   public destroyed(): void { }
@@ -61,55 +74,17 @@ export default class Settings extends AbstractPage {
     ipcRenderer.send("on-open-folder", "openFile");
   }
 
-  public updateStatRuleServer() {
-    db.bulkDocs(
-      [
-        {
-          _id: 'statRuleSyncServer',
-          url: this.statRuleSyncServer,
-        },
-      ]
-    ).then((res) => {
-      Message.success("成功更新埋点数据服务地址");
-    }).catch(err => {
-      Message.warning("更新埋点数据服务地址失败");
-    });
-  }
+  public onDataProxySwitchChanged(status: boolean) {
+    if (this.dpUrl != null) {
+      this.updateDataProxyServer({ url: this.dpUrl, status: status });
+    } else {
+      Message.warning("代理数据服务地址不能为空");
+      this.dataProxyStatus = !status;
+    }
 
-  public updateMockRuleServer() {
-    db.bulkDocs(
-      [
-        {
-          _id: 'mockRuleSyncServer',
-          url: this.statRuleSyncServer,
-        },
-      ]
-    ).then((res) => {
-      Message.success("成功更新Mock数据服务地址");
-    }).catch(err => {
-      Message.warning("更新Mock数据服务地址失败");
-    });
   }
 
   public onSave(): void {
-
-    db.bulkDocs(
-      [
-        {
-          _id: 'statRuleSyncServer',
-          url: this.statRuleSyncServer,
-        },
-        {
-          _id: 'mockRuleSyncServer',
-          url: this.mockRuleSyncServer,
-        }
-      ]
-    ).then((res) => {
-      console.log(`已经创建完成`);
-    }).catch(err => {
-
-    })
-
     this.saveLocalServerConfig({
       serverIP: this.curServerIP,
       proxyHttpPort: this.curProxyHttpPort,

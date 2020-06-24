@@ -1,5 +1,6 @@
 import { Message } from "element-ui";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { State } from "vuex-class";
 import { get } from "../../../model/BasicLocalAPI";
 import { ProxyStatRecord } from "../../../model/DataModels";
 
@@ -12,6 +13,9 @@ export default class ProxyStatDetail extends Vue {
 
   @Prop()
   private record: ProxyStatRecord;
+
+  @State((state) => state.Common.statRuleSyncServer)
+  private statRuleSyncServer: string;
 
   private statRule: { desc: string, rule: string[], ruleDesc: string } = null;
   private curStat: any;
@@ -51,12 +55,11 @@ export default class ProxyStatDetail extends Vue {
     elementId = row.event_id == 2001 ? "" : elementId;
     let keyword = row.event_id == 2001 ? pageId : elementId;
 
-    console.log(keyword);
     if (elementId == "" && pageId == "") {
       Vue.set(this.rows[index], "rowClassName", "warning-row");
       Message.warning("未找到相关等级埋点");
     } else {
-      get("/api/stat/queryStats", "https://app.yupaopao.com", {
+      get("/api/stat/queryStats", this.statRuleSyncServer, {
         eventId: row["event_id"],
         keyword: keyword
       }).then(resp => {
@@ -67,24 +70,25 @@ export default class ProxyStatDetail extends Vue {
 
         this.$refs.statsTable.toggleRowExpansion(row, true);
 
-        if (resp.data.data.data != null && resp.data.data.data.length == 1) {
-          let stat = resp.data.data.data[0];
-          let rules: string[] = stat.rule.split(/[,;，；]/);
-
-          Vue.set(this.rows[index], "statRule", {
-            desc: stat.name + stat.desc,
-            rule: stat.rule.split(/[,;，；]/),
-            ruleDesc: stat.ruleDesc
-          });
-
-          if (rules == null || rules.length == 0 || stat.rule == "") {
-            Vue.set(row, "rowClassName", "success-row");
-          } else {
-            Vue.set(this.rows[index], "rowClassName", this.argsVailidate(rules) ? "success-row" : "error-row");
-          }
-        } else {
+        if (resp.data.data.data == null || resp.data.data.data.length != 1) {
           Vue.set(this.rows[index], "rowClassName", "warning-row");
           Message.warning("未找到相关等级埋点");
+          return;
+        }
+
+
+        let stat = resp.data.data.data[0];
+        let rules: string[] = stat.rule.split(/[,;，；]/);
+
+        Vue.set(this.rows[index], "statRule", {
+          desc: stat.name + stat.desc,
+          rule: stat.rule.split(/[,;，；]/),
+          ruleDesc: stat.ruleDesc
+        });
+        if (stat.rule == null || stat.rule == "" || rules.length == 1) {
+          Vue.set(this.rows[index], "rowClassName", "success-row");
+        } else {
+          Vue.set(this.rows[index], "rowClassName", this.argsVailidate(rules) ? "success-row" : "error-row");
         }
       }).catch(err => {
         Message.warning(err);
@@ -93,6 +97,8 @@ export default class ProxyStatDetail extends Vue {
   }
 
   argsVailidate(rule: string[]): boolean {
+
+    if (this.curStat.args.length == 0) return true;
 
     let tmp: string[] = this.curStat.args.split(",");
 

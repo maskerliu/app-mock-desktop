@@ -26,11 +26,7 @@
     <br />
     <span class="rule-snap-desc">{{ source.desc }}</span>
     <br />
-    <span class="rule-snap-status">
-      <b style="color: #2980b9;">请求数:</b>
-      {{ source.requests != null ? source.requests.length : 0 }}
-    </span>
-    <span style="position: absolute; bottom: 12px; right: 50px;">
+    <span style="position: absolute; bottom: 5px; left: 10px;">
       <span style="font-size: 0.6rem; color: #34495e;">启用Mock:</span>
       <el-switch
         style="margin-top: 3px;"
@@ -65,7 +61,7 @@
 }
 
 .rule-snap-name {
-  max-width: 180px;
+  width: 150px;
   font-size: 0.8rem;
   font-weight: bold;
   color: #2980b9;

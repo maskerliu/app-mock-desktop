@@ -32,6 +32,12 @@ ipcMain.on("set-proxy-delay", (event: any, args?: any) => {
   } catch (err) { }
 });
 
+ipcMain.on("update-data-proxy-server", (event: IpcMainEvent, args: { url: string, status: boolean }) => {
+  try {
+    ProxyService.setDataProxyServer(args.url, args.status);
+  } catch (err) { }
+});
+
 ipcMain.on("get-local-server-config", (event: IpcMainEvent, args?: any) => {
   event.sender.send(
     "get-local-server-config",

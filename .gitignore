@@ -13,4 +13,4 @@ package-lock.json
 .idea/*
 .vscode/*
 *.log
-sharePerferences/*
+SharePerferences/*

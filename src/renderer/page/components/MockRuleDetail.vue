@@ -17,7 +17,7 @@
       <el-table-column prop="time" label="耗时" width="100"></el-table-column>
       <el-table-column prop="statusCode" label="请求状态" width="100"></el-table-column>
       <el-table-column prop="responseData.code" label="业务状态" width="100"></el-table-column>
-      <el-table-column label="操作" fixed="right" width="100">
+      <el-table-column label="操作" fixed="right">
         <template slot-scope="scope">
           <el-button
             type="primary"

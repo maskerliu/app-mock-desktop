@@ -11,17 +11,21 @@ const websocket = require("nodejs-websocket");
 
 class ProxyService {
   private static PROXY_DEF_TIMEOUT: number = 1000 * 15; // 15s
-  private isProxyRequest: boolean = true;
-  private isProxyStatistics: boolean = false;
   private _sessionId: number;
   private proxyDealy: number;
+  private dataProxyServer: string;
   private proxySocketServer: any = null;
+  private dataProxyStatus: boolean = false;
   private pbFiles: Array<{ name: string; value: string }> = null;
 
   constructor() {
     this._sessionId = 0;
   }
 
+  public setDataProxyServer(url: string, status: boolean) {
+    this.dataProxyServer = url;
+    this.dataProxyStatus = status;
+  }
   public setProxyDelay(delay: number) {
     this.proxyDealy = delay;
   }
@@ -130,8 +134,13 @@ class ProxyService {
     delete headers["host"];
     delete headers["x-host"];
 
+    let requestUrl = protocol + "//" + host + req.path;
+    if (this.dataProxyServer != null && this.dataProxyStatus) {
+      requestUrl = this.dataProxyServer + req.path;
+    }
+
     let options = {
-      url: protocol + "//" + host + req.path,
+      url: requestUrl,
       method: req.method,
       headers: headers,
       transformResponse: [

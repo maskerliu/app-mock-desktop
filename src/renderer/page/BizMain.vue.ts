@@ -28,16 +28,16 @@ export default class BizMain extends AbstractPage {
   private canRender: boolean = false;
   private curPage: string = null;
 
-  navMenu: Array<string> = ["Proxy", "MockRuleMgr", "Settings"];
+  navMenu: Array<string> = ["Proxy", "MockRuleMgr", "Spider", "Settings"];
   curActivedNavMenuIdx: string = null;
 
-  created() {}
+  created() { }
 
   mounted() {
     this.onNavTabClick(this.navMenu[0]);
   }
 
-  destroy() {}
+  destroy() { }
 
   leftNavBarItemClick() {
     let navBarConfig = this.navBarConfig;
@@ -102,5 +102,5 @@ export default class BizMain extends AbstractPage {
     }
   }
 
-  click2Reg() {}
+  click2Reg() { }
 }

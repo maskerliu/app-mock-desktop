@@ -5,11 +5,11 @@ import { namespace } from "vuex-class"
 import {
   CMDCode,
   ProxyRequestRecord,
-  ProxyStatRecord,
+  ProxyStatRecord
 } from "../../model/DataModels"
 import AbstractPage from "./AbstractPage.vue"
-import ProxyRequestDetail from "./components/ProxyRequestDetail.vue"
 import ProxyRecordSnap from "./components/ProxyRecordSnap.vue"
+import ProxyRequestDetail from "./components/ProxyRequestDetail.vue"
 import ProxyStatDetail from "./components/ProxyStatDetail.vue"
 
 const ProxyRecords = namespace("ProxyRecords");
@@ -32,10 +32,13 @@ export default class Proxy extends AbstractPage {
   @ProxyRecords.State("curRecord")
   private curRecord: ProxyRequestRecord | ProxyStatRecord;
 
+  @ProxyRecords.Mutation("setProxyTypes")
+  private setProxyTypes: Function;
+
   @ProxyRecords.Mutation("setCurRecord")
   private setCurRecord!: Function;
 
-  @ProxyRecords.Action("clearRecords")
+  @ProxyRecords.Mutation("clearRecords")
   private clearRecords!: Function;
 
   public $refs!: {
@@ -43,7 +46,7 @@ export default class Proxy extends AbstractPage {
     bottom: any;
   };
 
-  proxyTypes: string[] = [String(CMDCode.REQUEST)];
+  filterTypes: string[] = [String(CMDCode.REQUEST)];
   mockDelay: number = null;
   isDelay: boolean = false;
   filterInput: string = null;
@@ -60,6 +63,7 @@ export default class Proxy extends AbstractPage {
       leftItem: false,
       rightItem: false,
     });
+    this.setProxyTypes(this.filterTypes);
   }
 
   destroyed() {
@@ -76,18 +80,12 @@ export default class Proxy extends AbstractPage {
   private siftRecords(): void {
     this.filtedRecords = this.records.filter(
       (item: ProxyRequestRecord | ProxyStatRecord) => {
-        switch (item.type) {
-          case CMDCode.REQUEST_START:
-          case CMDCode.REQUEST_END:
-            if (this.proxyTypes.indexOf(String(CMDCode.REQUEST)) == -1) {
-              return false;
-            }
-            if (this.filterInput == null) return true;
-            return (<ProxyRequestRecord>item).url.indexOf(this.filterInput) !== -1;
-          case CMDCode.STATISTICS:
-            return this.proxyTypes.indexOf(String(CMDCode.STATISTICS)) != -1;
-          default:
-            return false;
+
+        if (item.type ==CMDCode.REQUEST_START|| item.type == CMDCode.REQUEST_END) {
+          if (this.filterInput == null) return true;
+          return (<ProxyRequestRecord>item).url.indexOf(this.filterInput) !== -1;
+        }else {
+          return true;
         }
       }
     );
@@ -112,8 +110,8 @@ export default class Proxy extends AbstractPage {
     this.siftRecords();
   }
 
-  @Watch("proxyTypes")
+  @Watch("filterTypes")
   private onProxyTypesChanged(): void {
-    this.siftRecords();
+    this.setProxyTypes(this.filterTypes);
   }
 }

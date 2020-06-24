@@ -3,50 +3,51 @@ import { ActionTree, Commit, GetterTree, MutationTree } from "vuex";
 import {
   CMDCode,
   ProxyRequestRecord,
-  ProxyStatRecord,
+  ProxyStatRecord
 } from "../../../model/DataModels";
 import { ProxyRecordState } from "../types";
-import store from "..";
 
 const state: ProxyRecordState = {
+  proxyTypes: [],
   records: [],
   curRecord: null,
 };
 
 const COLORS: string[] = [
-  "#00a8ff",
-  "#9c88ff",
-  "#fbc531",
-  "#4cd137",
-  "#487eb0",
-  "#e84118",
-  "#7f8fa6",
-  "#273c75",
-  "#dcdde1",
-  "#636e72"
+  "#F44336",
+  "#3F51B5",
+  "#2196F3",
+  "#00BCD4",
+  "#009688",
+  "#FF9800",
+  "#795548",
+  "#9C27B0",
+  "#607D8B",
+  "#673AB7"
 ];
 
 const getters: GetterTree<ProxyRecordState, any> = {
-  proxyRecords(
-    state: ProxyRecordState
-  ): Array<ProxyStatRecord | ProxyRequestRecord> {
-    return state.records;
-  },
+
 };
 
 // async
 export const actions: ActionTree<ProxyRecordState, any> = {
-  clearRecords(
-    context: { commit: Commit; state: ProxyRecordState },
-    data: any
-  ) {
-    context.commit("clearRecords");
-  },
+
 };
 
 // sync
 const mutations: MutationTree<ProxyRecordState> = {
+  setProxyTypes(state, proxyTypes) {
+    state.proxyTypes = proxyTypes;
+  },
   updateProxyRecords(state, record: ProxyRequestRecord) {
+
+    if (record.type == CMDCode.REQUEST_START || record.type == CMDCode.REQUEST_END) {
+      if (state.proxyTypes.indexOf(String(CMDCode.REQUEST)) == -1) return;
+    } else if (record.type == CMDCode.STATISTICS || record.type == CMDCode.SOCKET) {
+      if (state.proxyTypes.indexOf(String(record.type)) == -1) return;
+    }
+
     switch (record.type) {
       case CMDCode.REQUEST_START:
       case CMDCode.STATISTICS:

@@ -22,14 +22,15 @@
         <span class="stat-snap-pid">{{
           item.pageId == "" ? item.page : item.pageId
         }}</span>
+        <strong class="stat-snap-type"
+          >[{{ item.event_id == 2001 ? "PV" : "事件" }}]</strong
+        >
         <span
           class="stat-snap-eid"
-          v-if="item.elementId != '' || item.arg1 != ''"
+          v-if="item.event_id != 2001"
           ><br />{{ item.elementId == "" ? item.arg1 : item.elementId }}</span
         >
-        <strong class="stat-snap-type"
-          >[{{ item.elementId == '' && item.arg1 == '' ? "PV" : "事件" }}]</strong
-        >
+        
       </div>
     </div>
     <div v-else>
@@ -42,10 +43,10 @@
         <el-tag
           size="mini"
           :type="source.statusCode === 200 ? 'success' : 'danger'"
-          effect="plain"
+          effect="light"
         >
           <span class="request-snap-status">
-            <b style="color: #2980b9;">[HTTP]</b>
+            <b>[HTTP]</b>
             {{ source.statusCode }}
           </span>
         </el-tag>
@@ -58,12 +59,12 @@
           v-if="source.responseData != null"
         >
           <span class="request-snap-status">
-            <b style="color: #2980b9;">[BIZ]</b>
+            <b>[BIZ]</b>
             {{ source.responseData.code }}
           </span>
         </el-tag>
         <span class="request-snap-status">
-          <b style="color: #2980b9;">耗时:</b>
+          <b>耗时:</b>
           <span
             v-bind:style="{ color: source.time > 500 ? '#e74c3c' : '#2ecc71' }"
             >{{ source.time ? source.time : "--" }} ms</span
@@ -138,7 +139,7 @@
 
 .stat-snap-type {
   font-size: 0.6rem;
-  color: #c23616;
+  color: #d35400;
 }
 
 .request-snap-method {
@@ -163,7 +164,5 @@
 .request-snap-status {
   font-size: 0.6rem;
   font-weight: bold;
-  color: #34495e;
-  /* font-style: italic; */
 }
 </style>

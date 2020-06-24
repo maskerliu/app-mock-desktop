@@ -1,8 +1,6 @@
 <template>
   <div>
     <el-form
-      ref="form"
-      :model="form"
       label-width="200px"
       size="small"
       style="margin: 15px;"
@@ -36,30 +34,48 @@
       <el-form-item label="本地推送服务端口">
         <el-input v-model="curPushSocketPort" size="small"></el-input>
       </el-form-item>
-      <el-form-item label="埋点规则同步地址">
+      <el-form-item label="埋点规则服务地址">
         <el-input
-          v-model="statRuleSyncServer"
+          v-model="srsUrl"
           size="small"
+          clearable
           placeholder="http://sync.xxx.com/sync:xxxx"
         >
           <el-button
             slot="append"
             icon="iconfont icon-cloud-sync"
-            @click="updateStatRuleServer"
+            @click="updateStatRuleSyncServer(srsUrl)"
           ></el-button>
         </el-input>
       </el-form-item>
-      <el-form-item label="规则数据同步地址">
+      <el-form-item label="Mock数据服务地址">
         <el-input
-          v-model="mockRuleSyncServer"
+          v-model="mrsUrl"
           size="small"
+          clearable
           placeholder="http://sync.xxx.com/sync:xxxx"
         >
           <el-button
             slot="append"
             icon="iconfont icon-cloud-sync"
-            @click="updateMockRuleServer"
+            @click="updateMockRuleSyncServer(mrsUrl)"
           ></el-button>
+        </el-input>
+      </el-form-item>
+      <el-form-item label="代理数据服务地址">
+        <el-input
+          v-model="dpUrl"
+          size="small"
+          clearable
+          placeholder="http://10.111.50.135:9017"
+        >
+          <el-switch
+            v-model="dpStatus"
+            slot="append"
+            active-color="#13ce66"
+            @change="onDataProxySwitchChanged"
+          >
+          </el-switch>
         </el-input>
       </el-form-item>
       <el-form-item label="数据序列化插件" :inline="true">
