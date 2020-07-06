@@ -6,6 +6,6 @@ import { Action, namespace, Getter, Mutation, State } from "vuex-class"
   components: {},
 })
 export default class AbstractPage extends Vue {
-  @Action("updateNavBarConfig")
+  @Mutation("updateNavBarConfig")
   protected updateNavBarConfig: Function;
 }

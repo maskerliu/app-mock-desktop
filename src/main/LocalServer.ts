@@ -1,6 +1,8 @@
 import bodyParser from "body-parser";
 import compression from "compression";
 import { createServer, Server } from "http";
+import path from "path";
+import fs from "fs";
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
 import { NetworkInterfaceInfo, networkInterfaces } from "os";
@@ -34,6 +36,7 @@ class LocalServer {
 
   private initHttpServer(): void {
     this.httpApp = express();
+    this.httpApp.use('/mgr', express.static(__dirname + '/app/mgr'));
     this.httpApp.use(cors(corsOptions));
     this.httpApp.use(compression());
     this.httpApp.use((req: any, resp: Response, next: any) => {
@@ -70,16 +73,24 @@ class LocalServer {
     this.httpApp.use(bodyParser.text({ type: "application/json" }));
     this.httpApp.all("*", (req: Request, resp: Response, next: any) => {
       if (
-        req.url === "/" ||
         /^\/mw\//.test(req.url) ||
         /^\/appmock\//.test(req.url) ||
         /^\/burying-point\//.test(req.url)
       ) {
         WebService.filter(req, resp);
-      } else if (req.url !== "/favicon.ico") {
-        ProxyService.handleRequest(req, resp);
-      } else {
+      } else if (req.url == "favicon.ico") {
         resp.end();
+      } else if (/^\/test\//.test(req.url)) {
+        fs.readFile(`${path.join(__dirname + "/../../dist/electron/")}index.html`, function(err, data) {
+          resp.writeHead(200, { 'Content-Type': 'text/html', 'Content-Length': data.length });
+          resp.write(data);
+          resp.end();
+        });
+        // console.log(`file://${path.join(__dirname + "/../../dist/electron/")}index.html`);
+        // resp.sendFile(`file://${path.join(__dirname + "/../../dist/electron/")}index.html`);
+        // resp.end();
+      } else {
+        ProxyService.handleRequest(req, resp);
       }
     });
   }
@@ -192,7 +203,7 @@ class LocalServer {
 
   public startProxySocketServer(): void {
     try {
-    } catch (err) {}
+    } catch (err) { }
     ProxyService.initProxySocketServer(this.proxySocketPort);
   }
 

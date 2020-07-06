@@ -64,10 +64,9 @@
           </span>
         </el-tag>
         <span class="request-snap-status">
-          <b>耗时:</b>
           <span
             v-bind:style="{ color: source.time > 500 ? '#e74c3c' : '#2ecc71' }"
-            >{{ source.time ? source.time : "--" }} ms</span
+            >耗时: {{ source.time ? source.time : "--" }} ms</span
           >
         </span>
       </div>

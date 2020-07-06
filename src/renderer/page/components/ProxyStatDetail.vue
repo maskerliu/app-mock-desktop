@@ -29,7 +29,7 @@
             </el-col>
             <el-col
               :span="9"
-              v-if="rows[props.$index].statRule != null"
+              v-if="rows[props.$index] != null && rows[props.$index].statRule != null"
               style="height: 400px; overflow-y: scroll; padding: 15px;"
             >
               <pre class="preview">{{ rows[props.$index].statRule.desc }}</pre>

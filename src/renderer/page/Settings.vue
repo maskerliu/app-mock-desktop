@@ -1,10 +1,6 @@
 <template>
   <div>
-    <el-form
-      label-width="200px"
-      size="small"
-      style="margin: 15px;"
-    >
+    <el-form label-width="200px" size="small" style="margin: 15px;">
       <el-form-item label="网卡选择">
         <el-select
           v-model="curServerIP"
@@ -34,6 +30,20 @@
       <el-form-item label="本地推送服务端口">
         <el-input v-model="curPushSocketPort" size="small"></el-input>
       </el-form-item>
+      <el-form-item label="API定义服务地址">
+        <el-input
+          v-model="adsUrl"
+          size="small"
+          clearable
+          placeholder="http://sync.xxx.com/sync:xxxx"
+        >
+          <el-button
+            slot="append"
+            icon="iconfont icon-cloud-sync"
+            @click="updateApiDefineServer(adsUrl)"
+          ></el-button>
+        </el-input>
+      </el-form-item>
       <el-form-item label="埋点规则服务地址">
         <el-input
           v-model="srsUrl"
@@ -44,7 +54,7 @@
           <el-button
             slot="append"
             icon="iconfont icon-cloud-sync"
-            @click="updateStatRuleSyncServer(srsUrl)"
+            @click="updateStatRuleServer(srsUrl)"
           ></el-button>
         </el-input>
       </el-form-item>
@@ -58,13 +68,13 @@
           <el-button
             slot="append"
             icon="iconfont icon-cloud-sync"
-            @click="updateMockRuleSyncServer(mrsUrl)"
+            @click="updateMockRuleServer(mrsUrl)"
           ></el-button>
         </el-input>
       </el-form-item>
       <el-form-item label="代理数据服务地址">
         <el-input
-          v-model="dpUrl"
+          v-model="dpsUrl"
           size="small"
           clearable
           placeholder="http://10.111.50.135:9017"
@@ -76,6 +86,20 @@
             @change="onDataProxySwitchChanged"
           >
           </el-switch>
+        </el-input>
+      </el-form-item>
+      <el-form-item label="更新检查服务地址">
+        <el-input
+          v-model="vcsUrl"
+          size="small"
+          clearable
+          placeholder="http://10.111.50.135:9017"
+        >
+          <el-button
+            slot="append"
+            icon="iconfont icon-cloud-sync"
+            @click="updateVersionCheckServer(vcsUrl)"
+          ></el-button>
         </el-input>
       </el-form-item>
       <el-form-item label="数据序列化插件" :inline="true">
@@ -113,7 +137,7 @@
           <el-radio :label="10" style="height: 34px; margin-top: 15px;"
             >自定义
             <el-input
-              v-model="mockRuleSyncServer"
+              v-model="mrsUrl"
               size="small"
               placeholder="选择自定义序列化协议的JS实现插件"
               v-show="serialPlugin == 10"

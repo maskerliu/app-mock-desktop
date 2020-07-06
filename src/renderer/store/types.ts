@@ -32,10 +32,12 @@ export interface CommonState {
     ips: Array<IP>;
     pbFiles: Array<{ name: string; value: string }>;
   };
-  mockRuleSyncServer: string;
-  statRuleSyncServer: string;
+  apiDefineServer: string;
+  mockRuleServer: string;
+  statRuleServer: string;
   dataProxyServer: string;
   dataProxyStatus: boolean;
+  versionCheckServer: string;
 }
 
 export interface NavBarConfig {

@@ -18,11 +18,13 @@
       style="color: red; padding: 0 5px;"
       @click="onDelete()"
     ></span>
-    <span
-      class="iconfont icon-upload"
-      style="color: red; padding: 0 5px;"
-      @click="onUpload()"
-    ></span>
+    <el-tooltip effect="dark" content="同步到云端" placement="bottom">
+      <span
+        class="iconfont icon-upload"
+        style="color: red; padding: 0 5px;"
+        @click="onUpload()"
+      ></span>
+    </el-tooltip>
     <br />
     <span class="rule-snap-desc">{{ source.desc }}</span>
     <br />
@@ -88,5 +90,4 @@
   font-weight: normal;
   color: #34495e;
 }
-
 </style>

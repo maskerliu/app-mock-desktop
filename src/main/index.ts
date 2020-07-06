@@ -1,13 +1,13 @@
-import { app, BrowserWindow, Menu, nativeImage, shell, Tray } from "electron"
+import { app, BrowserWindow, Menu, nativeImage, shell, Tray, dialog } from "electron"
 import path from "path"
 import LocalServer from "./LocalServer"
 
 require("./IPCService")
 
+import AsarUpdateService from "./AsarUpdateService"
+
 if (process.env.NODE_ENV !== "development") {
-  (<any>global).__static = require("path")
-    .join(__dirname, "/static")
-    .replace(/\\/g, "\\\\");
+  (<any>global).__static = require("path").join(__dirname, "/static").replace(/\\/g, "\\\\");
 }
 
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
@@ -48,11 +48,15 @@ function createMainWindow(): void {
   mainWindow.loadURL(winURL);
   mainWindow.webContents.frameRate = 30;
 
-  mainWindow.webContents.on("paint", (event, dirty, image) => {});
+  mainWindow.webContents.on("paint", (event, dirty, image) => { });
 
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
+}
+
+function createAppMenu(): void {
+  Menu.setApplicationMenu(null)
 }
 
 function createTrayMenu(): void {
@@ -60,11 +64,11 @@ function createTrayMenu(): void {
   let trayMenuTemplate = [
     {
       label: "设置",
-      click: () => {}, //打开相应页面
+      click: () => { }, //打开相应页面
     },
     {
       label: "帮助",
-      click: () => {},
+      click: () => { },
     },
     {
       label: "关于",
@@ -101,13 +105,15 @@ if (process.platform === "win32") {
 }
 
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
-
+app.disableHardwareAcceleration();
 // app.commandLine.appendSwitch("disable-gpu");
 // app.commandLine.appendSwitch("disable-software-rasterizer");
 
 app.on("ready", () => {
   createMainWindow();
-  // createTrayMenu();
+  createAppMenu();
+  createTrayMenu();
+  AsarUpdateService.check();
   LocalServer.startProxyHttpServer();
   LocalServer.startLocalPushServer();
 });

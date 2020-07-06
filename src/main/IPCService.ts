@@ -3,6 +3,7 @@ import { mainWindow } from "./";
 import LocalServer from "./LocalServer";
 import ProxyService from "./ProxyService";
 import axios from "axios";
+import AsarUpdateService from "./AsarUpdateService";
 
 ipcMain.on("on-app-maximize", (event: IpcMainEvent, args?: any) => {
   if (mainWindow == null) return;
@@ -26,7 +27,7 @@ ipcMain.on("on-app-quit", (event: IpcMainEvent, args?: any) => {
   app.quit();
 });
 
-ipcMain.on("set-proxy-delay", (event: any, args?: any) => {
+ipcMain.on("set-proxy-delay", (event: IpcMainEvent, args?: any) => {
   try {
     ProxyService.setProxyDelay(args.delay);
   } catch (err) { }
@@ -38,7 +39,13 @@ ipcMain.on("update-data-proxy-server", (event: IpcMainEvent, args: { url: string
   } catch (err) { }
 });
 
-ipcMain.on("get-local-server-config", (event: IpcMainEvent, args?: any) => {
+ipcMain.on("update-version-check-server", (event: IpcMainEvent, args: { url: string }) => {
+  try {
+    AsarUpdateService.setVersionCheckServer(args.url);
+  } catch (err) { }
+});
+
+ipcMain.on("get-local-server-config", (event: IpcMainEvent) => {
   event.sender.send(
     "get-local-server-config",
     LocalServer.getLocalServerConfig()
@@ -49,10 +56,7 @@ ipcMain.on("update-local-server-config", (event: IpcMainEvent, args?: any) => {
   try {
     LocalServer.updateLocalServerConfig(args);
   } catch (err) { }
-  event.sender.send(
-    "get-local-server-config",
-    LocalServer.getLocalServerConfig()
-  );
+  event.sender.send("get-local-server-config", LocalServer.getLocalServerConfig());
 });
 
 ipcMain.on("on-open-folder", (event: IpcMainEvent, args?: any) => {

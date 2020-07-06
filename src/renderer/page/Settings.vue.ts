@@ -4,6 +4,7 @@ import { Component } from "vue-property-decorator"
 import { Action, Mutation, State } from "vuex-class"
 import { IP } from "../../model/DataModels"
 import AbstractPage from "./AbstractPage.vue"
+import { isUrl } from "../common/Utils"
 
 
 @Component({
@@ -12,13 +13,23 @@ import AbstractPage from "./AbstractPage.vue"
 })
 export default class Settings extends AbstractPage {
   @State((state) => state.Common.localServerConfig)
-  private localServerConfig: any;
+  private localServerConfig: {
+    serverIP: string;
+    proxyHttpPort: number;
+    proxySocketPort: number;
+    pushSocketPort: number;
+    ips: Array<IP>;
+    pbFiles: Array<{ name: string; value: string }>;
+  };
 
-  @State((state) => state.Common.mockRuleSyncServer)
-  private mockRuleSyncServer: string;
+  @State((state) => state.Common.apiDefineServer)
+  private apiDefineServer: string;
 
-  @State((state) => state.Common.statRuleSyncServer)
-  private statRuleSyncServer: string;
+  @State((state) => state.Common.statRuleServer)
+  private statRuleServer: string;
+
+  @State((state) => state.Common.mockRuleServer)
+  private mockRuleServer: string;
 
   @State((state) => state.Common.dataProxyServer)
   private dataProxyServer: string;
@@ -26,27 +37,38 @@ export default class Settings extends AbstractPage {
   @State((state) => state.Common.dataProxyStatus)
   private dataProxyStatus: boolean;
 
-  @Action("saveLocalServerConfig")
-  private saveLocalServerConfig: Function;
+  @State((state) => state.Common.versionCheckServer)
+  private versionCheckServer: string;
 
-  @Mutation("updateMockRuleSyncServer")
-  private updateMockRuleSyncServer: Function;
+  @Mutation("updateLocalServerConfig")
+  private updateLocalServerConfig: Function;
 
-  @Mutation("updateStatRuleSyncServer")
-  private updateStatRuleSyncServer: Function;
+  @Mutation("updateApiDefineServer")
+  private updateApiDefineServer: Function;
+
+  @Mutation("updateMockRuleServer")
+  private updateMockRuleServer: Function;
+
+  @Mutation("updateStatRuleServer")
+  private updateStatRuleServer: Function;
 
   @Mutation("updateDataProxyServer")
   private updateDataProxyServer: Function;
+
+  @Mutation("updateVersionCheckServer")
+  private updateVersionCheckServer: Function;
 
   private ips: Array<IP>;
   private curServerIP: string = null;
   private curProxyHttpPort: number = null;
   private curProxySocketPort: number = null;
   private curPushSocketPort: number = null;
+  private adsUrl: string = null;
   private srsUrl: string = null;
   private mrsUrl: string = null;
-  private dpUrl: string = null;
+  private dpsUrl: string = null;
   private dpStatus: boolean = false;
+  private vcsUrl: string = null;
   private pbFiles: any[] = null;
   private serialPlugin: number = 3;
 
@@ -62,10 +84,13 @@ export default class Settings extends AbstractPage {
     this.curProxySocketPort = this.localServerConfig.proxySocketPort;
     this.curPushSocketPort = this.localServerConfig.pushSocketPort;
     this.pbFiles = this.localServerConfig.pbFiles;
-    this.srsUrl = this.statRuleSyncServer;
-    this.mrsUrl = this.mockRuleSyncServer;
-    this.dpUrl = this.dataProxyServer;
+
+    this.adsUrl = this.apiDefineServer;
+    this.srsUrl = this.statRuleServer;
+    this.mrsUrl = this.mockRuleServer;
+    this.dpsUrl = this.dataProxyServer;
     this.dpStatus = this.dataProxyStatus;
+    this.vcsUrl = this.versionCheckServer;
   }
 
   public destroyed(): void { }
@@ -74,18 +99,22 @@ export default class Settings extends AbstractPage {
     ipcRenderer.send("on-open-folder", "openFile");
   }
 
-  public onDataProxySwitchChanged(status: boolean) {
-    if (this.dpUrl != null) {
-      this.updateDataProxyServer({ url: this.dpUrl, status: status });
+  public onDataProxySwitchChanged() {
+    if (isUrl(this.dpsUrl)) {
+      this.updateDataProxyServer({ url: this.dpsUrl, status: this.dpStatus });
     } else {
-      Message.warning("代理数据服务地址不能为空");
-      this.dataProxyStatus = !status;
+      Message.warning("非法URL");
+      this.dpStatus = !this.dpStatus;
     }
-
   }
 
   public onSave(): void {
-    this.saveLocalServerConfig({
+    this.updateApiDefineServer(this.adsUrl);
+    this.updateStatRuleServer(this.srsUrl);
+    this.updateMockRuleServer(this.mrsUrl);
+    this.updateDataProxyServer({ url: this.dpsUrl, status: this.dpStatus });
+    this.updateVersionCheckServer(this.vcsUrl);
+    this.updateLocalServerConfig({
       serverIP: this.curServerIP,
       proxyHttpPort: this.curProxyHttpPort,
       proxySocketPort: this.curProxySocketPort,

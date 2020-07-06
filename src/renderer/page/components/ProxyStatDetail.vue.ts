@@ -14,8 +14,8 @@ export default class ProxyStatDetail extends Vue {
   @Prop()
   private record: ProxyStatRecord;
 
-  @State((state) => state.Common.statRuleSyncServer)
-  private statRuleSyncServer: string;
+  @State((state) => state.Common.statRuleServer)
+  private statRuleServer: string;
 
   private statRule: { desc: string, rule: string[], ruleDesc: string } = null;
   private curStat: any;
@@ -58,8 +58,10 @@ export default class ProxyStatDetail extends Vue {
     if (elementId == "" && pageId == "") {
       Vue.set(this.rows[index], "rowClassName", "warning-row");
       Message.warning("未找到相关等级埋点");
+    } else if (this.statRuleServer == null) { 
+      Message.warning("请在设置中指定埋点管理服务地址"); 
     } else {
-      get("/api/stat/queryStats", this.statRuleSyncServer, {
+      get("/api/stat/queryStats", this.statRuleServer, {
         eventId: row["event_id"],
         keyword: keyword
       }).then(resp => {

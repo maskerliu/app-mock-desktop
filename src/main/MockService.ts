@@ -149,50 +149,59 @@ class MockService {
       });
     }
 
-    let bizResp: BizResponse<string> = new BizResponse<string>();
     if (rule._id === null || rule._id === undefined) {
-      this.localDB.post(rule).then((result: any) => {
-        if (result.ok) {
-          this.updateMockSettings();
-          bizResp.code = BizCode.SUCCESS;
-          bizResp.data = result.id;
-        } else {
-          bizResp.code = BizCode.FAIL;
-          bizResp.msg = "插入失败";
-        }
-        resp.json(bizResp);
-        resp.end();
-        return null;
-      }).catch((err: any) => {
-        bizResp.code = BizCode.ERROR;
-        bizResp.msg = err;
-        resp.json(bizResp);
-        resp.end();
-      });
+      this.insertMockRule(resp, rule);
     } else {
-      this.localDB.get(rule._id).then((doc: any) => {
-        let newRule = Object.assign(rule, { _rev: doc._rev });
-        if (onlySnap) newRule.requests = doc.requests;
-        return this.localDB.put(newRule);
-      }).then((result: any) => {
-        if (result.ok) {
-          this.updateMockSettings();
-          bizResp.code = BizCode.SUCCESS;
-          bizResp.data = result.id;
-        } else {
-          bizResp.code = BizCode.FAIL;
-          bizResp.msg = "插入失败";
-        }
-        resp.json(bizResp);
-        resp.end();
-        return null;
-      }).catch((err: any) => {
-        bizResp.code = BizCode.ERROR;
-        bizResp.msg = err;
-        resp.json(bizResp);
-        resp.end();
-      });
+      this.updateMockRule(resp, rule, onlySnap);
     }
+  }
+
+  private insertMockRule(resp: Response, rule: MockRule): void {
+    let bizResp: BizResponse<string> = new BizResponse<string>();
+    this.localDB.post(rule).then((result: any) => {
+      if (result.ok) {
+        this.updateMockSettings();
+        bizResp.code = BizCode.SUCCESS;
+        bizResp.data = result.id;
+      } else {
+        bizResp.code = BizCode.FAIL;
+        bizResp.msg = "插入失败";
+      }
+      resp.json(bizResp);
+      resp.end();
+      return null;
+    }).catch((err: any) => {
+      bizResp.code = BizCode.ERROR;
+      bizResp.msg = err;
+      resp.json(bizResp);
+      resp.end();
+    });
+  }
+
+  private updateMockRule(resp: Response, rule: MockRule, onlySnap: boolean): void {
+    let bizResp: BizResponse<string> = new BizResponse<string>();
+    this.localDB.get(rule._id).then((doc: any) => {
+      let newRule = Object.assign(rule, { _rev: doc._rev });
+      if (onlySnap) newRule.requests = doc.requests;
+      return this.localDB.put(newRule);
+    }).then((result: any) => {
+      if (result.ok) {
+        this.updateMockSettings();
+        bizResp.code = BizCode.SUCCESS;
+        bizResp.data = result.id;
+      } else {
+        bizResp.code = BizCode.FAIL;
+        bizResp.msg = "插入失败";
+      }
+      resp.json(bizResp);
+      resp.end();
+      return null;
+    }).catch((err: any) => {
+      bizResp.code = BizCode.ERROR;
+      bizResp.msg = err;
+      resp.json(bizResp);
+      resp.end();
+    });
   }
 
   public deleteMockRule(req: Request, resp: Response): void {

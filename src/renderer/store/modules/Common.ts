@@ -1,11 +1,13 @@
-import { ipcRenderer } from "electron";
+import { remote, ipcRenderer } from "electron";
 import { Message } from "element-ui";
-import PouchDB from "pouchdb";
+import PouchDB from "pouchdb"; 
+import path from "path";
 import { ActionTree, Commit, GetterTree, MutationTree } from "vuex";
 import store from "../";
 import { updateLocalDomain } from "../../../model/BasicLocalAPI";
 import PushClient from "../../common/PushClient";
 import { CommonState } from "../types";
+import { isUrl } from "../../common/Utils"
 
 const state: CommonState = {
   showQrCodeDialog: false,
@@ -25,13 +27,15 @@ const state: CommonState = {
     ips: [],
     pbFiles: [],
   },
-  mockRuleSyncServer: "",
-  statRuleSyncServer: "",
+  apiDefineServer: "",
+  mockRuleServer: "",
+  statRuleServer: "",
   dataProxyServer: "",
-  dataProxyStatus: false
+  dataProxyStatus: false,
+  versionCheckServer: ""
 };
 
-let db = new PouchDB('SharePerferences', { adapter: 'leveldb' });
+let db = new PouchDB(path.join(remote.app.getPath("userData"), 'SharePerferences'), { adapter: 'leveldb' });
 
 function generateUid() {
   let len = 8;
@@ -64,12 +68,16 @@ export const actions: ActionTree<CommonState, any> = {
     });
     ipcRenderer.send("get-local-server-config");
 
-    db.get('statRuleSyncServer').then((result: any) => {
-      state.statRuleSyncServer = result.url;
+    db.get('apiDefineServer').then((result: any) => {
+      state.apiDefineServer = result.url;
     }).catch(err => { });
 
-    db.get('mockRuleSyncServer').then((result: any) => {
-      state.mockRuleSyncServer = result.url;
+    db.get('statRuleServer').then((result: any) => {
+      state.statRuleServer = result.url;
+    }).catch(err => { });
+
+    db.get('mockRuleServer').then((result: any) => {
+      state.mockRuleServer = result.url;
     }).catch(err => { });
 
     db.get('dataProxyServer').then((result: any) => {
@@ -77,9 +85,11 @@ export const actions: ActionTree<CommonState, any> = {
       state.dataProxyStatus = result.status;
       ipcRenderer.send("update-data-proxy-server", { url: state.dataProxyServer, status: state.dataProxyStatus });
     }).catch(err => { });
-  },
-  updateNavBarConfig(context: { commit: Commit }, params: any): void {
-    context.commit("updateNavBarConfig", params);
+
+    db.get('versionCheckServer').then((result: any) => {
+      state.versionCheckServer = result.url;
+      ipcRenderer.send("update-version-check-server", { url: state.versionCheckServer });
+    }).catch(err => { });
   },
   unInit(context: { commit: Commit }): void {
     ipcRenderer.removeAllListeners("get-local-server-config");
@@ -110,43 +120,90 @@ export const mutations: MutationTree<CommonState> = {
 
     PushClient.start(params.serverIP, params.pushSocketPort);
   },
-  updateMockRuleSyncServer(state, url) {
-    db.put(
-      {
-        _id: 'mockRuleSyncServer',
-        url: this.statRuleSyncServer,
-      }
-    ).then((res) => {
-      state.mockRuleSyncServer = url;
-      Message.success("成功更新Mock数据服务地址");
-    }).catch(err => {
-      Message.warning("更新Mock数据服务地址失败");
-    });
-  },
-  updateStatRuleSyncServer(state, url) {
-    db.get("statRuleSyncServer").then(doc => {
+  updateApiDefineServer(state, url) {
+    if (!isUrl(url)) {
+      Message.error({ message: "非法Api定义服务地址", duration: 1000 });
+      return;
+    }
+
+    db.get("apiDefineServer").then(doc => {
       db.put(
         {
-          _id: 'statRuleSyncServer',
+          _id: 'apiDefineServer',
           _rev: doc._rev,
           url: url,
         }
       ).then((res) => {
-        state.statRuleSyncServer = url;
-        Message.success("成功更新埋点数据服务地址");
+        state.apiDefineServer = url;
+        Message.success({ message: "成功更新Api定义服务地址", duration: 500 });
+      }).catch(err => { Message.warning("更新Api定义服务地址失败"); });
+    }).catch(err => {
+      db.post({
+        _id: 'apiDefineServer',
+        url: url,
+      }).then(res => {
+        state.apiDefineServer = url;
+        Message.success({ message: "成功更新Api定义服务地址", duration: 500 });
+      }).catch(err => { Message.warning("更新Api定义服务地址失败"); })
+    });
+  },
+  updateStatRuleServer(state, url) {
+    if (!isUrl(url)) {
+      Message.error({ message: "非法埋点数据服务地址", duration: 1000 });
+      return;
+    }
+    db.get("statRuleServer").then(doc => {
+      db.put(
+        {
+          _id: 'statRuleServer',
+          _rev: doc._rev,
+          url: url,
+        }
+      ).then((res) => {
+        state.statRuleServer = url;
+        Message.success({ message: "成功更新埋点数据服务地址", duration: 500 });
       }).catch(err => { Message.warning("更新埋点数据服务地址失败"); });
     }).catch(err => {
       db.post({
-        _id: 'statRuleSyncServer',
+        _id: 'statRuleServer',
         url: url,
       }).then(res => {
-        state.statRuleSyncServer = url;
-        Message.success("成功更新埋点数据服务地址");
+        state.statRuleServer = url;
+        Message.success({ message: "成功更新埋点数据服务地址", duration: 500 });
       }).catch(err => { Message.warning("更新埋点数据服务地址失败"); })
-    })
-
+    });
+  },
+  updateMockRuleServer(state, url) {
+    if (!isUrl(url)) {
+      Message.error({ message: "非法Mock数据服务地址", duration: 1000 });
+      return;
+    }
+    db.get("mockRuleServer").then(doc => {
+      db.put(
+        {
+          _id: 'mockRuleServer',
+          _rev: doc._rev,
+          url: url,
+        }
+      ).then((res) => {
+        state.mockRuleServer = url;
+        Message.success({ message: "成功更新Mock数据服务地址", duration: 500 });
+      }).catch(err => { Message.warning("更新Mock数据服务地址失败"); });
+    }).catch(err => {
+      db.post({
+        _id: 'mockRuleServer',
+        url: url,
+      }).then(res => {
+        state.mockRuleServer = url;
+        Message.success({ message: "成功更新Mock数据服务地址", duration: 500 });
+      }).catch(err => { Message.warning("更新Mock数据服务地址失败"); })
+    });
   },
   updateDataProxyServer(state, params: { url: string, status: boolean }) {
+    if (!isUrl(params.url)) {
+      Message.error({ message: "非法数据代理服务地址", duration: 1000 });
+      return;
+    }
     db.get("dataProxyServer").then(doc => {
       db.put(
         {
@@ -159,9 +216,9 @@ export const mutations: MutationTree<CommonState> = {
         state.dataProxyServer = params.url;
         state.dataProxyStatus = params.status;
         ipcRenderer.send("update-data-proxy-server", params);
-        Message.success("成功更新Mock数据服务地址");
+        Message.success({ message: "成功更新数据代理服务地址", duration: 500 });
       }).catch(err => {
-        Message.warning("更新Mock数据服务地址失败");
+        Message.warning("更新数据代理服务地址失败");
       });
     }).catch(err => {
       db.post({
@@ -171,10 +228,40 @@ export const mutations: MutationTree<CommonState> = {
       }).then(res => {
         state.dataProxyServer = params.url;
         state.dataProxyStatus = params.status;
-        Message.success("成功更新埋点数据服务地址");
-      }).catch(err => { Message.warning("更新埋点数据服务地址失败"); })
+        Message.success({ message: "成功更新数据代理服务地址", duration: 500 });
+      }).catch(err => { Message.warning("更新数据代理服务地址失败"); })
     });
-  }
+  },
+  updateVersionCheckServer(state, url) {
+    if (!isUrl(url)) {
+      Message.error({ message: "非法版本检查服务地址", duration: 1000 });
+      return;
+    }
+    db.get("versionCheckServer").then(doc => {
+      db.put(
+        {
+          _id: 'versionCheckServer',
+          _rev: doc._rev,
+          url: url,
+        }
+      ).then((res) => {
+        state.versionCheckServer = url;
+        ipcRenderer.send("update-version-check-server", { url: state.versionCheckServer });
+        Message.success({ message: "成功更新版本检查服务地址", duration: 500 });
+      }).catch(err => {
+        Message.warning("更新版本检查服务地址失败" + err);
+      });
+    }).catch(err => {
+      db.post({
+        _id: 'versionCheckServer',
+        url: url,
+      }).then(res => {
+        state.versionCheckServer = url;
+        ipcRenderer.send("update-version-check-server", { url: state.versionCheckServer });
+        Message.success({ message: "成功更新版本检查服务地址", duration: 500 });
+      }).catch(err => { Message.warning("更新版本检查服务地址失败" + err); })
+    });
+  },
 };
 
 export default {
