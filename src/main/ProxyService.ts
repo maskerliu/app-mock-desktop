@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
-import Url from "url";
+import Url, { UrlWithParsedQuery } from "url";
 import MockService from "./MockService";
 import PushService from "./PushService";
 import protobuf from "protobufjs";
 import { CMDCode, ProxyRequestRecord, ProxyStatRecord } from "../model/DataModels";
+import { request } from "http";
 
 const JSONBigInt = require("json-bigint");
 const axios = require("axios");
 const websocket = require("nodejs-websocket");
 
 class ProxyService {
-  private static PROXY_DEF_TIMEOUT: number = 1000 * 15; // 15s
+  private static PROXY_DEF_TIMEOUT: number = 1000 * 5; // 15s
   private _sessionId: number;
   private proxyDealy: number;
   private dataProxyServer: string;
@@ -70,12 +71,19 @@ class ProxyService {
   public handleRequest(req: Request, resp: Response) {
     let startTime = new Date().getTime();
     let sessionId = ++this._sessionId;
-    let reqUrl = Url.parse(req.header("host"));
+    let reqUrl: Url.UrlWithStringQuery;
+    try {
+      reqUrl = Url.parse(req.headers.host);
+    } catch(err) {
+      console.error("handleRequest", err);
+    }
+   
     let requestData = null;
     if (req.method === "GET") {
       requestData = !!req.query ? req.query : null;
     } else {
-      requestData = !!req.body ? JSONBigInt.parse(req.body) : null;
+      if (req)
+      requestData = !!req.body && req.body != {} ? req.body : null;
     }
 
     let data: ProxyRequestRecord = {
@@ -88,6 +96,7 @@ class ProxyService {
       requestData: requestData,
       timestamp: new Date().getSeconds(),
     };
+    
 
     PushService.sendMessage(data);
 
@@ -164,6 +173,9 @@ class ProxyService {
       options["data"] = req.body;
     }
 
+    if (req.path == "/playmate/v1/order/getRecentOrder") {
+      console.log("hello");
+    }
     axios(options)
       .then((resp: any) => {
         try {
@@ -187,14 +199,15 @@ class ProxyService {
         }
       })
       .catch((err: any) => {
+        console.log("axios", err);
         let resp = err.response;
         let respData = !!resp ? resp.data : err.message;
         let data: ProxyRequestRecord = {
           id: sessionId,
           type: CMDCode.REQUEST_END,
           statusCode: -100,
-          headers: !!resp.headers ? resp.headers : null,
-          responseData: !!respData ? JSON.stringify(respData) : null,
+          headers: !!resp && !!resp.headers ? resp.headers : null,
+          responseData: !!resp && !!respData ? JSON.stringify(respData) : JSON.stringify(err),
           time: new Date().getTime() - startTime,
           isMock: false,
         };

@@ -54,7 +54,7 @@ class MockService {
             let data: ProxyRequestRecord = {
               id: sessionId,
               type: CMDCode.REQUEST_END,
-              statusCode: -100,
+              statusCode: statusCode,
               headers: !!record.responseHeaders ? record.responseHeaders : null,
               responseData: !!record.responseData ? JSON.stringify(record.responseData) : null,
               time: new Date().getTime() - startTime,
@@ -131,7 +131,8 @@ class MockService {
 
   public saveMockRule(req: Request, resp: Response): void {
     let onlySnap: boolean = req.query["onlySnap"] == "true";
-    let rule: MockRule = JSONBigInt.parse(req.body);
+    // let rule: MockRule = JSONBigInt.parse(req.body);
+    let rule: MockRule = req.body;
 
     if (rule.isMock) {
       this.localDB.find({
@@ -145,7 +146,7 @@ class MockService {
           return this.localDB.put(result.docs[0]);
         }
       }).catch((err: any) => {
-        console.log(err);
+        console.error("saveMockRule", err);
       });
     }
 

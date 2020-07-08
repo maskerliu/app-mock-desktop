@@ -36,7 +36,6 @@ class LocalServer {
 
   private initHttpServer(): void {
     this.httpApp = express();
-    this.httpApp.use('/mgr', express.static(__dirname + '/app/mgr'));
     this.httpApp.use(cors(corsOptions));
     this.httpApp.use(compression());
     this.httpApp.use((req: any, resp: Response, next: any) => {
@@ -68,9 +67,9 @@ class LocalServer {
         resp.end();
       }
     );
-
-    this.httpApp.use(bodyParser.urlencoded({ extended: true }));
-    this.httpApp.use(bodyParser.text({ type: "application/json" }));
+    this.httpApp.use(bodyParser.json({ limit: '50mb' }));  
+    this.httpApp.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
+    this.httpApp.use(bodyParser.text({ type: "application/json", limit: '50mb' }));
     this.httpApp.all("*", (req: Request, resp: Response, next: any) => {
       if (
         /^\/mw\//.test(req.url) ||

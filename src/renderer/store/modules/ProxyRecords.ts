@@ -76,11 +76,10 @@ const mutations: MutationTree<ProxyRecordState> = {
             Vue.set(state.records[i], "isMock", record.isMock);
             Vue.set(state.records[i], "type", record.type);
             Vue.set(state.records[i], "responseHeaders", record.responseHeaders);
-            Vue.set(
-              state.records[i],
-              "responseData",
-              JSON.parse(record.responseData)
-            );
+            try {
+              Vue.set(state.records[i], "responseData", JSON.parse(record.responseData));
+            } catch (err) {}
+            
             Vue.set(state.records[i], "statusCode", record.statusCode);
             Vue.set(state.records[i], "time", record.time);
             break;

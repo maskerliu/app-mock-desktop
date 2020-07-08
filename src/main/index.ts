@@ -113,6 +113,7 @@ app.on("ready", () => {
   createMainWindow();
   createAppMenu();
   createTrayMenu();
+  AsarUpdateService.setParentWindow(mainWindow);
   AsarUpdateService.check();
   LocalServer.startProxyHttpServer();
   LocalServer.startLocalPushServer();

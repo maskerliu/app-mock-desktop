@@ -1,10 +1,11 @@
 <template>
-  <div>
+  <div style="height: calc(100vh - 98px)">
     <h4 style="font-size: 0.9rem; color: grey;">规则详情</h4>
     <el-table
       style="width: 100%; margin-bottom: 20px;"
       border
       stripe
+      height="calc(100% - 40px)"
       :data="rule != null && rule.requests != null ? rule.requests : []"
     >
       <el-table-column prop="url" label="路径" width="320">

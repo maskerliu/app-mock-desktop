@@ -1,12 +1,14 @@
-import { app, dialog } from "electron"
+import { app, BrowserWindow, dialog } from "electron"
 import EAU from "electron-asar-hot-updater"
+import ProgressBar from "electron-progressbar"
 
 class AsarUpdateService {
 
+    private mainWindow: BrowserWindow = null;
     private versionCheckServer: string = null;
 
     constructor() {
-
+        
     }
 
     private init() {
@@ -15,10 +17,13 @@ class AsarUpdateService {
             server: false,
             debug: false,
             formatRes: (resp: any) => {
-                console.log(resp);
                 return resp;
             }
         });
+    }
+
+    public setParentWindow(parent: BrowserWindow) {
+        this.mainWindow = parent;
     }
 
     public setVersionCheckServer(url: string) {
@@ -48,15 +53,40 @@ class AsarUpdateService {
                 message: `是否立刻更新至 ${last}`,
                 detail: body.info,
                 defaultId: 0,
-            }).then(callIndex => {
-                console.log(callIndex);
-                switch (callIndex.response) {
+            }).then(optResult => {
+                switch (optResult.response) {
                     case 0:
+                        var progressBar = new ProgressBar({
+                            indeterminate: false,
+                            text: 'Preparing data...',
+                            detail: 'Wait...',
+                            style: {
+                              bar: { 'background-color': '#fff', 'height': '10px' },
+                              value: { 'background-color': '#2CD3A9', 'height': '10px' }
+                            },
+                            browserWindow: {
+                              parent: this.mainWindow
+                            }
+                        });
+                
+                        progressBar.on('completed', function () {
+                            console.info('completed...')
+                            progressBar.detail = 'Task completed. Exiting...'
+                        }).on('aborted', function (value) {
+                            console.info(`aborted... ${value}`)
+                        }).on('progress', function (value) {
+                            progressBar.detail = `Value ${value} out of ${progressBar.getOptions().maxValue}...`
+                        });
+
                         EAU.progress((state: any) => {
-                            console.log(state);
+                            if (!progressBar.isCompleted()) {
+                                progressBar.value = 100 * state.percent;
+                            }
                         });
 
                         EAU.download((downloadErr: any) => {
+                            progressBar.value = 100;
+                            progressBar.close();
                             if (downloadErr) {
                                 dialog.showErrorBox("error", downloadErr);
                                 return false;

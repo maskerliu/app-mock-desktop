@@ -13,27 +13,33 @@
         >
           <i class="iconfont icon-qrcode" style="font-size: 1.8rem;"></i>
         </el-menu-item>
-        <el-menu-item
-          index="Proxy"
-          style="padding-left: 20px;"
-          @click="onNavTabClick('Proxy')"
-        >
-          <i class="iconfont icon-mock" style="font-size: 1.8rem;"></i>
-        </el-menu-item>
-        <el-menu-item
-          index="MockRuleMgr"
-          style="padding-left: 20px;"
-          @click="onNavTabClick('MockRuleMgr')"
-        >
-          <i class="iconfont icon-rule" style="font-size: 1.8rem;"></i>
-        </el-menu-item>
-        <el-menu-item
-          index="Spider"
-          style="padding-left: 20px;"
-          @click="onNavTabClick('Spider')"
-        >
-          <i class="iconfont icon-spider" style="font-size: 1.8rem;"></i>
-        </el-menu-item>
+        <el-tooltip effect="dark" content="代理" placement="right">
+          <el-menu-item
+            index="Proxy"
+            style="padding-left: 20px;"
+            @click="onNavTabClick('Proxy')"
+          >
+            <i class="iconfont icon-mock" style="font-size: 1.8rem;"></i>
+          </el-menu-item>
+        </el-tooltip>
+        <el-tooltip effect="dark" content="Mock规则管理" placement="right">
+          <el-menu-item
+            index="MockRuleMgr"
+            style="padding-left: 20px;"
+            @click="onNavTabClick('MockRuleMgr')"
+          >
+            <i class="iconfont icon-rule" style="font-size: 1.8rem;"></i>
+          </el-menu-item>
+        </el-tooltip>
+        <el-tooltip effect="dark" content="爬虫" placement="right">
+          <el-menu-item
+            index="Spider"
+            style="padding-left: 20px;"
+            @click="onNavTabClick('Spider')"
+          >
+            <i class="iconfont icon-spider" style="font-size: 1.8rem;"></i>
+          </el-menu-item>
+        </el-tooltip>
         <el-menu-item
           index="Settings"
           style="padding-left: 20px;"
@@ -76,7 +82,11 @@
       <router-view></router-view>
     </el-col>
 
-    <el-dialog title="扫描二维码或者手机访问：" :visible.sync="showQrCodeDialog" width="300px">
+    <el-dialog
+      title="扫描二维码或者手机访问："
+      :visible.sync="showQrCodeDialog"
+      width="300px"
+    >
       <div id="register">
         <qrcode-vue
           :value="registerUrl"
@@ -85,7 +95,9 @@
         ></qrcode-vue>
         <br />
         <div>
-          <span style="color: #777; user-select: text;" @click="click2Reg">{{ registerUrl }}</span>
+          <span style="color: #777; user-select: text;" @click="click2Reg">{{
+            registerUrl
+          }}</span>
         </div>
       </div>
     </el-dialog>

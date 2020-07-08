@@ -72,6 +72,7 @@
           style="margin-bottom: 20px;"
           border
           stripe
+          height="calc(100% - 20px)"
           :data="curRule.requests"
           v-if="curRule != null && curRule.requests != null"
         >
