@@ -131,8 +131,8 @@ class MockService {
 
   public saveMockRule(req: Request, resp: Response): void {
     let onlySnap: boolean = req.query["onlySnap"] == "true";
-    // let rule: MockRule = JSONBigInt.parse(req.body);
-    let rule: MockRule = req.body;
+    let rule: MockRule = JSONBigInt.parse(req.body);
+    // let rule: MockRule = req.body;
 
     if (rule.isMock) {
       this.localDB.find({

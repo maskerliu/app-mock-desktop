@@ -82,8 +82,7 @@ class ProxyService {
     if (req.method === "GET") {
       requestData = !!req.query ? req.query : null;
     } else {
-      if (req)
-      requestData = !!req.body && req.body != {} ? req.body : null;
+      requestData = !!req.body && req.body != {} ? JSON.parse(req.body) : null;
     }
 
     let data: ProxyRequestRecord = {
@@ -173,9 +172,6 @@ class ProxyService {
       options["data"] = req.body;
     }
 
-    if (req.path == "/playmate/v1/order/getRecentOrder") {
-      console.log("hello");
-    }
     axios(options)
       .then((resp: any) => {
         try {

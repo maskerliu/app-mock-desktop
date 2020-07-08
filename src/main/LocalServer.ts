@@ -67,7 +67,6 @@ class LocalServer {
         resp.end();
       }
     );
-    this.httpApp.use(bodyParser.json({ limit: '50mb' }));  
     this.httpApp.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
     this.httpApp.use(bodyParser.text({ type: "application/json", limit: '50mb' }));
     this.httpApp.all("*", (req: Request, resp: Response, next: any) => {
