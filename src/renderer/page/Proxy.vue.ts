@@ -64,10 +64,11 @@ export default class Proxy extends AbstractPage {
       rightItem: false,
     });
     this.setProxyTypes(this.filterTypes);
+    this.filtedRecords = this.records;
   }
 
   destroyed() {
-    this.clearProxyRecrods();
+    // this.clearProxyRecrods();
   }
 
   public clearProxyRecrods(): void {

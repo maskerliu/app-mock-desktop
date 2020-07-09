@@ -24,7 +24,7 @@ class MockService {
     PouchDB.plugin(PouchDBFind);
     this.localDB = new PouchDB(path.join(app.getPath("userData"), "AppMockDB"));
     this.localDB.createIndex({
-      index: { fields: ["name"] },
+      index: { fields: ["_id"] },
     }).then((result: any) => {
       // console.log(result);
     }).catch((err: any) => {
@@ -206,7 +206,7 @@ class MockService {
   }
 
   public deleteMockRule(req: Request, resp: Response): void {
-    let ruleId: string = JSON.parse(req.body)["ruleId"];
+    let ruleId: any = req.query["ruleId"];
     let bizResp: BizResponse<string> = new BizResponse<string>();
     this.localDB.get(ruleId).then((doc: any) => {
       return this.localDB.remove(doc);

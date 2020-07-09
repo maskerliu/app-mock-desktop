@@ -68,16 +68,12 @@
               <span class="json-key">
                 {{ isArray ? "" : '"' + item.key + '":' }}
               </span>
-              <span
-                :class="['json-value', getDataType(item.value)]"
-              >
+              <span :class="['json-value', getDataType(item.value)]">
                 {{
-                  `
-                  ${getDataType(item.value) === "string" ? '"' : ""}
-                  ${item.value}
-                  ${getDataType(item.value) === "string" ? '"' : ""}
-                  ${index === items.length - 1 ? "" : ","}
-                  `
+                  (getDataType(item.value) === "string" ? '"' : "") +
+                    item.value +
+                    (getDataType(item.value) === "string" ? '"' : "") +
+                    (index === items.length - 1 ? "" : ",")
                 }}
               </span>
             </p>
