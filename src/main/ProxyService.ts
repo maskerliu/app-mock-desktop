@@ -82,7 +82,12 @@ class ProxyService {
     if (req.method === "GET") {
       requestData = !!req.query ? req.query : null;
     } else {
-      requestData = !!req.body && req.body != {} ? JSON.parse(req.body) : null;
+      try {
+        requestData = !!req.body && req.body != {} ? JSONBigInt.parse(req.body) : null;
+      } catch (err) {
+        console.error("handleRequest", err);
+      }
+      
     }
 
     let data: ProxyRequestRecord = {

@@ -72,7 +72,7 @@ export default class AddMockRule extends Vue {
     for (let i = 0; i < this.curRule.requests.length; ++i) {
       let request = this.curRule.requests[i];
       if (request.url === this.record.url) {
-        Vue.set(this.curRule.requests, i, Object.assign({}, this.record));
+        Vue.set(this.curRule.requests, i, Object.assign({}, this.wrapperRecord));
         delete this.curRule.requests[i].id;
         isContains = true;
         break;

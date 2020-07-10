@@ -8,7 +8,7 @@
       height="calc(100% - 40px)"
       :data="rule != null && rule.requests != null ? rule.requests : []"
     >
-      <el-table-column prop="url" label="路径" width="320">
+      <el-table-column prop="url" label="路径">
         <template slot-scope="scope">
           <span
             style="font-size: 0.7rem; color: #2980b9; font-style: italic; font-weight: bold;"
@@ -18,7 +18,7 @@
       <el-table-column prop="time" label="耗时" width="100"></el-table-column>
       <el-table-column prop="statusCode" label="请求状态" width="100"></el-table-column>
       <el-table-column prop="responseData.code" label="业务状态" width="100"></el-table-column>
-      <el-table-column label="操作" fixed="right">
+      <el-table-column label="操作" width="120">
         <template slot-scope="scope">
           <el-button
             type="primary"

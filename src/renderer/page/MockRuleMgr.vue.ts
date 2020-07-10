@@ -42,10 +42,13 @@ export default class MockRuleMgr extends AbstractPage {
   @MockRules.State("showDeleteMockRuleDialog")
   private showDeleteMockRuleDialog: boolean;
 
+  @MockRules.Mutation("setCurRule")
+  private setCurRule!: Function;
+
   @MockRules.State("curRule")
   private curRule: MockRule;
 
-  created() { }
+  created() { this.setCurRule(null); }
 
   mounted() {
     this.updateNavBarConfig({
@@ -54,7 +57,6 @@ export default class MockRuleMgr extends AbstractPage {
       rightItem: false,
     });
     this.fetchPagedMockRules();
-
     eventBus.$on("updateMockRules", this.fetchPagedMockRules);
   }
 
