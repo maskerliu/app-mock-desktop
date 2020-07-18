@@ -1,6 +1,21 @@
 <template>
-  <el-row :gutter="20">
-    <el-col class="bg-border" style="width: 300px; margin-left: 15px;">
+  <el-row :gutter="20" style="margin: 0;">
+    <vue-drag-resize
+      :isActive="true"
+      :isDraggable="false"
+      :w="snapWidth"
+      :minw="324"
+      :h="700"
+      :stickSize="12"
+      :sticks="['mr']"
+      style=" margin-left: 12px;"
+      v-on:resizing="resize"
+    >
+    <el-col
+      class="bg-border"
+      :style="{ width: snapWidth + 'px' }"
+      style="margin: 5px;"
+    >
       <el-checkbox-group
         size="mini"
         v-model="filterTypes"
@@ -49,8 +64,6 @@
         ></el-button>
       </el-input>
 
-      <el-divider />
-
       <virtual-list
         class="record-snap-panel"
         :size="50"
@@ -59,9 +72,12 @@
         :data-sources="filtedRecords"
         :data-component="proxyRecordSnap"
       />
+      
     </el-col>
+    </vue-drag-resize>
     <el-col
-      style="width: calc(100vw - 400px); margin: 5px;"
+      v-bind:style="{ 'margin-left': snapWidth + 10 + 'px' }"
+      style="width: calc(100% - 335px);"
       v-if="curRecord !== null"
     >
       <proxy-request-detail :record="curRecord" v-if="curRecord.type != 5020" />
@@ -76,13 +92,16 @@
 .bg-border {
   border: 1px solid #f1f1f1;
   border-radius: 8px;
-  margin: 5px;
 }
 
 .record-snap-panel {
-  height: calc(100vh - 245px);
+  height: calc(100vh - 205px);
   overflow-y: scroll;
   overflow-x: hidden;
-  margin-bottom: 5px;
+  margin: 15px 0 10px;
+}
+
+.vdr.active:before  {
+  outline: 1px dashed #d6d6d600;
 }
 </style>

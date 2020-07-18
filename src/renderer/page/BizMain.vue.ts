@@ -28,7 +28,7 @@ export default class BizMain extends AbstractPage {
   private canRender: boolean = false;
   private curPage: string = null;
 
-  navMenu: Array<string> = ["Proxy", "MockRuleMgr", "Spider", "Settings"];
+  navMenu: Array<string> = ["Proxy", "MockRuleMgr", "Spider", "UpupU", "Settings"];
   curActivedNavMenuIdx: string = null;
 
   created() { }

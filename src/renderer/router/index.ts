@@ -34,6 +34,11 @@ export default new Router({
             component: require('@/page/Spider').default,
         },
         {
+            path: '/upupu',
+            name: 'UpupU',
+            component: require('@/page/UpupU').default,
+        },
+        {
             path: '/settings',
             name: 'Settings',
             component: require('@/page/Settings').default,

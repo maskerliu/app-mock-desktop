@@ -150,7 +150,7 @@
 }
 
 .request-snap-url {
-  width: 165px;
+  width: calc(100% - 70px);
   font-size: 0.7rem;
   color: #34495e;
   padding: 0 0 5px 5px;

@@ -24,6 +24,9 @@ export default class Spider extends AbstractPage {
         });
     }
 
+    mounted() {
+    }
+
     onSpiderClick() {
         if (this.spiderIcon == "el-icon-video-play") {
             this.interval = setInterval(this.getRemotePage, 1000 * 1 * 10);
@@ -48,4 +51,6 @@ export default class Spider extends AbstractPage {
             console.log(err);
         });
     }
+
+    
 }

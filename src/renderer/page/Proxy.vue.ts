@@ -1,5 +1,6 @@
 import { ipcRenderer, webFrame } from "electron"
 import { Component, Watch } from "vue-property-decorator"
+import VueDragResize from 'vue-drag-resize'
 import VirtualList from "vue-virtual-scroll-list"
 import { namespace } from "vuex-class"
 import {
@@ -20,6 +21,7 @@ const ProxyRecords = namespace("ProxyRecords");
     VirtualList,
     ProxyRequestDetail,
     ProxyStatDetail,
+    VueDragResize,
   },
 })
 export default class Proxy extends AbstractPage {
@@ -40,6 +42,8 @@ export default class Proxy extends AbstractPage {
 
   @ProxyRecords.Mutation("clearRecords")
   private clearRecords!: Function;
+
+  snapWidth: number = 324;
 
   public $refs!: {
     wrapper: any;
@@ -82,14 +86,18 @@ export default class Proxy extends AbstractPage {
     this.filtedRecords = this.records.filter(
       (item: ProxyRequestRecord | ProxyStatRecord) => {
 
-        if (item.type ==CMDCode.REQUEST_START|| item.type == CMDCode.REQUEST_END) {
+        if (item.type == CMDCode.REQUEST_START || item.type == CMDCode.REQUEST_END) {
           if (this.filterInput == null) return true;
           return (<ProxyRequestRecord>item).url.indexOf(this.filterInput) !== -1;
-        }else {
+        } else {
           return true;
         }
       }
     );
+  }
+
+  public resize(newRect: { width: number, height: number, top: number, left: number }) {
+    this.snapWidth = newRect.width;
   }
 
   @Watch("isDelay")
