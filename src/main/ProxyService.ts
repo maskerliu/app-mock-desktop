@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import Url, { UrlWithParsedQuery } from "url";
+import protobuf from "protobufjs";
+import Url from "url";
+import zlib from "zlib";
+import { CMDCode, ProxyRequestRecord, ProxyStatRecord } from "../model/DataModels";
 import MockService from "./MockService";
 import PushService from "./PushService";
-import protobuf from "protobufjs";
-import { CMDCode, ProxyRequestRecord, ProxyStatRecord } from "../model/DataModels";
-import { request } from "http";
 
 const JSONBigInt = require("json-bigint");
 const axios = require("axios");
@@ -14,6 +14,8 @@ class ProxyService {
   private static PROXY_DEF_TIMEOUT: number = 1000 * 5; // 15s
   private _sessionId: number;
   private proxyDealy: number;
+  private isProxyRequest: boolean;
+  private isPorxyStat: boolean;
   private dataProxyServer: string;
   private proxySocketServer: any = null;
   private dataProxyStatus: boolean = false;
@@ -31,6 +33,15 @@ class ProxyService {
     this.proxyDealy = delay;
   }
 
+  public setProxyRequest(isProxy: boolean) {
+    this.isProxyRequest = isProxy;
+  }
+
+  public setStatProxy(isProxy: boolean) {
+    this.isPorxyStat = isProxy;
+  }
+
+  // TODO: 长连接统带代理初始化，待完善
   public initProxySocketServer(port: number): void {
     this.proxySocketServer = websocket
       .createServer((conn: any) => {
@@ -52,20 +63,63 @@ class ProxyService {
       });
   }
 
+  // TODO: 待完成
   public closeProxySocketServer(callback: any): void {
     if (this.proxySocketServer != null) {
       this.proxySocketServer.close(callback);
     }
   }
 
-  public handleStatRequest(data: any) {
-    let record: ProxyStatRecord = {
-      id: ++this._sessionId,
-      type: CMDCode.STATISTICS,
-      timestamp: new Date().getSeconds(),
-      statistics: data,
-    };
-    PushService.sendMessage(record);
+  public handleStatRequest(req: any, resp: Response) {
+    let data = Buffer.from(req.rawbody);
+    zlib.unzip(data, (err: any, buffer: any) => {
+      if (!err) {
+        let record: ProxyStatRecord = {
+          id: ++this._sessionId,
+          type: CMDCode.STATISTICS,
+          timestamp: new Date().getSeconds(),
+          statistics: JSON.parse(buffer.toString()),
+        };
+        PushService.sendMessage(record);
+
+
+        let originHost = req.header("x-host");
+        if (originHost == null) {
+          originHost = req.header("host");
+        }
+
+        let url = Url.parse(originHost);
+        let host = url.host.split(/[:\/]/)[0];
+        let port = url.port;
+        let protocol = url.protocol;
+
+        let headers = Object.assign({}, req.headers);
+        headers.host = protocol + "//" + host;
+
+        delete headers["host"];
+        delete headers["x-host"];
+
+        let requestUrl = protocol + "//" + host + req.path;
+        if (this.dataProxyServer != null && this.dataProxyStatus) {
+          requestUrl = this.dataProxyServer + req.path;
+        }
+
+        let options = {
+          url: requestUrl,
+          method: req.method,
+          headers: headers,
+          data: data
+        };
+        axios(options).then((resp: any) => {
+
+        }).catch((err: any) => {
+          console.error("stat", err);
+        });
+      } else {
+        console.error("stat", err);
+      }
+    });
+    resp.end();
   }
 
   public handleRequest(req: Request, resp: Response) {
@@ -74,10 +128,10 @@ class ProxyService {
     let reqUrl: Url.UrlWithStringQuery;
     try {
       reqUrl = Url.parse(req.headers.host);
-    } catch(err) {
+    } catch (err) {
       console.error("handleRequest", err);
     }
-   
+
     let requestData = null;
     if (req.method === "GET") {
       requestData = !!req.query ? req.query : null;
@@ -87,7 +141,7 @@ class ProxyService {
       } catch (err) {
         console.error("handleRequest", err);
       }
-      
+
     }
 
     let data: ProxyRequestRecord = {
@@ -100,7 +154,7 @@ class ProxyService {
       requestData: requestData,
       timestamp: new Date().getSeconds(),
     };
-    
+
 
     PushService.sendMessage(data);
 
@@ -177,45 +231,43 @@ class ProxyService {
       options["data"] = req.body;
     }
 
-    axios(options)
-      .then((resp: any) => {
-        try {
-          setTimeout(() => {
-            let data: ProxyRequestRecord = {
-              id: sessionId,
-              type: CMDCode.REQUEST_END,
-              statusCode: resp.status,
-              responseHeaders: !!resp.headers ? resp.headers : null,
-              responseData: !!resp.data ? JSON.stringify(resp.data) : null,
-              time: new Date().getTime() - startTime,
-              isMock: false,
-            };
-            PushService.sendMessage(data);
+    axios(options).then((resp: any) => {
+      try {
+        setTimeout(() => {
+          let data: ProxyRequestRecord = {
+            id: sessionId,
+            type: CMDCode.REQUEST_END,
+            statusCode: resp.status,
+            responseHeaders: !!resp.headers ? resp.headers : null,
+            responseData: !!resp.data ? JSON.stringify(resp.data) : null,
+            time: new Date().getTime() - startTime,
+            isMock: false,
+          };
+          PushService.sendMessage(data);
 
-            proxyResp.send(resp.data);
-            proxyResp.end();
-          }, this.proxyDealy);
-        } catch (err) {
-          console.error("proxyRequestData", err);
-        }
-      })
-      .catch((err: any) => {
-        console.log("axios", err);
-        let resp = err.response;
-        let respData = !!resp ? resp.data : err.message;
-        let data: ProxyRequestRecord = {
-          id: sessionId,
-          type: CMDCode.REQUEST_END,
-          statusCode: -100,
-          headers: !!resp && !!resp.headers ? resp.headers : null,
-          responseData: !!resp && !!respData ? JSON.stringify(respData) : JSON.stringify(err),
-          time: new Date().getTime() - startTime,
-          isMock: false,
-        };
-        PushService.sendMessage(data);
-        proxyResp.send(err.message);
-        proxyResp.end();
-      });
+          proxyResp.send(resp.data);
+          proxyResp.end();
+        }, this.proxyDealy);
+      } catch (err) {
+        console.error("proxyRequestData", err);
+      }
+    }).catch((err: any) => {
+      console.log("axios", err);
+      let resp = err.response;
+      let respData = !!resp ? resp.data : err.message;
+      let data: ProxyRequestRecord = {
+        id: sessionId,
+        type: CMDCode.REQUEST_END,
+        statusCode: -100,
+        headers: !!resp && !!resp.headers ? resp.headers : null,
+        responseData: !!resp && !!respData ? JSON.stringify(respData) : JSON.stringify(err),
+        time: new Date().getTime() - startTime,
+        isMock: false,
+      };
+      PushService.sendMessage(data);
+      proxyResp.send(err.message);
+      proxyResp.end();
+    });
   }
 }
 

@@ -1,16 +1,18 @@
 import bodyParser from "body-parser";
 import compression from "compression";
-import { createServer, Server } from "http";
-import path from "path";
-import fs from "fs";
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
+import fs from "fs";
+import { createServer, Server } from "http";
 import { NetworkInterfaceInfo, networkInterfaces } from "os";
-import zlib from "zlib";
+import path from "path";
 import { IP } from "../model/DataModels";
 import ProxyService from "./ProxyService";
 import PushService from "./PushService";
 import WebService from "./WebService";
+
+var nodeStatic = require('node-static');
+var file = new nodeStatic.Server(`${__dirname}/public`);
 
 const corsOptions = {
   origin: "http://localhost:9080",
@@ -39,54 +41,33 @@ class LocalServer {
     this.httpApp.use(cors(corsOptions));
     this.httpApp.use(compression());
     this.httpApp.use((req: any, resp: Response, next: any) => {
-      if (req.url === "/burying-point/collect") {
+      if (/^\/burying-point\//.test(req.url)) {
         let buf = [];
         req.on("data", (data: any) => {
           buf.push(data);
         });
         req.on("end", () => {
           req.rawbody = Buffer.concat(buf);
+          ProxyService.handleStatRequest(req, resp);
         });
       }
       next();
     });
 
-    this.httpApp.post(
-      "/burying-point/collect",
-      bodyParser.raw({ type: "text/plain" }),
-      (req: any, resp: any) => {
-        let data = Buffer.from(req.rawbody);
-        zlib.unzip(data, (err: any, buffer: any) => {
-          if (!err) {
-            // TODO
-            ProxyService.handleStatRequest(JSON.parse(buffer.toString()));
-          } else {
-            console.log(err);
-          }
-        });
-        resp.end();
-      }
-    );
     this.httpApp.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
     this.httpApp.use(bodyParser.text({ type: "application/json", limit: '50mb' }));
     this.httpApp.all("*", (req: Request, resp: Response, next: any) => {
-      if (
-        /^\/mw\//.test(req.url) ||
-        /^\/appmock\//.test(req.url) ||
-        /^\/burying-point\//.test(req.url)
-      ) {
+      if (/^\/mw\//.test(req.url) || /^\/appmock\//.test(req.url)) {
         WebService.filter(req, resp);
-      } else if (req.url == "favicon.ico") {
+      } else if (/^\/burying-point\//.test(req.url) || req.url == "favicon.ico") {
         resp.end();
       } else if (/^\/test\//.test(req.url)) {
-        fs.readFile(`${path.join(__dirname + "/../../dist/electron/")}index.html`, function(err, data) {
-          resp.writeHead(200, { 'Content-Type': 'text/html', 'Content-Length': data.length });
-          resp.write(data);
-          resp.end();
-        });
-        // console.log(`file://${path.join(__dirname + "/../../dist/electron/")}index.html`);
-        // resp.sendFile(`file://${path.join(__dirname + "/../../dist/electron/")}index.html`);
-        // resp.end();
+        file.serve(req, resp);
+        // fs.readFile(`${path.join(__dirname + "/../../dist/electron/")}index.html`, function (err, data) {
+        //   resp.writeHead(200, { 'Content-Type': 'text/html', 'Content-Length': data.length });
+        //   resp.write(data);
+        //   resp.end();
+        // });
       } else {
         ProxyService.handleRequest(req, resp);
       }

@@ -40,13 +40,13 @@
             <i class="iconfont icon-spider" style="font-size: 1.8rem;"></i>
           </el-menu-item>
         </el-tooltip>
-        <el-tooltip effect="dark" content="举牌小人" placement="right">
+        <el-tooltip effect="dark" content="实验室" placement="right">
           <el-menu-item
             index="UpupU"
             style="padding-left: 20px;"
             @click="onNavTabClick('UpupU')"
           >
-            <i class="iconfont icon-glove" style="font-size: 1.8rem;"></i>
+            <i class="iconfont icon-lab" style="font-size: 1.8rem;"></i>
           </el-menu-item>
         </el-tooltip>
         <el-menu-item
