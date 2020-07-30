@@ -60,7 +60,7 @@ export class ProxyRequestRecord {
   url?: string;
   statusCode?: number; // 请求状态
   timestamp?: number; // 请求发起时间
-  timelineColor? : string;
+  timelineColor?: string;
   time?: number; // 请求耗时
   isMock?: boolean; // 是否为Mock数据
   headers?: any; // 请求头
@@ -85,4 +85,12 @@ export class MockRule {
   desc: string;
   isMock?: boolean = false;
   requests: ProxyRequestRecord[];
+}
+
+export class LocalServerConfig {
+  serverIP: string;
+  proxyHttpPort: number;
+  proxySocketPort: number;
+  pushSocketPort: number;
+  ips: Array<IP>;
 }

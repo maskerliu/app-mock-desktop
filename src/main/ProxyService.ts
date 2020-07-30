@@ -70,6 +70,28 @@ class ProxyService {
     }
   }
 
+  public setProtoFiles(files: string[]) {
+    files.forEach((item: string) => {
+      var strs = item.split("/");
+      this.pbFiles.push({ name: strs[strs.length - 1], value: item });
+    });
+
+    protobuf.load(files, function (err: Error, root: any) {
+      if (err) throw err;
+
+      var MatchQueryMsgReq = root.lookupType("MatchQueryMsgReq");
+
+      var payload = { gameType: "shuishiwodi" };
+      var message = MatchQueryMsgReq.create(payload);
+      var buffer = MatchQueryMsgReq.encode(message).finish();
+      console.log(MatchQueryMsgReq.decode(buffer));
+    });
+  }
+
+  public getProtoFiles() {
+    return this.pbFiles;
+  }
+
   public handleStatRequest(req: any, resp: Response) {
     let data = Buffer.from(req.rawbody);
     zlib.unzip(data, (err: any, buffer: any) => {
@@ -80,13 +102,14 @@ class ProxyService {
           timestamp: new Date().getSeconds(),
           statistics: JSON.parse(buffer.toString()),
         };
-        PushService.sendMessage(record);
 
 
-        let originHost = req.header("x-host");
+        let originHost = req.header("host");
         if (originHost == null) {
-          originHost = req.header("host");
+          originHost = req.header("mock-host");
         }
+
+        PushService.sendMessage(record, req.header("mock-uid"));
 
         let url = Url.parse(originHost);
         let host = url.host.split(/[:\/]/)[0];
@@ -97,7 +120,8 @@ class ProxyService {
         headers.host = protocol + "//" + host;
 
         delete headers["host"];
-        delete headers["x-host"];
+        delete headers["mock-host"];
+        delete headers["mock-uid"];
 
         let requestUrl = protocol + "//" + host + req.path;
         if (this.dataProxyServer != null && this.dataProxyStatus) {
@@ -111,9 +135,9 @@ class ProxyService {
           data: data
         };
         axios(options).then((resp: any) => {
-
+          // console.log("stat", requestUrl, resp.status, new Date().getSeconds());
         }).catch((err: any) => {
-          console.error("stat", err);
+          console.error("stat", err.errno);
         });
       } else {
         console.error("stat", err);
@@ -141,7 +165,6 @@ class ProxyService {
       } catch (err) {
         console.error("handleRequest", err);
       }
-
     }
 
     let data: ProxyRequestRecord = {
@@ -156,38 +179,21 @@ class ProxyService {
     };
 
 
-    PushService.sendMessage(data);
+    PushService.sendMessage(data, req.header("mock-uid"));
 
-    if (!MockService.mockRequestData(sessionId, req, resp, startTime, this.proxyDealy))
+    MockService.mockRequestData(sessionId, req, resp, startTime, this.proxyDealy).then(() => {
+      // console.log("proxy is mock");
+    }).catch(reason => {
       this.proxyRequestData(sessionId, req, resp, startTime);
-  }
-
-  public setProtoFiles(files: string[]) {
-    files.forEach((item: string) => {
-      var strs = item.split("/");
-      this.pbFiles.push({ name: strs[strs.length - 1], value: item });
     });
-
-    protobuf.load(files, function (err: Error, root: any) {
-      if (err) throw err;
-
-      var MatchQueryMsgReq = root.lookupType("MatchQueryMsgReq");
-
-      var payload = { gameType: "shuishiwodi" };
-      var message = MatchQueryMsgReq.create(payload);
-      var buffer = MatchQueryMsgReq.encode(message).finish();
-      console.log(MatchQueryMsgReq.decode(buffer));
-    });
-  }
-
-  public getProtoFiles() {
-    return this.pbFiles;
+    // if (!MockService.mockRequestData(sessionId, req, resp, startTime, this.proxyDealy))
+    //   this.proxyRequestData(sessionId, req, resp, startTime);
   }
 
   private proxyRequestData(sessionId: number, req: Request, proxyResp: Response, startTime: number) {
-    let originHost = req.header("x-host");
+    let originHost = req.header("host");
     if (originHost == null) {
-      originHost = req.header("host");
+      originHost = req.header("mock-host");
     }
 
     let url = Url.parse(originHost);
@@ -199,7 +205,8 @@ class ProxyService {
     headers.host = protocol + "//" + host;
 
     delete headers["host"];
-    delete headers["x-host"];
+    delete headers["mock-host"];
+    delete headers["mock-uid"];
 
     let requestUrl = protocol + "//" + host + req.path;
     if (this.dataProxyServer != null && this.dataProxyStatus) {
@@ -243,7 +250,7 @@ class ProxyService {
             time: new Date().getTime() - startTime,
             isMock: false,
           };
-          PushService.sendMessage(data);
+          PushService.sendMessage(data, req.header("mock-uid"));
 
           proxyResp.send(resp.data);
           proxyResp.end();
@@ -264,7 +271,7 @@ class ProxyService {
         time: new Date().getTime() - startTime,
         isMock: false,
       };
-      PushService.sendMessage(data);
+      PushService.sendMessage(data, req.header("mock-uid"));
       proxyResp.send(err.message);
       proxyResp.end();
     });

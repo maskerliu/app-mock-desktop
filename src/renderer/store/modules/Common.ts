@@ -1,13 +1,13 @@
 import { remote, ipcRenderer } from "electron";
 import { Message } from "element-ui";
-import PouchDB from "pouchdb"; 
+import PouchDB from "pouchdb";
 import path from "path";
 import { ActionTree, Commit, GetterTree, MutationTree } from "vuex";
 import store from "../";
-import { updateLocalDomain } from "../../../model/BasicLocalAPI";
-import PushClient from "../../common/PushClient";
+import { updateLocalDomain, updateClientUID } from "../../../model/BasicLocalAPI";
+import { PushClient } from "../../../common/PushClient";
 import { CommonState } from "../types";
-import { isUrl } from "../../common/Utils"
+import { isUrl, generateUid } from "../../../common/Utils"
 
 const state: CommonState = {
   showQrCodeDialog: false,
@@ -35,27 +35,17 @@ const state: CommonState = {
   versionCheckServer: ""
 };
 
-let db = new PouchDB(path.join(remote.app.getPath("userData"), 'SharePerferences'), { adapter: 'leveldb' });
-
-function generateUid() {
-  let len = 8;
-  let res = [];
-  for (let i = 0; i !== len; ++i) {
-    res.push(
-      String.fromCharCode(
-        Math.floor(Math.random() * 26) + (Math.random() > 0.5 ? 65 : 97)
-      )
-    );
-  }
-  res.push(new Date().getTime() + "o");
-  return res.join("");
-}
+const db = new PouchDB(path.join(remote.app.getPath("userData"), 'SharePerferences'), { adapter: 'leveldb' });
+let pushClient: PushClient = null;
 
 export const getters: GetterTree<CommonState, any> = {};
 
 // async
 export const actions: ActionTree<CommonState, any> = {
   init(context: { commit: Commit }): void {
+
+    pushClient = new PushClient(store);
+
     ipcRenderer.on("get-local-server-config", (event: any, data: any) => {
       store.commit("updateLocalServerConfig", data);
     });
@@ -108,17 +98,19 @@ export const mutations: MutationTree<CommonState> = {
     state.navBarConfig = Object.assign({}, navBarConfig);
   },
   updateLocalServerConfig(state, params) {
+    let uid = generateUid();
     state.localServerConfig.serverIP = params.serverIP;
     state.localServerConfig.proxyHttpPort = params.proxyHttpPort;
     state.localServerConfig.proxySocketPort = params.proxySocketPort;
     state.localServerConfig.pushSocketPort = params.pushSocketPort;
     state.localServerConfig.ips = params.ips;
     state.localServerConfig.pbFiles = params.pbFiles;
-    state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/mw/register?_=0__0&uid=${generateUid()}`;
+    state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/mw/register?_=0__0&uid=${uid}`;
 
     updateLocalDomain(state.localServerConfig);
+    updateClientUID(uid);
 
-    PushClient.start(params.serverIP, params.pushSocketPort);
+    pushClient.start(params.serverIP, params.pushSocketPort, uid);
   },
   updateApiDefineServer(state, url) {
     if (!isUrl(url)) {

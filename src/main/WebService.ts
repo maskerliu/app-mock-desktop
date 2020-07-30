@@ -7,7 +7,7 @@ import { request } from "http";
 const DEFAULT_HEADER = { "Content-Type": "text/html" };
 
 class WebService {
-  constructor() {}
+  constructor() { }
 
   filter(req: Request, resp: Response) {
     let props = this.parseUrl(req.url);
@@ -34,7 +34,7 @@ class WebService {
         type: CMDCode.REGISTER_SUCCESS,
         data: uid,
       };
-      PushService.sendMessage(data);
+      PushService.sendMessage(data, `${uid}`);
     } else {
       resp.end("invalid uid");
     }

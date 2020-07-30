@@ -2,7 +2,6 @@ import { app, dialog, ipcMain, IpcMainEvent, NativeImage } from "electron";
 import { mainWindow } from "./";
 import LocalServer from "./LocalServer";
 import ProxyService from "./ProxyService";
-import axios from "axios";
 import AsarUpdateService from "./AsarUpdateService";
 
 ipcMain.on("on-app-maximize", (event: IpcMainEvent, args?: any) => {

@@ -6,19 +6,12 @@ import fs from "fs";
 import { createServer, Server } from "http";
 import { NetworkInterfaceInfo, networkInterfaces } from "os";
 import path from "path";
-import { IP } from "../model/DataModels";
+import { IP, BizCode, BizResponse, LocalServerConfig } from "../model/DataModels";
 import ProxyService from "./ProxyService";
 import PushService from "./PushService";
 import WebService from "./WebService";
 
-var nodeStatic = require('node-static');
-var file = new nodeStatic.Server(`${__dirname}/public`);
 
-const corsOptions = {
-  origin: "http://localhost:9080",
-  credentials: true,
-  optionsSuccessStatus: 200,
-};
 
 class LocalServer {
   private serverIP: string;
@@ -27,19 +20,25 @@ class LocalServer {
   private pushSocketPort: number;
   private httpServer: Server;
   private httpApp: Application;
+  private corsOptions = {
+    credentials: true,
+    optionsSuccessStatus: 200,
+  };
 
   constructor() {
     this.serverIP = LocalServer.getLocalIPs()[0].address;
     this.proxyHttpPort = 8885;
     this.proxySocketPort = 8886;
     this.pushSocketPort = 8887;
+    this.corsOptions['origin'] = [`http://${this.serverIP}:${this.proxyHttpPort}`, `http://${this.serverIP}:9081`];
     this.initHttpServer();
   }
 
   private initHttpServer(): void {
     this.httpApp = express();
-    this.httpApp.use(cors(corsOptions));
+    this.httpApp.use(cors(this.corsOptions));
     this.httpApp.use(compression());
+    this.httpApp.use(express.static(path.resolve(__dirname, '../web')));
     this.httpApp.use((req: any, resp: Response, next: any) => {
       if (/^\/burying-point\//.test(req.url)) {
         let buf = [];
@@ -47,6 +46,7 @@ class LocalServer {
           buf.push(data);
         });
         req.on("end", () => {
+          console.log();
           req.rawbody = Buffer.concat(buf);
           ProxyService.handleStatRequest(req, resp);
         });
@@ -58,16 +58,20 @@ class LocalServer {
     this.httpApp.use(bodyParser.text({ type: "application/json", limit: '50mb' }));
     this.httpApp.all("*", (req: Request, resp: Response, next: any) => {
       if (/^\/mw\//.test(req.url) || /^\/appmock\//.test(req.url)) {
-        WebService.filter(req, resp);
-      } else if (/^\/burying-point\//.test(req.url) || req.url == "favicon.ico") {
+        if (/^\/appmock\/getLocalServerConfig/.test(req.url)) {
+          let bizResp: BizResponse<LocalServerConfig> = new BizResponse<LocalServerConfig>();
+          bizResp.code = BizCode.SUCCESS;
+          bizResp.data = this.getLocalServerConfig();
+          resp.json(bizResp);
+          resp.end();
+        } else {
+          WebService.filter(req, resp);
+        }
+
+      } else if (/^\/burying-point\//.test(req.url)) {
         resp.end();
-      } else if (/^\/test\//.test(req.url)) {
-        file.serve(req, resp);
-        // fs.readFile(`${path.join(__dirname + "/../../dist/electron/")}index.html`, function (err, data) {
-        //   resp.writeHead(200, { 'Content-Type': 'text/html', 'Content-Length': data.length });
-        //   resp.write(data);
-        //   resp.end();
-        // });
+      } else if (/^\/favicon.ico/.test(req.url)) {
+        
       } else {
         ProxyService.handleRequest(req, resp);
       }
@@ -101,13 +105,7 @@ class LocalServer {
     return ips;
   }
 
-  public getLocalServerConfig(): {
-    serverIP: string;
-    proxyHttpPort: number;
-    proxySocketPort: number;
-    pushSocketPort: number;
-    ips: IP[];
-  } {
+  public getLocalServerConfig(): LocalServerConfig {
     return {
       serverIP: LocalServer.getLocalIPs()[0].address,
       proxyHttpPort: this.proxyHttpPort,

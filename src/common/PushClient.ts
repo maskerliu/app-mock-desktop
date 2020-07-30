@@ -1,14 +1,16 @@
 import { Message } from "element-ui";
 import Vue from "vue";
 import VueNativeSocket from "vue-native-websocket";
-import { CMDCode } from "../../model/DataModels";
-import store from "../store";
+import { CMDCode } from "../model/DataModels";
 
-class PushClient {
+
+export class PushClient {
   private SocketConfig: {};
   private vm: Vue;
+  private store: any;
 
-  constructor() {
+  constructor(store: any) {
+    this.store = store;
     this.SocketConfig = {
       reconnection: true,
       reconnectionAttempts: 5,
@@ -20,7 +22,7 @@ class PushClient {
     this.vm = new Vue();
   }
 
-  public start(serverIP: string, port: number): void {
+  public start(serverIP: string, port: number, uid: string): void {
     try {
       this.vm.$disconnect();
     } catch (err) {
@@ -28,6 +30,9 @@ class PushClient {
     }
 
     this.vm.$connect(`ws://${serverIP}:${port}`, this.SocketConfig);
+    Vue.prototype.$socket.onopen = (stream: any) => {
+      Vue.prototype.$socket.send(uid);
+    };
     Vue.prototype.$socket.onmessage = (stream: any) => {
       this.handleMsg(stream.data);
     };
@@ -37,20 +42,18 @@ class PushClient {
     let msg = JSON.parse(data);
     switch (msg.type) {
       case CMDCode.REGISTER_SUCCESS:
-        store.commit("updateShowQrCodeDialog", false);
+        this.store.commit("updateShowQrCodeDialog", false);
         Message({ message: "设备[" + msg.data + "]注册成功", type: "success" });
         break;
       case CMDCode.REQUEST_START:
       case CMDCode.REQUEST_END:
-        store.commit("ProxyRecords/updateProxyRecords", msg);
+        this.store.commit("ProxyRecords/updateProxyRecords", msg);
         break;
       case CMDCode.STATISTICS:
-        store.commit("ProxyRecords/updateProxyRecords", msg);
+        this.store.commit("ProxyRecords/updateProxyRecords", msg);
         break;
       default:
         Message({ message: "unhandled code:" + msg.code, type: "warning" });
     }
   }
 }
-
-export default new PushClient();

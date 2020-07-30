@@ -1,8 +1,8 @@
 import { Message } from "element-ui";
 import VJsonEditor from "v-jsoneditor";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import { MockRule, ProxyRequestRecord } from "../../../model/DataModels";
-import { getMockRuleDetail, saveMockRule } from "../../../model/LocaAPIs";
+import { MockRule, ProxyRequestRecord } from "../../model/DataModels";
+import { getMockRuleDetail, saveMockRule } from "../../model/LocaAPIs";
 
 @Component({
   name: "MockRuleDetail",

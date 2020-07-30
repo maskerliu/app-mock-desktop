@@ -1,8 +1,8 @@
 import { Message } from "element-ui";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { State } from "vuex-class";
-import { get } from "../../../model/BasicLocalAPI";
-import { ProxyStatRecord } from "../../../model/DataModels";
+import { get } from "../../model/BasicLocalAPI";
+import { ProxyStatRecord } from "../../model/DataModels";
 
 
 @Component({

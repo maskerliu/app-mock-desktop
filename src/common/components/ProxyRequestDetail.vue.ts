@@ -1,6 +1,6 @@
-import { clipboard } from "electron"
+// import { clipboard } from "electron"
 import { Component, Prop, Vue, Watch } from "vue-property-decorator"
-import { ProxyRequestRecord } from "../../../model/DataModels"
+import { ProxyRequestRecord } from "../../model/DataModels"
 import AddMockRule from "./AddMockRule.vue"
 import JsonViewer from "./JsonViewer.vue"
 
@@ -69,7 +69,7 @@ export default class ProxyRequestDetail extends Vue {
   }
 
   copyLink() {
-    clipboard.writeText(this.record.url);
+    // clipboard.writeText(this.record.url);
   }
 
   addToMockRule() {

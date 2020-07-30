@@ -4,7 +4,7 @@ import { Component } from "vue-property-decorator"
 import { Action, Mutation, State } from "vuex-class"
 import { IP } from "../../model/DataModels"
 import AbstractPage from "./AbstractPage.vue"
-import { isUrl } from "../common/Utils"
+import { isUrl } from "../../common/Utils"
 
 
 @Component({

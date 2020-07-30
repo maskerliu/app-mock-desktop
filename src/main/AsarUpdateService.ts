@@ -1,6 +1,6 @@
-import { app, BrowserWindow, dialog } from "electron"
-import EAU from "electron-asar-hot-updater"
-import ProgressBar from "electron-progressbar"
+import { app, BrowserWindow, dialog } from "electron";
+import EAU from "electron-asar-hot-updater";
+import ProgressBar from "electron-progressbar";
 
 class AsarUpdateService {
 
@@ -8,7 +8,7 @@ class AsarUpdateService {
     private versionCheckServer: string = null;
 
     constructor() {
-        
+
     }
 
     private init() {
@@ -39,7 +39,7 @@ class AsarUpdateService {
         EAU.check((err: any, last: any, body: any) => {
             if (err) {
                 if (err === 'no_update_available') { return false; }
-                if (err === 'version_not_specified' && process.env.NODE_ENV === 'development') { return false; } 
+                if (err === 'version_not_specified' && process.env.NODE_ENV === 'development') { return false; }
                 return false;
             }
 
@@ -61,14 +61,14 @@ class AsarUpdateService {
                             text: 'Preparing data...',
                             detail: 'Wait...',
                             style: {
-                              bar: { 'background-color': '#fff', 'height': '10px' },
-                              value: { 'background-color': '#2CD3A9', 'height': '10px' }
+                                bar: { 'background-color': '#fff', 'height': '10px' },
+                                value: { 'background-color': '#2CD3A9', 'height': '10px' }
                             },
                             browserWindow: {
-                              parent: this.mainWindow
+                                parent: this.mainWindow
                             }
                         });
-                
+
                         progressBar.on('completed', function () {
                             console.info('completed...')
                             progressBar.detail = 'Task completed. Exiting...'

@@ -5,18 +5,15 @@ import PouchDB from "pouchdb"
 import PouchDBFind from "pouchdb-find"
 import { CMDCode, BizCode, BizResponse, MockRule, ProxyRequestRecord } from "../model/DataModels"
 import PushService from "./PushService"
+import { rejects } from "assert"
 
 const JSONBigInt = require("json-bigint");
 
 class MockService {
   private localDB: any;
-  private isMock: boolean;
-  private curMockRule: MockRule;
+  private clientMockStatus: {} = {}; // TODO：失效会话清理
 
   constructor() {
-    this.isMock = false;
-    this.curMockRule = null;
-
     this.initDB();
   }
 
@@ -33,48 +30,54 @@ class MockService {
     this.updateMockSettings();
   }
 
-  public mockRequestData(sessionId: number, req: Request, resp: Response, startTime: number, proxyDelay: number): boolean {
-    if (
-      !this.isMock ||
-      this.curMockRule == null ||
-      this.curMockRule.requests == null
-    )
-      return false;
+  public mockRequestData(
+    sessionId: number,
+    req: Request,
+    resp: Response,
+    startTime: number,
+    proxyDelay: number): Promise<boolean> {
 
-    for (let i: number = 0; i < this.curMockRule.requests.length; ++i) {
-      if (this.curMockRule.requests[i].url === req.url) {
-        let record = this.curMockRule.requests[i];
-        try {
-          setTimeout(() => {
-            let statusCode: number = record.statusCode || 200;
-            resp.status(statusCode);
-            resp.json(record.responseData);
-            resp.end();
-
-            let data: ProxyRequestRecord = {
-              id: sessionId,
-              type: CMDCode.REQUEST_END,
-              statusCode: statusCode,
-              headers: !!record.responseHeaders ? record.responseHeaders : null,
-              responseData: !!record.responseData ? JSON.stringify(record.responseData) : null,
-              time: new Date().getTime() - startTime,
-              isMock: true,
-            };
-            PushService.sendMessage(data);
-          }, proxyDelay);
-          return true;
-        } catch (err) {
-          console.error("mockRequestData", err);
-          console.error(record);
-          return false;
-        }
+    return new Promise((resolve, reject) => {
+      let uid = req.header("mock-uid");
+      if (uid == null || this.clientMockStatus[`${uid}`] == null) {
+        reject();
       }
-    }
-    return false;
+      let ruleId = this.clientMockStatus[`${uid}`].ruleId;
+      this.localDB.get(ruleId, { attachments: true }).then((result: any) => {
+        let curMockRule: MockRule = result;
+        for (let i: number = 0; i < curMockRule.requests.length; ++i) {
+          if (curMockRule.requests[i].url === req.url) {
+            let record = curMockRule.requests[i];
+            setTimeout(() => {
+              let statusCode: number = record.statusCode || 200;
+              resp.status(statusCode);
+              resp.json(record.responseData);
+              resp.end();
+
+              let data: ProxyRequestRecord = {
+                id: sessionId,
+                type: CMDCode.REQUEST_END,
+                statusCode: statusCode,
+                headers: !!record.responseHeaders ? record.responseHeaders : null,
+                responseData: !!record.responseData ? JSON.stringify(record.responseData) : null,
+                time: new Date().getTime() - startTime,
+                isMock: true,
+              };
+              PushService.sendMessage(data, uid);
+            }, proxyDelay);
+            resolve();
+          }
+        }
+        reject();
+      }).catch((err: any) => {
+        reject();
+      });
+    });
   }
 
   public searchMockRules(req: Request, resp: Response): void {
     let keyword: any = req.query["keyword"];
+    let uid = req.query["uid"];
     let selector = { _id: { $ne: /_design\/idx/ } };
     if (keyword == null) {
       selector = Object.assign(selector, { name: { $ne: keyword } });
@@ -88,13 +91,21 @@ class MockService {
     this.localDB.find({
       selector: selector,
       limit: 15,
-      fields: ["_id", "name", "desc", "isMock"],
+      fields: ["_id", "name", "desc"],
       sort: ["name"],
     }).then((result: any) => {
       let rules: Array<MockRule> = [];
       for (let i: number = 0; i < result.docs.length; ++i) {
         try {
           let rule: MockRule = result.docs[i];
+
+          if (this.clientMockStatus[`${uid}`] != null) {
+            let ruleId: string = this.clientMockStatus[`${uid}`].ruleId;
+            if (ruleId == rule._id) {
+              rule.isMock = true;
+            }
+          }
+
           rules.push(rule);
         } catch (err) {
           console.error("searchMockRules", err);
@@ -131,24 +142,18 @@ class MockService {
 
   public saveMockRule(req: Request, resp: Response): void {
     let onlySnap: boolean = req.query["onlySnap"] == "true";
-    let rule: MockRule = JSONBigInt.parse(req.body);
-    // let rule: MockRule = req.body;
+    let uid: any = req.query["uid"];
 
+    let rule: MockRule = JSONBigInt.parse(req.body);
     if (rule.isMock) {
-      this.localDB.find({
-        selector: {
-          isMock: true,
-          _id: { $ne: rule._id },
-        },
-      }).then((result: any) => {
-        if (result.docs.length > 0) {
-          result.docs[0].isMock = false;
-          return this.localDB.put(result.docs[0]);
-        }
-      }).catch((err: any) => {
-        console.error("saveMockRule", err);
-      });
+      this.clientMockStatus[uid] = { ruleId: rule._id }
+    } else {
+      delete this.clientMockStatus[uid];
     }
+
+    console.log(this.clientMockStatus);
+
+    delete rule.isMock;
 
     if (rule._id === null || rule._id === undefined) {
       this.insertMockRule(resp, rule);
@@ -249,8 +254,8 @@ class MockService {
   private updateMockSettings(): void {
     this.localDB.find({ selector: { isMock: true } }).then((result: any) => {
       if (result.docs != null) {
-        this.isMock = true;
-        this.curMockRule = result.docs[0];
+        // this.isMock = true;
+        // this.curMockRule = result.docs[0];
       }
     }).catch((err: any) => { });
   }

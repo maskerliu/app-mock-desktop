@@ -1,6 +1,6 @@
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { namespace, State } from "vuex-class";
-import { ProxyRequestRecord } from "../../../model/DataModels";
+import { ProxyRequestRecord } from "../../model/DataModels";
 
 const ProxyRecords = namespace("ProxyRecords");
 

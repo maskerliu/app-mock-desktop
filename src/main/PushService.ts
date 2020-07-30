@@ -8,21 +8,22 @@ const websocket = require("nodejs-websocket");
 
 class PushService {
   private wsServer: any = null;
+  private clients: {} = {}; // TODO：失效会话清理
 
   constructor() {
-    
+
   }
 
   public initWebSocket(port: number): void {
     this.wsServer = websocket
       .createServer((conn: any) => {
         conn.on("text", (str: string) => {
-          conn.sendText(str);
+          this.clients[str] = conn.key;
         });
         conn.on("close", (code: number, reason: any) => {
           console.log("关闭连接");
         });
-        conn.on("connect", function(code: number) {
+        conn.on("connect", function (code: number) {
           console.log("开启连接", code);
         });
         conn.on("error", (code: number, reason: any) => {
@@ -40,9 +41,11 @@ class PushService {
     }
   }
 
-  public sendMessage(data: ProxyRequestRecord | ProxyStatRecord) {
-    if (!!this.wsServer.connections[0]) {
-      this.wsServer.connections[0].sendText(JSON.stringify(data));
+  public sendMessage(data: ProxyRequestRecord | ProxyStatRecord, clientUid: string) {
+
+    let connKey = this.clients[clientUid];
+    for (let conn of this.wsServer.connections) {
+      if (conn.key == connKey) { conn.sendText(JSON.stringify(data)); }
     }
   }
 }

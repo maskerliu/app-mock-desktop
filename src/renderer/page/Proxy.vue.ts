@@ -9,9 +9,9 @@ import {
   ProxyStatRecord
 } from "../../model/DataModels"
 import AbstractPage from "./AbstractPage.vue"
-import ProxyRecordSnap from "./components/ProxyRecordSnap.vue"
-import ProxyRequestDetail from "./components/ProxyRequestDetail.vue"
-import ProxyStatDetail from "./components/ProxyStatDetail.vue"
+import ProxyRecordSnap from "../../common/components/ProxyRecordSnap.vue"
+import ProxyRequestDetail from "../../common/components/ProxyRequestDetail.vue"
+import ProxyStatDetail from "../../common/components/ProxyStatDetail.vue"
 
 const ProxyRecords = namespace("ProxyRecords");
 

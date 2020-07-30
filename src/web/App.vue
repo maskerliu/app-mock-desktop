@@ -31,34 +31,6 @@
             <i class="iconfont icon-rule" style="font-size: 1.8rem;"></i>
           </el-menu-item>
         </el-tooltip>
-        <el-tooltip effect="dark" content="爬虫" placement="right">
-          <el-menu-item
-            index="Spider"
-            style="padding-left: 20px;"
-            @click="onNavTabClick('Spider')"
-          >
-            <i class="iconfont icon-spider" style="font-size: 1.8rem;"></i>
-          </el-menu-item>
-        </el-tooltip>
-        <el-tooltip effect="dark" content="实验室" placement="right">
-          <el-menu-item
-            index="UpupU"
-            style="padding-left: 20px;"
-            @click="onNavTabClick('UpupU')"
-          >
-            <i class="iconfont icon-lab" style="font-size: 1.8rem;"></i>
-          </el-menu-item>
-        </el-tooltip>
-        <el-menu-item
-          index="Settings"
-          style="padding-left: 20px;"
-          @click="onNavTabClick('Settings')"
-        >
-          <i class="iconfont icon-setting" style="font-size: 1.8rem;"></i>
-        </el-menu-item>
-        <el-menu-item index="4" style="padding-left: 15px;">
-          <debug-panel />
-        </el-menu-item>
       </el-menu>
     </el-col>
     <el-col
@@ -66,27 +38,9 @@
     >
       <div class="header">
         <div class="header-title" @click="leftNavBarItemClick">
-          <i class="el-icon-back" v-if="navBarConfig.leftItem"></i>
-          <span class="navbar-btn">{{ navBarConfig.title }}</span>
         </div>
         <div class="header-content"></div>
-        <div class="header-right">
-          <span
-            class="el-icon-minus header-right-btn"
-            style="color: #f39c12;"
-            @click="onMinus()"
-          ></span>
-          <span
-            class="el-icon-full-screen header-right-btn"
-            style="color: #2ecc71;"
-            @click="onMaximize()"
-          ></span>
-          <span
-            class="el-icon-switch-button header-right-btn"
-            style="color: #e74c3c;"
-            @click="onClose()"
-          ></span>
-        </div>
+        <div class="header-right"></div>
       </div>
       <router-view></router-view>
     </el-col>
@@ -96,6 +50,7 @@
       :visible="showQrCodeDialog"
       @close="updateShowQrCodeDialog(false)"
       width="300px"
+      
     >
       <div id="register">
         <qrcode-vue
@@ -105,18 +60,30 @@
         ></qrcode-vue>
         <br />
         <div>
-          <span style="color: #777; user-select: text;" @click="click2Reg">{{
-            registerUrl
-          }}</span>
+          <span style="color: #777; user-select: text;">{{ registerUrl }}</span>
         </div>
       </div>
     </el-dialog>
   </el-row>
 </template>
 
-<script lang="ts" src="./BizMain.vue.ts"></script>
+<script lang="ts" src="./App.vue.ts"></script>
 
 <style scoped>
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
 #app {
   font-family: "Microsoft YaHei", 微软雅黑, "MicrosoftJhengHei", 华文细黑,
     STHeiti, MingLiu, monospace;
@@ -129,14 +96,6 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-}
-
-#app::-webkit-scrollbar {
-  display: none;
-}
-
-.el-menu--collapse {
-  width: 80px;
 }
 
 .navbar-btn {
@@ -153,6 +112,7 @@
 .header {
   display: flex;
   align-items: center;
+  height: 20px;
   padding: 15px;
   background: #8e44ad;
   color: white;

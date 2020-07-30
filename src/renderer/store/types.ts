@@ -2,22 +2,13 @@ import {
   MockRule,
   ProxyRequestRecord,
   ProxyStatRecord,
+  IP
 } from "../../model/DataModels";
 
 export interface EnvState {
   env: string;
   appId: string;
   bundleId: string;
-}
-
-export interface IP {
-  address: string;
-  netmask: string;
-  family: string;
-  mac: string;
-  internal: boolean;
-  cidr: string;
-  name: string;
 }
 
 export interface CommonState {

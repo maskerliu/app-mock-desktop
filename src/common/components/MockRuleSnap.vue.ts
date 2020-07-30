@@ -1,9 +1,9 @@
 import { Message } from "element-ui";
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { namespace } from "vuex-class";
-import { MockRule } from "../../../model/DataModels";
-import { saveMockRule, uploadMockRule } from "../../../model/LocaAPIs";
-import { eventBus } from "../../common/EventBus";
+import { MockRule } from "../../model/DataModels";
+import { saveMockRule, uploadMockRule } from "../../model/LocaAPIs";
+import { eventBus } from "../EventBus";
 
 const MockRules = namespace("MockRules");
 
