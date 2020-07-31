@@ -21,12 +21,17 @@ export default new Router({
         {
             path: '/proxy',
             name: 'Proxy',
-            component: require('@/page/Proxy').default,
+            component: require('../../common/page/BaseProxy').default,
         },
         {
             path: '/mockRuleMgr',
             name: 'MockRuleMgr',
             component: require('../../common/page/BaseMockRuleMgr').default,
+        },
+        {
+            path: '/demo',
+            name: 'Demo',
+            component: require('@/page/Demo').default,
         }
     ]
 })

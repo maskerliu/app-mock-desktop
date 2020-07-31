@@ -3,9 +3,8 @@ import { Request, Response } from "express"
 import path from "path"
 import PouchDB from "pouchdb"
 import PouchDBFind from "pouchdb-find"
-import { CMDCode, BizCode, BizResponse, MockRule, ProxyRequestRecord } from "../model/DataModels"
+import { BizCode, BizResponse, CMDCode, MockRule, ProxyRequestRecord } from "../model/DataModels"
 import PushService from "./PushService"
-import { rejects } from "assert"
 
 const JSONBigInt = require("json-bigint");
 

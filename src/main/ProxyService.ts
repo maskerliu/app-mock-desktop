@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import protobuf from "protobufjs";
 import Url from "url";
 import zlib from "zlib";
-import { CMDCode, ProxyRequestRecord, ProxyStatRecord } from "../model/DataModels";
+import { CMDCode, BizResponse, BizCode, ProxyRequestRecord, ProxyStatRecord } from "../model/DataModels";
 import MockService from "./MockService";
 import PushService from "./PushService";
 
@@ -13,13 +13,14 @@ const websocket = require("nodejs-websocket");
 class ProxyService {
   private static PROXY_DEF_TIMEOUT: number = 1000 * 5; // 15s
   private _sessionId: number;
-  private proxyDealy: number;
-  private isProxyRequest: boolean;
-  private isPorxyStat: boolean;
+  // private proxyDealy: number;
   private dataProxyServer: string;
   private proxySocketServer: any = null;
   private dataProxyStatus: boolean = false;
   private pbFiles: Array<{ name: string; value: string }> = null;
+
+
+  private proxyDelays: {} = {};
 
   constructor() {
     this._sessionId = 0;
@@ -29,16 +30,25 @@ class ProxyService {
     this.dataProxyServer = url;
     this.dataProxyStatus = status;
   }
-  public setProxyDelay(delay: number) {
-    this.proxyDealy = delay;
-  }
 
-  public setProxyRequest(isProxy: boolean) {
-    this.isProxyRequest = isProxy;
-  }
+  public setProxyDelay(req: Request, resp: Response): void {
+    let uid: any = req.query["uid"];
+    let isDelay: any = req.query["isOpen"];
+    let delay: any = req.query["delay"];
 
-  public setStatProxy(isProxy: boolean) {
-    this.isPorxyStat = isProxy;
+    if (isDelay) {
+      this.proxyDelays[uid] = { delay: delay };
+    } else {
+      delete this.proxyDelays[uid];
+    }
+
+    console.log(this.proxyDelays);
+
+    let bizResp: BizResponse<string> = new BizResponse<string>();
+    bizResp.code = BizCode.SUCCESS;
+    bizResp.data = "success";
+    resp.json(bizResp);
+    resp.end();
   }
 
   // TODO: 长连接统带代理初始化，待完善
@@ -178,19 +188,17 @@ class ProxyService {
       timestamp: new Date().getSeconds(),
     };
 
-
-    PushService.sendMessage(data, req.header("mock-uid"));
-
-    MockService.mockRequestData(sessionId, req, resp, startTime, this.proxyDealy).then(() => {
+    let uid = req.header("mock-uid");
+    PushService.sendMessage(data, uid);
+    let delay = this.proxyDelays[uid] != null ? parseInt(this.proxyDelays[uid].delay) : 0;
+    MockService.mockRequestData(sessionId, req, resp, startTime, delay).then(() => {
       // console.log("proxy is mock");
     }).catch(reason => {
-      this.proxyRequestData(sessionId, req, resp, startTime);
+      this.proxyRequestData(sessionId, req, resp, startTime, delay);
     });
-    // if (!MockService.mockRequestData(sessionId, req, resp, startTime, this.proxyDealy))
-    //   this.proxyRequestData(sessionId, req, resp, startTime);
   }
 
-  private proxyRequestData(sessionId: number, req: Request, proxyResp: Response, startTime: number) {
+  private proxyRequestData(sessionId: number, req: Request, proxyResp: Response, startTime: number, delay: number) {
     let originHost = req.header("host");
     if (originHost == null) {
       originHost = req.header("mock-host");
@@ -254,7 +262,7 @@ class ProxyService {
 
           proxyResp.send(resp.data);
           proxyResp.end();
-        }, this.proxyDealy);
+        }, delay);
       } catch (err) {
         console.error("proxyRequestData", err);
       }

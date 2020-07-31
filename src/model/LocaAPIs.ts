@@ -28,5 +28,5 @@ export function uploadMockRule(rule: MockRule): AxiosPromise<BizResponse<string>
 }
 
 export function getLocalServerConfig(): AxiosPromise<BizResponse<LocalServerConfig>> {
-  return get("/appmock/getLocalServerConfig", process.env.SERVER_BASE_URL);
+  return post("/appmock/getLocalServerConfig", process.env.SERVER_BASE_URL);
 }

@@ -70,8 +70,6 @@ class LocalServer {
 
       } else if (/^\/burying-point\//.test(req.url)) {
         resp.end();
-      } else if (/^\/favicon.ico/.test(req.url)) {
-        
       } else {
         ProxyService.handleRequest(req, resp);
       }

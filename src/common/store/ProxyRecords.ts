@@ -4,8 +4,8 @@ import {
   CMDCode,
   ProxyRequestRecord,
   ProxyStatRecord
-} from "../../../model/DataModels";
-import { ProxyRecordState } from "../types";
+} from "../../model/DataModels";
+import { ProxyRecordState } from "./CommonStateModel";
 
 const state: ProxyRecordState = {
   proxyTypes: [],

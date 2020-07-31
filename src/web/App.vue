@@ -31,6 +31,15 @@
             <i class="iconfont icon-rule" style="font-size: 1.8rem;"></i>
           </el-menu-item>
         </el-tooltip>
+        <el-tooltip effect="dark" content="Demo" placement="right">
+          <el-menu-item
+            index="Demo"
+            style="padding-left: 20px;"
+            @click="onNavTabClick('Demo')"
+          >
+            <i class="iconfont icon-lab" style="font-size: 1.8rem;"></i>
+          </el-menu-item>
+        </el-tooltip>
       </el-menu>
     </el-col>
     <el-col

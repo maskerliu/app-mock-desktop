@@ -1,9 +1,4 @@
-import {
-  MockRule,
-  ProxyRequestRecord,
-  ProxyStatRecord,
-  IP
-} from "../../model/DataModels";
+import { IP } from "../../model/DataModels";
 
 export interface EnvState {
   env: string;
@@ -37,16 +32,4 @@ export interface NavBarConfig {
   rightItem: boolean;
   rightCallback: Function;
   title: string;
-}
-
-export interface ProxyRecordState {
-  proxyTypes: string[];
-  records: Array<ProxyRequestRecord | ProxyStatRecord>;
-  curRecord: ProxyRequestRecord;
-}
-
-export interface MockRuleState {
-  showEditMockRuleDialog: boolean;
-  showDeleteMockRuleDialog: boolean;
-  curRule: MockRule;
 }

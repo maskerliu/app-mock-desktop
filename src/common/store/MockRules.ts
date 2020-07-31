@@ -1,6 +1,6 @@
 import { ActionTree, GetterTree, MutationTree } from "vuex";
-import { MockRule } from "../../../model/DataModels";
-import { MockRuleState } from "../types";
+import { MockRule } from "../../model/DataModels";
+import { MockRuleState } from "./CommonStateModel";
 
 const state: MockRuleState = {
   showEditMockRuleDialog: false,

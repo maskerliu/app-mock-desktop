@@ -28,7 +28,7 @@ ipcMain.on("on-app-quit", (event: IpcMainEvent, args?: any) => {
 
 ipcMain.on("set-proxy-delay", (event: IpcMainEvent, args?: any) => {
   try {
-    ProxyService.setProxyDelay(args.delay);
+    // ProxyService.setProxyDelay(args.delay);
   } catch (err) { }
 });
 

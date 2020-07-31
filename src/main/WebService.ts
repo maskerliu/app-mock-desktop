@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { CMDCode } from "../model/DataModels";
 import MockService from "./MockService";
+import ProxyService from "./ProxyService";
 import PushService from "./PushService";
-import { request } from "http";
 
 const DEFAULT_HEADER = { "Content-Type": "text/html" };
 
@@ -15,6 +15,8 @@ class WebService {
     try {
       if (MockService[props.path] != null) {
         MockService[props.path].apply(MockService, [req, resp]);
+      } else if (ProxyService[props.path] != null) {
+        ProxyService[props.path].apply(ProxyService, [req, resp])
       } else if (this[props.path] != null) {
         this[props.path].apply(this, [req, resp]);
       }

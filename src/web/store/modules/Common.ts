@@ -21,7 +21,6 @@ const state: CommonState = {
     }
 };
 
-const db = new PouchDB('SharePerferences');
 let pushClient: PushClient = null;
 
 export const getters: GetterTree<CommonState, any> = {};
