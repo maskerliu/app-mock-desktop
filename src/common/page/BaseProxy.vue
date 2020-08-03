@@ -1,6 +1,6 @@
 <template>
-    <el-row ref="container" :gutter="20" style="margin: 0;">
-        <el-col ref="leftDom" class="bg-border" style="margin: 5px; width: 300px;">
+    <el-row ref="container" :gutter="20" style="margin: 0; height: 100%;">
+        <el-col ref="leftDom" class="bg-border" style="margin: 5px; width: 300px; height: calc(100% - 60px);">
             <el-checkbox-group
                 size="mini"
                 v-model="filterTypes"
@@ -67,6 +67,7 @@
 .bg-border {
     border: 1px solid #f1f1f1;
     border-radius: 8px;
+    box-shadow: 1px 1px 1px rgba(120, 120, 120, 0.5);
 }
 
 .resize-bar {
@@ -77,7 +78,7 @@
 }
 
 .record-snap-panel {
-    height: calc(100vh - 205px);
+    height: calc(100% - 140px);
     overflow-y: scroll;
     overflow-x: hidden;
     margin: 15px 0 10px;

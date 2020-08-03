@@ -15,3 +15,15 @@ export function generateUid(): string {
 export function isUrl(url: string): boolean {
     return /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\*\+,;=.]+$/.exec(url) != null;
 }
+
+export function throttle(fn: Function, delay: number) {
+    let timer = null;
+    return (...args: any) => {
+        if (!timer) {
+            timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = null;
+            }, delay);
+        }
+    };
+}

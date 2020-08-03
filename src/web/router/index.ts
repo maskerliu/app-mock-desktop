@@ -1,19 +1,19 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import Vue from 'vue';
+import VueRouter from 'vue-router';
 
-Vue.use(Router);
+Vue.use(VueRouter);
 
-const originalPush = Router.prototype.push;
-Router.prototype.push = function push(location: any) {
+const originalPush = VueRouter.prototype.push;
+VueRouter.prototype.push = function push(location: any) {
     return originalPush.call(this, location).catch((err: any) => err);
 };
 
-const originalReplace = Router.prototype.replace;
-Router.prototype.replace = function replace(location: any) {
+const originalReplace = VueRouter.prototype.replace;
+VueRouter.prototype.replace = function replace(location: any) {
     return originalPush.call(this, location).catch((err: any) => err);
 };
 
-export default new Router({
+export default new VueRouter({
     routes: [
         {
             path: '/'

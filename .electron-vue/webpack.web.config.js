@@ -10,11 +10,20 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 
 let webConfig = {
     devtool: '#cheap-module-eval-source-map',
     entry: {
         web: path.join(__dirname, '../src/web/main.ts')
+    },
+    externals: {
+        // 'vue': 'Vue',
+        // 'vue': "VueRouter",
+        // 'axios': 'axios',
+        // 'element-ui': 'ELEMENT',
     },
     module: {
         rules: [
@@ -31,14 +40,9 @@ let webConfig = {
                 use: 'vue-html-loader'
             },
             {
-                test: /\.js$/,
-                use: 'babel-loader',
-                include: [path.resolve(__dirname, '../src/renderer')],
-                exclude: /node_modules/
-            },
-            {
-                test: /\.tsx?$/,
+                test: /\.ts$/,
                 loader: "ts-loader",
+                // include: [path.resolve(__dirname, '../src/web'), path.resolve(__dirname, '../src/common')],
                 exclude: /node_modules/,
                 options: {
                     appendTsSuffixTo: [/\.vue$/]
@@ -85,7 +89,7 @@ let webConfig = {
         new MiniCssExtractPlugin({ filename: 'styles.css' }),
         new HtmlWebpackPlugin({
             filename: 'index.html',
-            template: path.resolve(__dirname, '../src/web/index.html'),
+            template: path.resolve(__dirname, '../src/index.ejs'),
             minify: {
                 collapseWhitespace: true,
                 removeAttributeQuotes: true,
@@ -100,6 +104,20 @@ let webConfig = {
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoEmitOnErrorsPlugin()
     ],
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+                libs: {
+                    name: 'libs',
+                    test: /[\\/]node_modules[\\/]/,
+                    priority: 10,
+                    chunks: 'initial' // 只打包初始时依赖的第三方
+                }
+            }
+        },
+        runtimeChunk: 'single',
+    },
     output: {
         filename: '[name].js',
         path: path.join(__dirname, '../dist/web')
@@ -118,7 +136,7 @@ let webConfig = {
  * Adjust webConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
-    webConfig.devtool = ''
+    webConfig.devtool = '';
 
     webConfig.plugins.push(
         new MinifyPlugin(),
@@ -136,7 +154,22 @@ if (process.env.NODE_ENV === 'production') {
         new webpack.LoaderOptionsPlugin({
             minimize: true
         })
-    )
+    );
+} else {
+    webConfig.plugins.push(
+        new BundleAnalyzerPlugin({
+            analyzerMode: 'server',
+            analyzerHost: '127.0.0.1',
+            analyzerPort: 9088,
+            reportFilename: 'report.html',
+            defaultSizes: 'parsed',
+            openAnalyzer: true,
+            generateStatsFile: false,
+            statsFilename: 'stats.json',
+            statsOptions: null,
+            logLevel: 'info'
+        }),
+    );
 }
 
 module.exports = webConfig

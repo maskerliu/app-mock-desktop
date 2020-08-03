@@ -1,5 +1,4 @@
 import { Message } from "element-ui"
-import { throttle } from "lodash"
 import { Component, Watch, Vue } from "vue-property-decorator"
 import VirtualList from "vue-virtual-scroll-list"
 import { namespace } from "vuex-class"
@@ -12,6 +11,7 @@ import {
 import { eventBus } from "../EventBus"
 import MockRuleDetail from "../components/MockRuleDetail.vue"
 import MockRuleSnap from "../components/MockRuleSnap.vue"
+import { throttle } from "../Utils"
 
 const MockRules = namespace("MockRules");
 
@@ -102,8 +102,9 @@ export default class BaseMockRuleMgr extends Vue {
     this.wrapperRule = this.curRule;
   }
 
-  @Watch("searchKeyword", { immediate: false, deep: true })
-  throttlesearchKeywordChange = throttle(function (val: string) {
+
+  @Watch("searchKeyword", { immediate: false, deep: false })
+  throttlesearchKeywordChange = throttle((val: string) => {
     this.fetchPagedMockRules();
   }, 1000);
 }

@@ -26,13 +26,19 @@ export default class BizMain extends AbstractPage {
   private canRender: boolean = false;
   private curPage: string = null;
 
-  public navMenu: Array<string> = ["Proxy", "MockRuleMgr", "Spider", "UpupU", "Settings"];
+  navMenus: Array<{ path: string, tip: string, icon: string }> = [
+    { path: "Proxy", tip: "代理", icon: "icon-mock" },
+    { path: "MockRuleMgr", tip: "Mock规则管理", icon: "icon-rule" },
+    { path: "Spider", tip: "爬虫", icon: "icon-spider" },
+    { path: "UpupU", tip: "实验室", icon: "icon-lab" },
+    { path: "Settings", tip: "设置", icon: "icon-setting" }
+];
   public curActivedNavMenuIdx: string = null;
 
   created() { }
 
   mounted() {
-    this.onNavTabClick(this.navMenu[0]);
+    this.onNavTabClick(this.navMenus[0].path);
   }
 
   destroy() { }

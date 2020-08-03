@@ -98,17 +98,13 @@
   border-radius: 8px;
   margin: 5px;
   padding: 5px;
+  box-shadow: 1px 1px 1px rgba(120, 120, 120, 0.5);
 }
 
 .rule-snap-panel {
   height: calc(100vh - 140px);
   margin-top: 15px;
-  /* overflow-y: scroll; */
   overflow-x: hidden;
   margin-bottom: 5px;
 }
-
-/* .rule-snap-panel::-webkit-scrollbar {
-  display: none;
-} */
 </style>

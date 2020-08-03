@@ -2,7 +2,6 @@ import { AxiosPromise } from "axios";
 import { BASE_UPLOAD_URL, get, post } from "./BasicLocalAPI";
 import { BizResponse, MockRule, LocalServerConfig } from "./DataModels";
 
-
 export function setProxyDelay(delay: number, isOpen: boolean): AxiosPromise<BizResponse<string>> {
   return get("/appmock/setProxyDelay", null, { isOpen, delay });
 }

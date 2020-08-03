@@ -11,6 +11,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 const TerserPlugin = require("terser-webpack-plugin");
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 let whiteListedModules = ["vue"];
 
@@ -177,6 +178,21 @@ if (process.env.NODE_ENV === "production") {
         new webpack.LoaderOptionsPlugin({
             minimize: true
         })
+    );
+} else {
+    rendererConfig.plugins.push(
+        new BundleAnalyzerPlugin({
+            analyzerMode: 'server',
+            analyzerHost: '127.0.0.1',
+            analyzerPort: 9089,
+            reportFilename: 'report.html',
+            defaultSizes: 'parsed',
+            openAnalyzer: true,
+            generateStatsFile: false,
+            statsFilename: 'stats.json',
+            statsOptions: null,
+            logLevel: 'info'
+        }),
     );
 }
 

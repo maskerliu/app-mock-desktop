@@ -1,5 +1,4 @@
 import axios, { AxiosPromise } from "axios";
-
 import { Message } from "element-ui";
 
 import { BizResponse, BizCode } from "./DataModels";

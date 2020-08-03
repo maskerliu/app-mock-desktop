@@ -1,5 +1,5 @@
 import QrcodeVue from "qrcode.vue";
-import { Component, Watch, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { Action, Mutation, State } from "vuex-class";
 
 
@@ -21,14 +21,17 @@ export default class App extends Vue {
     @Action("init")
     private init: Function;
 
-
     @Mutation("updateShowQrCodeDialog")
     private updateShowQrCodeDialog: Function;
 
-    private curPage: string = null;
+    navMenus: Array<{ path: string, tip: string, icon: string }> = [
+        { path: "Proxy", tip: "代理", icon: "icon-mock" },
+        { path: "MockRuleMgr", tip: "Mock规则管理", icon: "icon-rule" },
+        { path: "Demo", tip: "实验室", icon: "icon-lab" }
+    ];
 
-    private navMenu: Array<string> = ["Proxy", "MockRuleMgr",];
-    private curActivedNavMenuIdx: string = null;
+    curPage: string = null;
+    curActivedNavMenuIdx: string = null;
 
     created() {
         this.init();

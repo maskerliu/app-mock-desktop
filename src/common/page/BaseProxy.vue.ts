@@ -1,5 +1,4 @@
 import { Component, Watch, Vue } from "vue-property-decorator"
-import VueDragResize from 'vue-drag-resize'
 import VirtualList from "vue-virtual-scroll-list"
 import { namespace } from "vuex-class"
 import {
@@ -20,7 +19,6 @@ const ProxyRecords = namespace("ProxyRecords");
         VirtualList,
         ProxyRequestDetail,
         ProxyStatDetail,
-        VueDragResize,
     },
 })
 export default class BaseProxy extends Vue {
