@@ -1,10 +1,11 @@
 import { ipcRenderer } from "electron"
-import { Message } from "element-ui"
+import Message from "element-ui/packages/message"
 import { Component } from "vue-property-decorator"
-import { Action, Mutation, State } from "vuex-class"
-import { IP } from "../../model/DataModels"
-import AbstractPage from "./AbstractPage.vue"
+import { Mutation, State, Action } from "vuex-class"
 import { isUrl } from "../../common/Utils"
+import { IP, MsgPushClient, PushMsgType, PushMsg, BizType, CMDType } from "../../model/DataModels"
+import AbstractPage from "./AbstractPage.vue"
+import { getAllPushClients } from "../../model/LocaAPIs"
 
 
 @Component({
@@ -17,7 +18,6 @@ export default class Settings extends AbstractPage {
     serverIP: string;
     proxyHttpPort: number;
     proxySocketPort: number;
-    pushSocketPort: number;
     ips: Array<IP>;
     pbFiles: Array<{ name: string; value: string }>;
   };
@@ -40,6 +40,10 @@ export default class Settings extends AbstractPage {
   @State((state) => state.Common.versionCheckServer)
   private versionCheckServer: string;
 
+
+  @Action("sendMessage")
+  private sendMessage: Function;
+
   @Mutation("updateLocalServerConfig")
   private updateLocalServerConfig: Function;
 
@@ -58,11 +62,16 @@ export default class Settings extends AbstractPage {
   @Mutation("updateVersionCheckServer")
   private updateVersionCheckServer: Function;
 
+  private dialogVisible: boolean = false;
+  private selectClient: MsgPushClient = null;
+  private broadcastMsg: string = "";
+  private imMsg: string = "";
+  private clients: {} = {};
+
   private ips: Array<IP>;
   private curServerIP: string = null;
   private curProxyHttpPort: number = null;
   private curProxySocketPort: number = null;
-  private curPushSocketPort: number = null;
   private adsUrl: string = null;
   private srsUrl: string = null;
   private mrsUrl: string = null;
@@ -71,6 +80,8 @@ export default class Settings extends AbstractPage {
   private vcsUrl: string = null;
   private pbFiles: any[] = null;
   private serialPlugin: number = 3;
+
+  private syncClientsTimer: any;
 
   public created(): void {
     this.updateNavBarConfig({
@@ -82,7 +93,6 @@ export default class Settings extends AbstractPage {
     this.curServerIP = this.localServerConfig.serverIP;
     this.curProxyHttpPort = this.localServerConfig.proxyHttpPort;
     this.curProxySocketPort = this.localServerConfig.proxySocketPort;
-    this.curPushSocketPort = this.localServerConfig.pushSocketPort;
     this.pbFiles = this.localServerConfig.pbFiles;
 
     this.adsUrl = this.apiDefineServer;
@@ -91,12 +101,24 @@ export default class Settings extends AbstractPage {
     this.dpsUrl = this.dataProxyServer;
     this.dpStatus = this.dataProxyStatus;
     this.vcsUrl = this.versionCheckServer;
+
+    this.syncClientsTimer = setInterval(() => {
+      this.getOnlineClients();
+    }, 3000);
   }
 
-  public destroyed(): void { }
+  public destroyed(): void {
+    clearInterval(this.syncClientsTimer);
+  }
 
   public onOpenFileDialog(): void {
     ipcRenderer.send("on-open-folder", "openFile");
+  }
+
+  public getOnlineClients() {
+    getAllPushClients().then(resp => {
+      this.clients = resp.data.data;
+    }).catch(err => { })
   }
 
   public onDataProxySwitchChanged() {
@@ -118,7 +140,45 @@ export default class Settings extends AbstractPage {
       serverIP: this.curServerIP,
       proxyHttpPort: this.curProxyHttpPort,
       proxySocketPort: this.curProxySocketPort,
-      pushSocketPort: this.curPushSocketPort
     });
+  }
+  public sendBroadcastMsg(): void {
+    let msg: PushMsg<any> = {
+      type: PushMsgType.TXT,
+      payload: {
+        type: BizType.IM,
+        content: this.broadcastMsg
+      }
+    }
+    this.sendMessage(msg);
+    this.broadcastMsg = "";
+  }
+
+  public sendMsg(): void {
+    let msg: PushMsg<any> = {
+      to: this.selectClient.uid,
+      type: PushMsgType.TXT,
+      payload: {
+        type: BizType.IM,
+        content: this.imMsg
+      }
+    }
+    this.sendMessage(msg);
+    this.imMsg = "";
+  }
+
+  public kickDown(): void {
+    this.sendMessage({
+      to: this.selectClient.uid,
+      type: PushMsgType.CMD,
+      payload: {
+        type: CMDType.KICKDOWN,
+      }
+    });
+  }
+
+  public showOpMenu(client: MsgPushClient): void {
+    this.dialogVisible = true;
+    this.selectClient = client;
   }
 }

@@ -1,6 +1,6 @@
 import { AxiosPromise } from "axios";
 import { BASE_UPLOAD_URL, get, post } from "./BasicLocalAPI";
-import { BizResponse, MockRule, LocalServerConfig } from "./DataModels";
+import { BizResponse, MockRule, LocalServerConfig, MsgPushClient } from "./DataModels";
 
 export function setProxyDelay(delay: number, isOpen: boolean): AxiosPromise<BizResponse<string>> {
   return get("/appmock/setProxyDelay", null, { isOpen, delay });
@@ -27,5 +27,9 @@ export function uploadMockRule(rule: MockRule): AxiosPromise<BizResponse<string>
 }
 
 export function getLocalServerConfig(): AxiosPromise<BizResponse<LocalServerConfig>> {
-  return post("/appmock/getLocalServerConfig", process.env.SERVER_BASE_URL);
+  return get("/appmock/getLocalServerConfig", process.env.SERVER_BASE_URL);
+}
+
+export function getAllPushClients(): AxiosPromise<BizResponse<Array<MsgPushClient>>> {
+  return post("/appmock/getAllPushClients", process.env.SERVER_BASE_URL);
 }

@@ -1,4 +1,4 @@
-import { Message } from "element-ui";
+import Message from "element-ui/packages/message";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { get } from "../../model/BasicLocalAPI";
@@ -58,8 +58,8 @@ export default class ProxyStatDetail extends Vue {
     if (elementId == "" && pageId == "") {
       Vue.set(this.rows[index], "rowClassName", "warning-row");
       Message.warning("未找到相关等级埋点");
-    } else if (this.statRuleServer == null) { 
-      Message.warning("请在设置中指定埋点管理服务地址"); 
+    } else if (this.statRuleServer == null) {
+      Message.warning("请在设置中指定埋点管理服务地址");
     } else {
       get("/api/stat/queryStats", this.statRuleServer, {
         eventId: row["event_id"],

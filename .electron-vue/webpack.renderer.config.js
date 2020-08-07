@@ -11,6 +11,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 const TerserPlugin = require("terser-webpack-plugin");
+const tsImportPluginFactory = require('ts-import-plugin')
+const camel2Dash = require('camel-2-dash')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 let whiteListedModules = ["vue"];
@@ -43,11 +45,30 @@ let rendererConfig = {
             },
             {
                 test: /\.tsx?$/,
-                loader: "ts-loader",
+                use: [
+                    'babel-loader',
+                    {
+                        loader: "ts-loader",
+                        options: {
+                            appendTsSuffixTo: [/\.vue$/],
+                            transpileOnly: true,
+                            getCustomTransformers: () => ({
+                                before: [tsImportPluginFactory({
+                                    libraryName: 'element-ui',
+                                    libraryDirectory: 'lib',
+                                    camel2DashComponentName: true,
+                                    style: (_path) =>
+                                        path.join('element-ui', 'lib', 'theme-chalk', `${
+                                            camel2Dash(path.basename(_path, '.js'))}.css`),
+                                })]
+                            }),
+                            compilerOptions: {
+                                module: 'es2015'
+                            },
+                        }
+                    }
+                ],
                 exclude: /node_modules/,
-                options: {
-                    appendTsSuffixTo: [/\.vue$/]
-                }
             },
             {
                 test: /\.node$/,
@@ -143,6 +164,27 @@ let rendererConfig = {
                 }
             }),
         ],
+        splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+                vender: {
+                    name: 'vender',
+                    test: /[\\/]node_modules[\\/]/,
+                    priority: 10,
+                    chunks: 'initial' // 只打包初始时依赖的第三方
+                },
+                elementUI: {
+                    name: "element-ui", // 单独将 elementUI 拆包
+                    priority: 20, // 权重要大于 libs 和 app 不然会被打包进 libs 或者 app
+                    test: /[\\/]node_modules[\\/]element-ui[\\/]/
+                },
+                jsonEditor: {
+                    name: "jsoneditor", // 单独将 elementUI 拆包
+                    priority: 20, // 权重要大于 libs 和 app 不然会被打包进 libs 或者 app
+                    test: /[\\/]node_modules[\\/]v-jsoneditor[\\/]/
+                },
+            }
+        },
     },
     target: "electron-renderer"
 };
@@ -167,13 +209,23 @@ if (process.env.NODE_ENV === "production") {
     rendererConfig.plugins.push(
         new CopyWebpackPlugin([
             {
-                from: path.join(__dirname, "../static"),
-                to: path.join(__dirname, "../dist/electron/static"),
+                from: path.join(__dirname, "../static/jupaixiaoren"),
+                to: path.join(__dirname, "../dist/electron/static/jupaixiaoren"),
+                ignore: [".*"]
+            },
+            {
+                from: path.join(__dirname, "../static/icon.ico"),
+                to: path.join(__dirname, "../dist/electron/static/icon.ico"),
+                ignore: [".*"]
+            },
+            {
+                from: path.join(__dirname, "../static/icon_*.png"),
+                to: path.join(__dirname, "../dist/electron/"),
                 ignore: [".*"]
             }
         ]),
         new webpack.DefinePlugin({
-            "process.env.NODE_ENV": '"production"'
+            "process.env.NODE_ENV": '"production"',
         }),
         new webpack.LoaderOptionsPlugin({
             minimize: true
@@ -181,6 +233,9 @@ if (process.env.NODE_ENV === "production") {
     );
 } else {
     rendererConfig.plugins.push(
+        new webpack.DefinePlugin({
+            'process.env.SERVER_BASE_URL': '"http://192.168.30.51:8885"'
+        }),
         new BundleAnalyzerPlugin({
             analyzerMode: 'server',
             analyzerHost: '127.0.0.1',

@@ -3,14 +3,14 @@ import { Request, Response } from "express"
 import path from "path"
 import PouchDB from "pouchdb"
 import PouchDBFind from "pouchdb-find"
-import { BizCode, BizResponse, CMDCode, MockRule, ProxyRequestRecord } from "../model/DataModels"
+import { BizCode, BizResponse, PorxyType, MockRule, ProxyRequestRecord } from "../model/DataModels"
 import PushService from "./PushService"
 
 const JSONBigInt = require("json-bigint");
 
 class MockService {
   private localDB: any;
-  private clientMockStatus: {} = {}; // TODO：失效会话清理
+  private clientMockStatus: {} = {};
 
   constructor() {
     this.initDB();
@@ -20,7 +20,7 @@ class MockService {
     PouchDB.plugin(PouchDBFind);
     this.localDB = new PouchDB(path.join(app.getPath("userData"), "AppMockDB"));
     this.localDB.createIndex({
-      index: { fields: ["_id"] },
+      index: { fields: ["name"] },
     }).then((result: any) => {
       // console.log(result);
     }).catch((err: any) => {
@@ -55,14 +55,14 @@ class MockService {
 
               let data: ProxyRequestRecord = {
                 id: sessionId,
-                type: CMDCode.REQUEST_END,
+                type: PorxyType.REQUEST_END,
                 statusCode: statusCode,
                 headers: !!record.responseHeaders ? record.responseHeaders : null,
                 responseData: !!record.responseData ? JSON.stringify(record.responseData) : null,
                 time: new Date().getTime() - startTime,
                 isMock: true,
               };
-              PushService.sendMessage(data, uid);
+              PushService.sendProxyMessage(data, uid);
             }, proxyDelay);
             resolve();
           }

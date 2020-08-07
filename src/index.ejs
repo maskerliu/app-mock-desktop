@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="stylesheet" href="https://at.alicdn.com/t/font_1637704_4p43ypsod8s.css">
-    <link rel="shortcut icon" href="/static/favicon.ico">
-    <title>AppMock</title>
-    <% if (htmlWebpackPlugin.options.nodeModules) { %>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <link rel="stylesheet" href="https://at.alicdn.com/t/font_1637704_x703876i7b.css" />
+        <link rel="shortcut icon" href="/static/favicon.ico" />
+        <title>AppMock</title>
+        <% if (htmlWebpackPlugin.options.nodeModules) { %>
         <script>
-            require("module").globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, "\\\\") %>')
+            require("module").globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, "\\\\") %>');
         </script>
-    <% } %>
-</head>
-<body style="margin: 0;">
-<div id="app"></div>
-</body>
+        <% } %>
+    </head>
+    <body style="margin: 0;">
+        <div id="app"></div>
+    </body>
 </html>

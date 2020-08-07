@@ -1,8 +1,8 @@
-import { app, dialog, ipcMain, IpcMainEvent, NativeImage } from "electron";
+import { app, dialog, ipcMain, IpcMainEvent } from "electron";
 import { mainWindow } from "./";
+// import AsarUpdateService from "./AsarUpdateService";
 import LocalServer from "./LocalServer";
 import ProxyService from "./ProxyService";
-import AsarUpdateService from "./AsarUpdateService";
 
 ipcMain.on("on-app-maximize", (event: IpcMainEvent, args?: any) => {
   if (mainWindow == null) return;
@@ -40,15 +40,12 @@ ipcMain.on("update-data-proxy-server", (event: IpcMainEvent, args: { url: string
 
 ipcMain.on("update-version-check-server", (event: IpcMainEvent, args: { url: string }) => {
   try {
-    AsarUpdateService.setVersionCheckServer(args.url);
+    // AsarUpdateService.setVersionCheckServer(args.url);
   } catch (err) { }
 });
 
 ipcMain.on("get-local-server-config", (event: IpcMainEvent) => {
-  event.sender.send(
-    "get-local-server-config",
-    LocalServer.getLocalServerConfig()
-  );
+  event.sender.send("get-local-server-config", LocalServer.getLocalServerConfig());
 });
 
 ipcMain.on("update-local-server-config", (event: IpcMainEvent, args?: any) => {

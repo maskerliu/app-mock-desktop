@@ -1,12 +1,10 @@
-import { Message } from "element-ui"
-import PouchDB from "pouchdb"
 import { ActionTree, Commit, GetterTree, MutationTree } from "vuex"
 import store from "../"
-import { updateLocalDomain, updateClientUID } from "../../../model/BasicLocalAPI"
-import { getLocalServerConfig } from "../../../model/LocaAPIs"
-import { CommonState } from "../types"
 import { PushClient } from "../../../common/PushClient"
 import { generateUid } from "../../../common/Utils"
+import { updateClientUID, updateLocalDomain } from "../../../model/BasicLocalAPI"
+import { getLocalServerConfig } from "../../../model/LocaAPIs"
+import { CommonState } from "../types"
 
 const state: CommonState = {
     showQrCodeDialog: false,
@@ -15,7 +13,6 @@ const state: CommonState = {
         serverIP: null,
         proxyHttpPort: null,
         proxySocketPort: null,
-        pushSocketPort: null,
         ips: [],
         pbFiles: [],
     }
@@ -34,7 +31,7 @@ export const actions: ActionTree<CommonState, any> = {
         }).catch(err => { });
     },
     unInit(context: { commit: Commit }): void {
-
+        pushClient.close();
     },
     saveLocalServerConfig(context: { commit: Commit }, params: any) {
 
@@ -52,7 +49,7 @@ export const mutations: MutationTree<CommonState> = {
         state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/mw/register?_=0__0&uid=${uid}`;
         updateLocalDomain(state.localServerConfig);
         updateClientUID(uid);
-        pushClient.start(params.serverIP, params.pushSocketPort, uid);
+        pushClient.start(`http://${params.serverIP}:${params.proxyHttpPort}`, uid);
     }
 };
 

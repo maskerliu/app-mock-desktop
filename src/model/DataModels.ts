@@ -1,27 +1,9 @@
-export enum CMDCode {
-  REQUEST = 5010,
-  REQUEST_START = 5011,
-  REQUEST_END = 5012,
-  STATISTICS = 5020,
-  SOCKET = 5030,
-  REGISTER_SUCCESS = 6000,
-}
-
 export enum BizCode {
   SUCCESS = 8000,
   FAIL = 8010,
   ERROR = 9000,
 }
 
-export interface IP {
-  address: string;
-  netmask: string;
-  family: string;
-  mac: string;
-  internal: boolean;
-  cidr: string;
-  name: string;
-}
 
 export class BizResponse<T> {
   code: number;
@@ -35,6 +17,16 @@ export class Paged<T> {
   page: any;
   totalPage: number;
   isEnd: boolean;
+}
+
+export interface IP {
+  address: string;
+  netmask: string;
+  family: string;
+  mac: string;
+  internal: boolean;
+  cidr: string;
+  name: string;
 }
 
 export interface StatisticRecord {
@@ -91,6 +83,49 @@ export class LocalServerConfig {
   serverIP: string;
   proxyHttpPort: number;
   proxySocketPort: number;
-  pushSocketPort: number;
   ips: Array<IP>;
+}
+
+export interface MsgPushClient {
+  key: string;
+  uid: string;
+  ip: string; // client ip
+  port: string; // client port
+}
+
+export enum PushMsgType {
+  TXT = 0,
+  CMD = 1,
+}
+
+export enum CMDType {
+  REGISTER = 0,
+  KICKDOWN = 1,
+  RECONNECT = 2,
+  BROADCAST = 3
+}
+
+export enum BizType {
+  IM = 0,
+  Proxy = 1
+}
+
+export interface PushMsg<T> {
+  type: PushMsgType;
+  from?: string;
+  to?: string;
+  payload: PushMsgPayload<T>;
+}
+
+export interface PushMsgPayload<T> {
+  type: BizType | CMDType;
+  content: T
+}
+
+export enum PorxyType {
+  REQUEST = 5010,
+  REQUEST_START = 5011,
+  REQUEST_END = 5012,
+  STATISTICS = 5020,
+  SOCKET = 5030,
 }

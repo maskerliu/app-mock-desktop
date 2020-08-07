@@ -1,4 +1,4 @@
-import { Message } from "element-ui";
+import Message from "element-ui/packages/message";
 import VJsonEditor from "v-jsoneditor";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { MockRule, ProxyRequestRecord } from "../../model/DataModels";
@@ -47,7 +47,7 @@ export default class AddMockRule extends Vue {
       .then((result) => {
         this.searchResults = result.data.data;
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }
 
   onRuleSelected(item: MockRule) {
@@ -58,7 +58,7 @@ export default class AddMockRule extends Vue {
       .then((result) => {
         this.curRule = result.data.data;
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }
 
   addRule() {

@@ -1,7 +1,7 @@
 import axios, { AxiosPromise } from "axios";
-import { Message } from "element-ui";
+import Message from "element-ui/packages/message";
+import { BizCode, BizResponse } from "./DataModels";
 
-import { BizResponse, BizCode } from "./DataModels";
 
 axios.defaults.adapter = require("axios/lib/adapters/http");
 axios.defaults.timeout = 10000;

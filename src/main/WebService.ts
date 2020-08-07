@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CMDCode } from "../model/DataModels";
+import { PushMsg, CMDType, PushMsgType } from "../model/DataModels";
 import MockService from "./MockService";
 import ProxyService from "./ProxyService";
 import PushService from "./PushService";
@@ -15,6 +15,8 @@ class WebService {
     try {
       if (MockService[props.path] != null) {
         MockService[props.path].apply(MockService, [req, resp]);
+      } else if (PushService[props.path] != null) {
+        PushService[props.path].apply(PushService, [req, resp]);
       } else if (ProxyService[props.path] != null) {
         ProxyService[props.path].apply(ProxyService, [req, resp])
       } else if (this[props.path] != null) {
@@ -32,10 +34,13 @@ class WebService {
     let uid = req.query["uid"];
     if (uid) {
       resp.end();
-      let data = {
-        type: CMDCode.REGISTER_SUCCESS,
-        data: uid,
-      };
+      let data: PushMsg<any> = {
+        type: PushMsgType.CMD,
+        payload: {
+          type: CMDType.REGISTER,
+          content: uid
+        }
+      }
       PushService.sendMessage(data, `${uid}`);
     } else {
       resp.end("invalid uid");

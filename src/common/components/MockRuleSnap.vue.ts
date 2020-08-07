@@ -1,4 +1,4 @@
-import { Message } from "element-ui";
+import Message from "element-ui/packages/message";
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { namespace } from "vuex-class";
 import { MockRule } from "../../model/DataModels";

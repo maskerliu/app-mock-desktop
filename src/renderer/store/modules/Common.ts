@@ -1,13 +1,15 @@
-import { remote, ipcRenderer } from "electron";
-import { Message } from "element-ui";
-import PouchDB from "pouchdb";
+import { ipcRenderer, remote } from "electron";
+import Message from "element-ui/packages/message";
 import path from "path";
+import PouchDB from "pouchdb";
 import { ActionTree, Commit, GetterTree, MutationTree } from "vuex";
 import store from "../";
-import { updateLocalDomain, updateClientUID } from "../../../model/BasicLocalAPI";
 import { PushClient } from "../../../common/PushClient";
+import { generateUid, isUrl } from "../../../common/Utils";
+import { updateClientUID, updateLocalDomain } from "../../../model/BasicLocalAPI";
+import { getLocalServerConfig } from "../../../model/LocaAPIs";
 import { CommonState } from "../types";
-import { isUrl, generateUid } from "../../../common/Utils"
+import { PushMsg } from "../../../model/DataModels";
 
 const state: CommonState = {
   showQrCodeDialog: false,
@@ -23,7 +25,6 @@ const state: CommonState = {
     serverIP: null,
     proxyHttpPort: null,
     proxySocketPort: null,
-    pushSocketPort: null,
     ips: [],
     pbFiles: [],
   },
@@ -43,20 +44,26 @@ export const getters: GetterTree<CommonState, any> = {};
 // async
 export const actions: ActionTree<CommonState, any> = {
   init(context: { commit: Commit }): void {
-
     pushClient = new PushClient(store);
 
     ipcRenderer.on("get-local-server-config", (event: any, data: any) => {
       store.commit("updateLocalServerConfig", data);
     });
+
+    // getLocalServerConfig().then(resp => {
+    //   store.commit("updateLocalServerConfig", resp.data.data);
+    // }).catch(err => {
+    //   console.log(err);
+    // });
+
+    ipcRenderer.send("get-local-server-config");
+
     ipcRenderer.on("on-selected-files", (event: any, data: any) => {
-      console.log("on select files");
       // data.files.forEach((item: string) => {
       //     var strs = item.split("/");
       //     this.pbFiles.push({ name: strs[strs.length - 1], value: item });
       // });
     });
-    ipcRenderer.send("get-local-server-config");
 
     db.get('apiDefineServer').then((result: any) => {
       state.apiDefineServer = result.url;
@@ -83,10 +90,14 @@ export const actions: ActionTree<CommonState, any> = {
   },
   unInit(context: { commit: Commit }): void {
     ipcRenderer.removeAllListeners("get-local-server-config");
+    ipcRenderer.removeAllListeners("on-selected-files");
   },
   saveLocalServerConfig(context: { commit: Commit }, params: any) {
     ipcRenderer.send("update-local-server-config", params);
   },
+  sendMessage(context: { commit: Commit }, params: PushMsg<any>) {
+    pushClient.send(params);
+  }
 };
 
 // sync
@@ -102,15 +113,13 @@ export const mutations: MutationTree<CommonState> = {
     state.localServerConfig.serverIP = params.serverIP;
     state.localServerConfig.proxyHttpPort = params.proxyHttpPort;
     state.localServerConfig.proxySocketPort = params.proxySocketPort;
-    state.localServerConfig.pushSocketPort = params.pushSocketPort;
     state.localServerConfig.ips = params.ips;
     state.localServerConfig.pbFiles = params.pbFiles;
     state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/mw/register?_=0__0&uid=${uid}`;
 
     updateLocalDomain(state.localServerConfig);
     updateClientUID(uid);
-
-    pushClient.start(params.serverIP, params.pushSocketPort, uid);
+    pushClient.start(`http://${params.serverIP}:${params.proxyHttpPort}`, uid);
   },
   updateApiDefineServer(state, url) {
     if (!isUrl(url)) {

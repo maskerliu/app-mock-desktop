@@ -5,6 +5,5 @@ export interface CommonState {
     serverIP: string;
     proxyHttpPort: number;
     proxySocketPort: number;
-    pushSocketPort: number;
   };
 }

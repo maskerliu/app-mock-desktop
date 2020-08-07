@@ -9,9 +9,11 @@ const MinifyPlugin = require("babel-minify-webpack-plugin")
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const tsImportPluginFactory = require('ts-import-plugin')
+const camel2Dash = require('camel-2-dash')
 const { VueLoaderPlugin } = require('vue-loader')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+
 
 
 let webConfig = {
@@ -40,13 +42,32 @@ let webConfig = {
                 use: 'vue-html-loader'
             },
             {
-                test: /\.ts$/,
-                loader: "ts-loader",
+                test: /\.tsx?$/,
+                use: [
+                    'babel-loader',
+                    {
+                        loader: "ts-loader",
+                        options: {
+                            appendTsSuffixTo: [/\.vue$/],
+                            transpileOnly: true,
+                            getCustomTransformers: () => ({
+                                before: [tsImportPluginFactory({
+                                    libraryName: 'element-ui',
+                                    libraryDirectory: 'lib',
+                                    camel2DashComponentName: true,
+                                    style: (_path) =>
+                                        path.join('element-ui', 'lib', 'theme-chalk', `${
+                                            camel2Dash(path.basename(_path, '.js'))}.css`),
+                                })]
+                            }),
+                            compilerOptions: {
+                                module: 'es2015'
+                            },
+                        }
+                    }
+                ],
                 // include: [path.resolve(__dirname, '../src/web'), path.resolve(__dirname, '../src/common')],
                 exclude: /node_modules/,
-                options: {
-                    appendTsSuffixTo: [/\.vue$/]
-                }
             },
             {
                 test: /\.vue$/,
@@ -99,7 +120,6 @@ let webConfig = {
         }),
         new webpack.DefinePlugin({
             'process.env.IS_WEB': 'true',
-            'process.env.SERVER_BASE_URL': '"http://192.168.30.51:8885"'
         }),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoEmitOnErrorsPlugin()
@@ -108,12 +128,22 @@ let webConfig = {
         splitChunks: {
             chunks: 'all',
             cacheGroups: {
-                libs: {
-                    name: 'libs',
+                vender: {
+                    name: 'vender',
                     test: /[\\/]node_modules[\\/]/,
                     priority: 10,
                     chunks: 'initial' // 只打包初始时依赖的第三方
-                }
+                },
+                elementUI: {
+                    name: "element-ui", // 单独将 elementUI 拆包
+                    priority: 20, // 权重要大于 libs 和 app 不然会被打包进 libs 或者 app
+                    test: /[\\/]node_modules[\\/]element-ui[\\/]/
+                },
+                jsonEditor: {
+                    name: "jsoneditor", // 单独将 elementUI 拆包
+                    priority: 20, // 权重要大于 libs 和 app 不然会被打包进 libs 或者 app
+                    test: /[\\/]node_modules[\\/]v-jsoneditor[\\/]/
+                },
             }
         },
         runtimeChunk: 'single',
@@ -142,14 +172,18 @@ if (process.env.NODE_ENV === 'production') {
         new MinifyPlugin(),
         new CopyWebpackPlugin([
             {
-                from: path.join(__dirname, '../static'),
-                to: path.join(__dirname, '../dist/web/static'),
+                from: path.join(__dirname, '../static/live2d'),
+                to: path.join(__dirname, '../dist/web/static/live2d'),
+                ignore: ['.*']
+            },
+            {
+                from: path.join(__dirname, '../static/favicon.ico'),
+                to: path.join(__dirname, '../dist/web/static/favicon.ico'),
                 ignore: ['.*']
             }
         ]),
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': '"production"',
-            'process.env.SERVER_BASE_URL': null
+            'process.env.NODE_ENV': '"production"'
         }),
         new webpack.LoaderOptionsPlugin({
             minimize: true
@@ -157,6 +191,9 @@ if (process.env.NODE_ENV === 'production') {
     );
 } else {
     webConfig.plugins.push(
+        new webpack.DefinePlugin({
+            'process.env.SERVER_BASE_URL': '"http://192.168.30.51:8885"'
+        }),
         new BundleAnalyzerPlugin({
             analyzerMode: 'server',
             analyzerHost: '127.0.0.1',

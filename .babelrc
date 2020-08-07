@@ -28,17 +28,21 @@
     "web": {
       "presets": [
         [
-          "env",
+          "es2015",
           {
             "modules": false
           }
-        ],
-        "stage-0"
+        ]
       ]
     }
   },
   "plugins": [
-    "transform-runtime",
-    // "transform-remove-strict-mode"
+    [
+      "component",
+      {
+        "libraryName": "element-ui",
+        "styleLibraryName": "theme-chalk"
+      }
+    ]
   ]
 }

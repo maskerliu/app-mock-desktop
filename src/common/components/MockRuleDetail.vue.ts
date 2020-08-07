@@ -1,4 +1,4 @@
-import { Message } from "element-ui";
+import Message from "element-ui/packages/message";
 import VJsonEditor from "v-jsoneditor";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { MockRule, ProxyRequestRecord } from "../../model/DataModels";

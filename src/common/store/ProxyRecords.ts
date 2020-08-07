@@ -1,10 +1,6 @@
 import Vue from "vue";
-import { ActionTree, Commit, GetterTree, MutationTree } from "vuex";
-import {
-  CMDCode,
-  ProxyRequestRecord,
-  ProxyStatRecord
-} from "../../model/DataModels";
+import { ActionTree, GetterTree, MutationTree } from "vuex";
+import { PorxyType, ProxyRequestRecord } from "../../model/DataModels";
 import { ProxyRecordState } from "./CommonStateModel";
 
 const state: ProxyRecordState = {
@@ -42,15 +38,15 @@ const mutations: MutationTree<ProxyRecordState> = {
   },
   updateProxyRecords(state, record: ProxyRequestRecord) {
 
-    if (record.type == CMDCode.REQUEST_START || record.type == CMDCode.REQUEST_END) {
-      if (state.proxyTypes.indexOf(String(CMDCode.REQUEST)) == -1) return;
-    } else if (record.type == CMDCode.STATISTICS || record.type == CMDCode.SOCKET) {
+    if (record.type == PorxyType.REQUEST_START || record.type == PorxyType.REQUEST_END) {
+      if (state.proxyTypes.indexOf(String(PorxyType.REQUEST)) == -1) return;
+    } else if (record.type == PorxyType.STATISTICS || record.type == PorxyType.SOCKET) {
       if (state.proxyTypes.indexOf(String(record.type)) == -1) return;
     }
 
     switch (record.type) {
-      case CMDCode.REQUEST_START:
-      case CMDCode.STATISTICS:
+      case PorxyType.REQUEST_START:
+      case PorxyType.STATISTICS:
         if (state.records.length > 40) {
           state.records.splice(state.records.length - 10, 10);
         }
@@ -69,7 +65,7 @@ const mutations: MutationTree<ProxyRecordState> = {
         }
         if (!isExist) state.curRecord = null;
         break;
-      case CMDCode.REQUEST_END:
+      case PorxyType.REQUEST_END:
         for (let i = 0; i < state.records.length; ++i) {
           let anchor: ProxyRequestRecord = <ProxyRequestRecord>state.records[i];
           if (anchor != null && anchor.id == record.id) {
@@ -78,8 +74,8 @@ const mutations: MutationTree<ProxyRecordState> = {
             Vue.set(state.records[i], "responseHeaders", record.responseHeaders);
             try {
               Vue.set(state.records[i], "responseData", JSON.parse(record.responseData));
-            } catch (err) {}
-            
+            } catch (err) { }
+
             Vue.set(state.records[i], "statusCode", record.statusCode);
             Vue.set(state.records[i], "time", record.time);
             break;

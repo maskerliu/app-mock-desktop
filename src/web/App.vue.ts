@@ -21,6 +21,9 @@ export default class App extends Vue {
     @Action("init")
     private init: Function;
 
+    @Action("unInit")
+    private unInit: Function;
+
     @Mutation("updateShowQrCodeDialog")
     private updateShowQrCodeDialog: Function;
 
@@ -37,8 +40,22 @@ export default class App extends Vue {
         this.init();
     }
 
-    destroyed() {
+    mounted() {
+        // window.onbeforeunload =  (e)=> {
+        //     this.unInit();
+        //     return "浏览器关闭！";
+        // };
+        // window.addEventListener('beforeunload', e => this.beforeunloadHandler(e))
+    }
 
+    destroyed() {
+        console.log("destory");
+        this.unInit();
+    }
+
+    beforeunloadHandler(e: any) {
+        alert("hello");
+        this.unInit();
     }
 
     leftNavBarItemClick() {

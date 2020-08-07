@@ -2,22 +2,19 @@ import bodyParser from "body-parser";
 import compression from "compression";
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
-import fs from "fs";
 import { createServer, Server } from "http";
 import { NetworkInterfaceInfo, networkInterfaces } from "os";
 import path from "path";
-import { IP, BizCode, BizResponse, LocalServerConfig } from "../model/DataModels";
+import { BizCode, BizResponse, IP, LocalServerConfig } from "../model/DataModels";
 import ProxyService from "./ProxyService";
 import PushService from "./PushService";
 import WebService from "./WebService";
-
 
 
 class LocalServer {
   private serverIP: string;
   private proxyHttpPort: number;
   private proxySocketPort: number;
-  private pushSocketPort: number;
   private httpServer: Server;
   private httpApp: Application;
   private corsOptions = {
@@ -29,8 +26,12 @@ class LocalServer {
     this.serverIP = LocalServer.getLocalIPs()[0].address;
     this.proxyHttpPort = 8885;
     this.proxySocketPort = 8886;
-    this.pushSocketPort = 8887;
-    this.corsOptions['origin'] = [`http://${this.serverIP}:${this.proxyHttpPort}`, `http://${this.serverIP}:9081`];
+    this.corsOptions['origin'] = [
+      `http://${this.serverIP}:${this.proxyHttpPort}`,
+      `http://${this.serverIP}:9081`,
+      'http://localhost:9080',
+      'http://localhost:9081'
+    ];
     this.initHttpServer();
   }
 
@@ -108,7 +109,6 @@ class LocalServer {
       serverIP: LocalServer.getLocalIPs()[0].address,
       proxyHttpPort: this.proxyHttpPort,
       proxySocketPort: this.proxySocketPort,
-      pushSocketPort: this.pushSocketPort,
       ips: LocalServer.getLocalIPs(),
       pbFiles: ProxyService.getProtoFiles(),
     };
@@ -118,7 +118,6 @@ class LocalServer {
     serverIP: string;
     proxyHttpPort: number;
     proxySocketPort: number;
-    pushSocketPort: number;
   }): void {
     if (this.serverIP != config.serverIP) {
       this.serverIP = config.serverIP;
@@ -127,7 +126,6 @@ class LocalServer {
 
       this.startProxyHttpServer();
       this.startProxySocketServer();
-      this.startLocalPushServer();
     } else {
       if (this.proxyHttpPort != config.proxyHttpPort) {
         this.serverIP = config.serverIP;
@@ -140,12 +138,6 @@ class LocalServer {
         this.proxySocketPort = config.proxySocketPort;
         this.startProxySocketServer();
       }
-
-      if (this.pushSocketPort != config.pushSocketPort) {
-        this.serverIP = config.serverIP;
-        this.pushSocketPort = config.pushSocketPort;
-        this.startLocalPushServer();
-      }
     }
   }
 
@@ -154,7 +146,9 @@ class LocalServer {
       if (this.httpServer) {
         this.httpServer.close((err?: Error) => {
           console.log(`关闭本地代理服务[${this.proxyHttpPort}]`, err);
-          this.httpServer = createServer(this.httpApp).listen(
+          this.httpServer = createServer(this.httpApp);
+          PushService.bindServer(this.httpServer);
+          this.httpServer.listen(
             this.proxyHttpPort,
             this.serverIP,
             () => {
@@ -163,7 +157,9 @@ class LocalServer {
           );
         });
       } else {
-        this.httpServer = createServer(this.httpApp).listen(
+        this.httpServer = createServer(this.httpApp);
+        PushService.bindServer(this.httpServer);
+        this.httpServer.listen(
           this.proxyHttpPort,
           this.serverIP,
           () => {
@@ -176,21 +172,11 @@ class LocalServer {
     }
   }
 
+  // TODO
   public startProxySocketServer(): void {
     try {
     } catch (err) { }
     ProxyService.initProxySocketServer(this.proxySocketPort);
-  }
-
-  public startLocalPushServer(): void {
-    try {
-      PushService.closeWebSocketServer(() => {
-        console.log(`关闭本地推送服务`);
-      });
-    } catch (err) {
-      console.log("startLocalPushServer", err);
-    }
-    PushService.initWebSocket(this.pushSocketPort);
   }
 }
 

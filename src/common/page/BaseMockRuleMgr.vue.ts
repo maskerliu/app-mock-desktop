@@ -1,4 +1,4 @@
-import { Message } from "element-ui"
+import Message from "element-ui/packages/message"
 import { Component, Watch, Vue } from "vue-property-decorator"
 import VirtualList from "vue-virtual-scroll-list"
 import { namespace } from "vuex-class"

@@ -1,10 +1,10 @@
-import { app, BrowserWindow, Menu, nativeImage, shell, Tray, dialog } from "electron"
+import { app, BrowserWindow, Menu, nativeImage, shell, Tray } from "electron"
 import path from "path"
+// import AsarUpdateService from "./AsarUpdateService"
 import LocalServer from "./LocalServer"
 
 require("./IPCService")
 
-import AsarUpdateService from "./AsarUpdateService"
 
 if (process.env.NODE_ENV !== "development") {
   (<any>global).__static = require("path").join(__dirname, "/static").replace(/\\/g, "\\\\");
@@ -16,14 +16,8 @@ export let mainWindow: BrowserWindow = null;
 
 let appTray: Tray = null;
 
-const winURL: string =
-  process.env.NODE_ENV === "development"
-    ? `http://localhost:9080`
-    : `file://${__dirname}/index.html`;
-const trayFloder: string =
-  process.env.NODE_ENV === "development"
-    ? path.join(__dirname, "../../static")
-    : path.join(__dirname, "./static");
+const winURL: string = process.env.NODE_ENV === "development" ? `http://localhost:9080` : `file://${__dirname}/index.html`;
+const trayFloder: string = process.env.NODE_ENV === "development" ? path.join(__dirname, "../../static") : path.join(__dirname, "./static");
 
 function createMainWindow(): void {
   let icon = nativeImage.createFromPath(path.join(trayFloder, "icon_tray.png"));
@@ -47,7 +41,7 @@ function createMainWindow(): void {
 
   mainWindow.loadURL(winURL);
   mainWindow.webContents.frameRate = 30;
-
+  // mainWindow.webContents.openDevTools();
   mainWindow.webContents.on("paint", (event, dirty, image) => { });
 
   mainWindow.on("closed", () => {
@@ -112,10 +106,9 @@ app.on("ready", () => {
   createMainWindow();
   createAppMenu();
   createTrayMenu();
-  AsarUpdateService.setParentWindow(mainWindow);
-  AsarUpdateService.check();
+  // AsarUpdateService.setParentWindow(mainWindow);
+  // AsarUpdateService.check();
   LocalServer.startProxyHttpServer();
-  LocalServer.startLocalPushServer();
 });
 
 app.on("window-all-closed", () => {

@@ -1,59 +1,85 @@
-import { Message } from "element-ui";
-import Vue from "vue";
-import VueNativeSocket from "vue-native-websocket";
-import { CMDCode } from "../model/DataModels";
+import Message from "element-ui/packages/message";
+import SockJS from "sockjs-client";
+import { BizType, CMDType, PushMsg, PushMsgType, PushMsgPayload } from "../model/DataModels";
 
 
 export class PushClient {
-  private SocketConfig: {};
-  private vm: Vue;
   private store: any;
+  private uid: string;
+
+  private sockjs: any;
 
   constructor(store: any) {
     this.store = store;
-    this.SocketConfig = {
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 3000,
-      format: "json",
-      connectManually: true,
-    };
-    Vue.use(VueNativeSocket, "ws://localhost:8887", this.SocketConfig);
-    this.vm = new Vue();
   }
 
-  public start(serverIP: string, port: number, uid: string): void {
+  public start(host: string, uid: string): void {
+    this.uid = uid;
     try {
-      this.vm.$disconnect();
-    } catch (err) {
-      console.log(err);
-    }
+      this.sockjs.close();
+    } catch (err) { }
+    this.sockjs = new SockJS(`${host}/echo`);
+    this.sockjs.onopen = () => { this.register(uid); }
+    this.sockjs.onmessage = (e: any) => { this.handleMsg(e.data); }
+  }
 
-    this.vm.$connect(`ws://${serverIP}:${port}`, this.SocketConfig);
-    Vue.prototype.$socket.onopen = (stream: any) => {
-      Vue.prototype.$socket.send(uid);
+  public close() {
+    this.sockjs.close();
+  }
+
+  public send(data: PushMsg<any>): void {
+    data.from = this.uid;
+    this.sockjs.send(JSON.stringify(data));
+  }
+
+  private register(uid: string): void {
+    let msg: PushMsg<any> = {
+      type: PushMsgType.CMD,
+      from: this.sockjs.id,
+      payload: {
+        type: CMDType.REGISTER,
+        content: uid
+      }
     };
-    Vue.prototype.$socket.onmessage = (stream: any) => {
-      this.handleMsg(stream.data);
-    };
+    this.sockjs.send(JSON.stringify(msg));
   }
 
   private handleMsg(data: any): void {
-    let msg = JSON.parse(data);
+    let msg: PushMsg<any> = JSON.parse(data);
     switch (msg.type) {
-      case CMDCode.REGISTER_SUCCESS:
-        this.store.commit("updateShowQrCodeDialog", false);
-        Message({ message: "设备[" + msg.data + "]注册成功", type: "success" });
+      case PushMsgType.CMD: {
+        this.handleCMD(msg.payload);
         break;
-      case CMDCode.REQUEST_START:
-      case CMDCode.REQUEST_END:
-        this.store.commit("ProxyRecords/updateProxyRecords", msg);
+      }
+      case PushMsgType.TXT: {
+        switch (msg.payload.type) {
+          case BizType.Proxy: {
+            this.store.commit("ProxyRecords/updateProxyRecords", msg.payload.content);
+            break;
+          }
+          case BizType.IM: {
+            Message({ message: msg.payload.content, type: "success" });
+            break;
+          }
+        }
         break;
-      case CMDCode.STATISTICS:
-        this.store.commit("ProxyRecords/updateProxyRecords", msg);
-        break;
+      }
+
       default:
-        Message({ message: "unhandled code:" + msg.code, type: "warning" });
+        Message({ message: "unhandled code:" + msg.type, type: "warning" });
+    }
+  }
+
+  private handleCMD(msg: PushMsgPayload<any>) {
+    switch (msg.type) {
+      case CMDType.REGISTER:
+        this.store.commit("updateShowQrCodeDialog", false);
+        Message({ message: "设备[" + msg.content + "]注册成功", type: "success" });
+        break;
+      case CMDType.KICKDOWN:
+        Message({ message: "被踢下线", type: "error" });
+        window.close();
+        break;
     }
   }
 }

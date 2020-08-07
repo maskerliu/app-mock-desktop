@@ -1,12 +1,9 @@
-import { Component, Watch, Vue } from "vue-property-decorator"
+import { Component, Vue, Watch } from "vue-property-decorator"
 import VirtualList from "vue-virtual-scroll-list"
 import { namespace } from "vuex-class"
-import {
-    CMDCode,
-    ProxyRequestRecord,
-    ProxyStatRecord
-} from "../../model/DataModels"
+import { PorxyType, ProxyRequestRecord, ProxyStatRecord } from "../../model/DataModels"
 import { setProxyDelay } from "../../model/LocaAPIs"
+import Live2d from '../components/live2d'
 import ProxyRecordSnap from "../components/ProxyRecordSnap.vue"
 import ProxyRequestDetail from "../components/ProxyRequestDetail.vue"
 import ProxyStatDetail from "../components/ProxyStatDetail.vue"
@@ -17,6 +14,7 @@ const ProxyRecords = namespace("ProxyRecords");
     name: "BaseProxy",
     components: {
         VirtualList,
+        Live2d,
         ProxyRequestDetail,
         ProxyStatDetail,
     },
@@ -46,7 +44,7 @@ export default class BaseProxy extends Vue {
     };
 
     proxyRecordSnap: any = ProxyRecordSnap;
-    filterTypes: string[] = [String(CMDCode.REQUEST)];
+    filterTypes: string[] = [String(PorxyType.REQUEST)];
     proxyDelay: number = null;
     isDelay: boolean = false;
     filterInput: string = null;
@@ -101,7 +99,7 @@ export default class BaseProxy extends Vue {
     siftRecords(): void {
         this.filtedRecords = this.records.filter(
             (item: ProxyRequestRecord | ProxyStatRecord) => {
-                if (item.type == CMDCode.REQUEST_START || item.type == CMDCode.REQUEST_END) {
+                if (item.type == PorxyType.REQUEST_START || item.type == PorxyType.REQUEST_END) {
                     if (this.filterInput == null) return true;
                     return (<ProxyRequestRecord>item).url.indexOf(this.filterInput) !== -1;
                 } else {

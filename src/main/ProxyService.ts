@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import protobuf from "protobufjs";
 import Url from "url";
 import zlib from "zlib";
-import { CMDCode, BizResponse, BizCode, ProxyRequestRecord, ProxyStatRecord } from "../model/DataModels";
+import { BizCode, BizResponse, PorxyType, ProxyRequestRecord, ProxyStatRecord } from "../model/DataModels";
 import MockService from "./MockService";
 import PushService from "./PushService";
 
@@ -11,15 +11,12 @@ const axios = require("axios");
 const websocket = require("nodejs-websocket");
 
 class ProxyService {
-  private static PROXY_DEF_TIMEOUT: number = 1000 * 5; // 15s
+  private static PROXY_DEF_TIMEOUT: number = 1000 * 15; // 15s
   private _sessionId: number;
-  // private proxyDealy: number;
   private dataProxyServer: string;
   private proxySocketServer: any = null;
   private dataProxyStatus: boolean = false;
   private pbFiles: Array<{ name: string; value: string }> = null;
-
-
   private proxyDelays: {} = {};
 
   constructor() {
@@ -41,8 +38,6 @@ class ProxyService {
     } else {
       delete this.proxyDelays[uid];
     }
-
-    console.log(this.proxyDelays);
 
     let bizResp: BizResponse<string> = new BizResponse<string>();
     bizResp.code = BizCode.SUCCESS;
@@ -108,7 +103,7 @@ class ProxyService {
       if (!err) {
         let record: ProxyStatRecord = {
           id: ++this._sessionId,
-          type: CMDCode.STATISTICS,
+          type: PorxyType.STATISTICS,
           timestamp: new Date().getSeconds(),
           statistics: JSON.parse(buffer.toString()),
         };
@@ -119,21 +114,26 @@ class ProxyService {
           originHost = req.header("mock-host");
         }
 
-        PushService.sendMessage(record, req.header("mock-uid"));
+        originHost = req.header("mock-host");
 
-        let url = Url.parse(originHost);
-        let host = url.host.split(/[:\/]/)[0];
-        let port = url.port;
-        let protocol = url.protocol;
+        PushService.sendProxyMessage(record, req.header("mock-uid"));
+
+        // let url = Url.parse(originHost);
+        // let host = url.host.split(/[:\/]/)[0];
+        // let port = url.port;
+        // let protocol = url.protocol;
 
         let headers = Object.assign({}, req.headers);
-        headers.host = protocol + "//" + host;
-
+        // headers.host = protocol + "//" + host;
         delete headers["host"];
         delete headers["mock-host"];
         delete headers["mock-uid"];
 
-        let requestUrl = protocol + "//" + host + req.path;
+        let requestUrl = originHost + req.path;
+
+
+        // console.log("stat", req.header("Mock-Host"), req.header("Mock-Uid"));
+
         if (this.dataProxyServer != null && this.dataProxyStatus) {
           requestUrl = this.dataProxyServer + req.path;
         }
@@ -147,7 +147,7 @@ class ProxyService {
         axios(options).then((resp: any) => {
           // console.log("stat", requestUrl, resp.status, new Date().getSeconds());
         }).catch((err: any) => {
-          console.error("stat", err.errno);
+          // console.error("stat", err);
         });
       } else {
         console.error("stat", err);
@@ -179,7 +179,7 @@ class ProxyService {
 
     let data: ProxyRequestRecord = {
       id: sessionId,
-      type: CMDCode.REQUEST_START,
+      type: PorxyType.REQUEST_START,
       url: req.url,
       method: req.method,
       headers: req.headers,
@@ -187,9 +187,9 @@ class ProxyService {
       requestData: requestData,
       timestamp: new Date().getSeconds(),
     };
-
+    // console.log("request", req.header("Mock-Host"), req.header("Mock-Uid"));
     let uid = req.header("mock-uid");
-    PushService.sendMessage(data, uid);
+    PushService.sendProxyMessage(data, uid);
     let delay = this.proxyDelays[uid] != null ? parseInt(this.proxyDelays[uid].delay) : 0;
     MockService.mockRequestData(sessionId, req, resp, startTime, delay).then(() => {
       // console.log("proxy is mock");
@@ -251,14 +251,14 @@ class ProxyService {
         setTimeout(() => {
           let data: ProxyRequestRecord = {
             id: sessionId,
-            type: CMDCode.REQUEST_END,
+            type: PorxyType.REQUEST_END,
             statusCode: resp.status,
             responseHeaders: !!resp.headers ? resp.headers : null,
             responseData: !!resp.data ? JSON.stringify(resp.data) : null,
             time: new Date().getTime() - startTime,
             isMock: false,
           };
-          PushService.sendMessage(data, req.header("mock-uid"));
+          PushService.sendProxyMessage(data, req.header("mock-uid"));
 
           proxyResp.send(resp.data);
           proxyResp.end();
@@ -272,14 +272,14 @@ class ProxyService {
       let respData = !!resp ? resp.data : err.message;
       let data: ProxyRequestRecord = {
         id: sessionId,
-        type: CMDCode.REQUEST_END,
+        type: PorxyType.REQUEST_END,
         statusCode: -100,
         headers: !!resp && !!resp.headers ? resp.headers : null,
         responseData: !!resp && !!respData ? JSON.stringify(respData) : JSON.stringify(err),
         time: new Date().getTime() - startTime,
         isMock: false,
       };
-      PushService.sendMessage(data, req.header("mock-uid"));
+      PushService.sendProxyMessage(data, req.header("mock-uid"));
       proxyResp.send(err.message);
       proxyResp.end();
     });
