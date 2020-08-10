@@ -61,6 +61,7 @@ export default class ProxyStatDetail extends Vue {
     } else if (this.statRuleServer == null) {
       Message.warning("请在设置中指定埋点管理服务地址");
     } else {
+      console.log(this.statRuleServer);
       get("/api/stat/queryStats", this.statRuleServer, {
         eventId: row["event_id"],
         keyword: keyword

@@ -65,12 +65,6 @@
 <script lang="ts" src="./BaseProxy.vue.ts"></script>
 
 <style scoped>
-.bg-border {
-    border: 1px solid #f1f1f1;
-    border-radius: 8px;
-    box-shadow: 1px 1px 1px rgba(120, 120, 120, 0.5);
-}
-
 .resize-bar {
     position: relative;
     width: 10px;

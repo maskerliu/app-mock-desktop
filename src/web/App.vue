@@ -47,7 +47,7 @@
 
 <script lang="ts" src="./App.vue.ts"></script>
 
-<style scoped>
+<style>
 ::-webkit-scrollbar {
     width: 5px;
     height: 5px;
@@ -127,5 +127,14 @@
 .header-right-btn:hover {
     border-radius: 4rem;
     border: 1px solid white;
+}
+
+.bg-border {
+    height: calc(100vh - 80px);
+    margin: 5px;
+    padding: 0;
+    border: 1px solid #f1f1f1;
+    border-radius: 8px;
+    box-shadow: 1px 1px 1px rgba(120, 120, 120, 0.5);
 }
 </style>

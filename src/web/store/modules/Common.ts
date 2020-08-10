@@ -3,6 +3,7 @@ import store from "../"
 import { PushClient } from "../../../common/PushClient"
 import { generateUid } from "../../../common/Utils"
 import { updateClientUID, updateLocalDomain } from "../../../model/BasicLocalAPI"
+import { PushMsg } from "../../../model/DataModels"
 import { getLocalServerConfig } from "../../../model/LocaAPIs"
 import { CommonState } from "../types"
 
@@ -33,9 +34,9 @@ export const actions: ActionTree<CommonState, any> = {
     unInit(context: { commit: Commit }): void {
         pushClient.close();
     },
-    saveLocalServerConfig(context: { commit: Commit }, params: any) {
-
-    },
+    sendMessage(context: { commit: Commit }, params: PushMsg<any>) {
+        pushClient.send(params);
+    }
 };
 
 // sync

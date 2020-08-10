@@ -49,7 +49,7 @@ class PushService {
             content: uid
           }
         }
-        conn.write(JSON.stringify(resp));
+        // conn.write(JSON.stringify(resp));
         break;
       case CMDType.RECONNECT:
         break;

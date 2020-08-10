@@ -1,11 +1,11 @@
 import { ipcRenderer } from "electron"
 import Message from "element-ui/packages/message"
 import { Component } from "vue-property-decorator"
-import { Mutation, State, Action } from "vuex-class"
+import { Action, Mutation, State } from "vuex-class"
 import { isUrl } from "../../common/Utils"
-import { IP, MsgPushClient, PushMsgType, PushMsg, BizType, CMDType } from "../../model/DataModels"
-import AbstractPage from "./AbstractPage.vue"
+import { BizType, CMDType, IP, MsgPushClient, PushMsg, PushMsgType } from "../../model/DataModels"
 import { getAllPushClients } from "../../model/LocaAPIs"
+import AbstractPage from "./AbstractPage.vue"
 
 
 @Component({

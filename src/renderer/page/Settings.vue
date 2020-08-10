@@ -114,7 +114,7 @@
             </el-form>
         </el-col>
 
-        <el-col :span="7" class="bg-border">
+        <el-col :span="7" class="bg-border" style="padding: 5px;">
             <el-row style="padding: 10px 0;">
                 <h5 style="color: grey;">在线Client</h5>
                 <el-input placeholder="请输入内容" v-model="broadcastMsg" size="small">
@@ -122,7 +122,7 @@
                     <el-button slot="append" icon="iconfont icon-send" @click="sendBroadcastMsg"></el-button>
                 </el-input>
             </el-row>
-            <el-row style="text-align: center;">
+            <el-row style="text-align: center; overflow-y: auto; height: calc(100% - 120px);">
                 <el-col :span="6" v-for="item in clients" :key="item.key" style="margin: 10px 0;">
                     <el-popover placement="bottom" trigger="manual">
                         <el-tooltip
@@ -171,13 +171,4 @@
 
 <script lang="ts" src="./Settings.vue.ts"></script>
 
-<style>
-.bg-border {
-    height: calc(100vh - 80px);
-    margin: 5px;
-    padding: 0;
-    border: 1px solid #f1f1f1;
-    border-radius: 8px;
-    box-shadow: 1px 1px 1px rgba(120, 120, 120, 0.5);
-}
-</style>
+<style></style>

@@ -66,7 +66,7 @@ export function get(
   params?: {}
 ): AxiosPromise<BizResponse<any>> {
   return axios({
-    baseURL: BASE_LOCAL_URL == null ? baseUrl : BASE_LOCAL_URL,
+    baseURL: baseUrl != null ? baseUrl : BASE_LOCAL_URL,
     url: path,
     method: "GET",
     params: Object.assign({ uid: clientUID }, params),
@@ -93,7 +93,7 @@ export function post(
   data?: {}
 ): AxiosPromise<BizResponse<any>> {
   return axios({
-    baseURL: BASE_LOCAL_URL == null ? baseUrl : BASE_LOCAL_URL,
+    baseURL: baseUrl != null ? baseUrl : BASE_LOCAL_URL,
     url: path,
     method: "POST",
     params: Object.assign({ uid: clientUID }, params),
