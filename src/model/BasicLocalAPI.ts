@@ -56,8 +56,6 @@ axios.interceptors.response.use(
   }
 );
 
-export let BASE_LOCAL_URL = null;
-export let BASE_UPLOAD_URL = null;
 let clientUID = null;
 
 export function get(
@@ -66,7 +64,7 @@ export function get(
   params?: {}
 ): AxiosPromise<BizResponse<any>> {
   return axios({
-    baseURL: baseUrl != null ? baseUrl : BASE_LOCAL_URL,
+    baseURL: baseUrl,
     url: path,
     method: "GET",
     params: Object.assign({ uid: clientUID }, params),
@@ -93,7 +91,7 @@ export function post(
   data?: {}
 ): AxiosPromise<BizResponse<any>> {
   return axios({
-    baseURL: baseUrl != null ? baseUrl : BASE_LOCAL_URL,
+    baseURL: baseUrl,
     url: path,
     method: "POST",
     params: Object.assign({ uid: clientUID }, params),
@@ -112,11 +110,6 @@ export function post(
         return Promise.reject(resp);
     }
   });
-}
-
-export function updateLocalDomain(localServerConfig: any) {
-  BASE_LOCAL_URL = `http://${localServerConfig.serverIP}:${localServerConfig.proxyHttpPort}`;
-  BASE_UPLOAD_URL = `http://${localServerConfig.syncServerUrl}`;
 }
 
 export function updateClientUID(uid: string) {

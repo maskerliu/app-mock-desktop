@@ -28,6 +28,7 @@ class LocalServer {
     this.proxySocketPort = 8886;
     this.corsOptions['origin'] = [
       `http://${this.serverIP}:${this.proxyHttpPort}`,
+      `https://${this.serverIP}:${this.proxyHttpPort}`,
       `http://${this.serverIP}:9081`,
       'http://localhost:9080',
       'http://localhost:9081'
@@ -68,7 +69,6 @@ class LocalServer {
         } else {
           WebService.filter(req, resp);
         }
-
       } else if (/^\/burying-point\//.test(req.url)) {
         resp.end();
       } else {

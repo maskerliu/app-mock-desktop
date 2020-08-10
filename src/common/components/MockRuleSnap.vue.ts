@@ -2,7 +2,7 @@ import Message from "element-ui/packages/message";
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { namespace } from "vuex-class";
 import { MockRule } from "../../model/DataModels";
-import { saveMockRule, uploadMockRule } from "../../model/LocaAPIs";
+import { saveMockRule } from "../../model/LocaAPIs";
 import { eventBus } from "../EventBus";
 
 const MockRules = namespace("MockRules");
@@ -27,7 +27,7 @@ export default class MockRuleSnap extends Vue {
   @MockRules.Mutation("setShowDeleteMockRuleDialog")
   private setShowDeleteMockRuleDialog!: Function;
 
-  created() {}
+  created() { }
 
   onClick() {
     this.setCurRule(this.source);
@@ -44,13 +44,6 @@ export default class MockRuleSnap extends Vue {
   }
 
   onUpload() {
-    uploadMockRule(this.source)
-      .then((result: any) => {
-        console.log("upload mock rule");
-      })
-      .catch((err: any) => {
-        console.log(err);
-      });
   }
 
   onMockSwitchChanged() {

@@ -6,10 +6,9 @@ import { ActionTree, Commit, GetterTree, MutationTree } from "vuex";
 import store from "../";
 import { PushClient } from "../../../common/PushClient";
 import { generateUid, isUrl } from "../../../common/Utils";
-import { updateClientUID, updateLocalDomain } from "../../../model/BasicLocalAPI";
-import { getLocalServerConfig } from "../../../model/LocaAPIs";
-import { CommonState } from "../types";
+import { updateClientUID } from "../../../model/BasicLocalAPI";
 import { PushMsg } from "../../../model/DataModels";
+import { CommonState } from "../types";
 
 const state: CommonState = {
   showQrCodeDialog: false,
@@ -49,12 +48,6 @@ export const actions: ActionTree<CommonState, any> = {
     ipcRenderer.on("get-local-server-config", (event: any, data: any) => {
       store.commit("updateLocalServerConfig", data);
     });
-
-    // getLocalServerConfig().then(resp => {
-    //   store.commit("updateLocalServerConfig", resp.data.data);
-    // }).catch(err => {
-    //   console.log(err);
-    // });
 
     ipcRenderer.send("get-local-server-config");
 
@@ -115,11 +108,9 @@ export const mutations: MutationTree<CommonState> = {
     state.localServerConfig.proxySocketPort = params.proxySocketPort;
     state.localServerConfig.ips = params.ips;
     state.localServerConfig.pbFiles = params.pbFiles;
-    state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/mw/register?_=0__0&uid=${uid}`;
-
-    updateLocalDomain(state.localServerConfig);
     updateClientUID(uid);
-    pushClient.start(`http://${params.serverIP}:${params.proxyHttpPort}`, uid);
+    state.registerUrl = `${process.env.SERVER_BASE_URL}/mw/register?_=0__0&uid=${uid}`;
+    pushClient.start(`${process.env.SERVER_BASE_URL}`, uid);
   },
   updateApiDefineServer(state, url) {
     if (!isUrl(url)) {

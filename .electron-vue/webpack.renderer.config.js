@@ -15,6 +15,8 @@ const tsImportPluginFactory = require('ts-import-plugin')
 const camel2Dash = require('camel-2-dash')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
+const config = require("../config.json")
+
 let whiteListedModules = ["vue"];
 
 let rendererConfig = {
@@ -226,6 +228,7 @@ if (process.env.NODE_ENV === "production") {
         ]),
         new webpack.DefinePlugin({
             "process.env.NODE_ENV": '"production"',
+            'process.env.SERVER_BASE_URL': config.domain
         }),
         new webpack.LoaderOptionsPlugin({
             minimize: true
@@ -234,7 +237,7 @@ if (process.env.NODE_ENV === "production") {
 } else {
     rendererConfig.plugins.push(
         new webpack.DefinePlugin({
-            'process.env.SERVER_BASE_URL': '"http://192.168.30.51:8885"'
+            'process.env.SERVER_BASE_URL': config.dev_domain
         }),
         new BundleAnalyzerPlugin({
             analyzerMode: 'server',

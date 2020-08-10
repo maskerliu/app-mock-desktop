@@ -2,7 +2,7 @@ import { ActionTree, Commit, GetterTree, MutationTree } from "vuex"
 import store from "../"
 import { PushClient } from "../../../common/PushClient"
 import { generateUid } from "../../../common/Utils"
-import { updateClientUID, updateLocalDomain } from "../../../model/BasicLocalAPI"
+import { updateClientUID } from "../../../model/BasicLocalAPI"
 import { PushMsg } from "../../../model/DataModels"
 import { getLocalServerConfig } from "../../../model/LocaAPIs"
 import { CommonState } from "../types"
@@ -16,7 +16,8 @@ const state: CommonState = {
         proxySocketPort: null,
         ips: [],
         pbFiles: [],
-    }
+    },
+    statRuleServer: ""
 };
 
 let pushClient: PushClient = null;
@@ -47,10 +48,9 @@ export const mutations: MutationTree<CommonState> = {
     updateLocalServerConfig(state, params) {
         let uid = generateUid();
         state.localServerConfig = params;
-        state.registerUrl = `http://${params.serverIP}:${params.proxyHttpPort}/mw/register?_=0__0&uid=${uid}`;
-        updateLocalDomain(state.localServerConfig);
         updateClientUID(uid);
-        pushClient.start(`http://${params.serverIP}:${params.proxyHttpPort}`, uid);
+        state.registerUrl = `${process.env.SERVER_BASE_URL}/mw/register?_=0__0&uid=${uid}`;
+        pushClient.start(`${process.env.SERVER_BASE_URL}`, uid);
     }
 };
 
