@@ -11,17 +11,22 @@
 yarn
 
 # serve with hot reload at localhost:9080
-yarn run dev
+yarn dev
 
 # build electron application for production
-npm run build
-
-if problem try electron-rebuild for sqlite3.
+yarn build
 
 ```
 
 ### 接入指南
-> 您的应用需对网络请求框架做一个简单改造，在所有需要接入AppMock的请求URL的Host的改为AppMock提供的Host，同时将需代理请求的源Host加入请求Header的Host（某些端由于http协议实现限制可能不允许修改header中的host字段）或者X-Host字段，即完成应用端改造。
+> 您的应用需对网络请求框架做一个简单改造，在所有需要接入AppMock的请求URL的Host的替换为AppMock提供的Host，同时将需代理请求的Header中添加
+
+``` javascript
+req.headers['mock-host'] = origin_host;
+req.headers['mock-uid'] = mock_uid;
+```
+
+> 即完成应用端改造，其中origin_host为原请求的host，mock_uid为AppMock代理请求client的id。
 > #### AppMock代理服务的地址获取方案
 > + 移动端提供扫码获取Host SDK方便在研发过程中接入； :clock3: :x:
 >     - android扫码组件； :clock3: :x:
@@ -54,13 +59,20 @@ if problem try electron-rebuild for sqlite3.
         - 本地规则组创建/管理 :ok_hand: :heavy_check_mark:
         - 本地规则编辑/添加 :ok_hand: :heavy_check_mark:
         - 本地规则组代理开关 :ok_hand: :heavy_check_mark:
-        - 规则组数据云备份/共享 :clock3: :x:
-
+        
++ #### 支持网页版本 2020.08.18
+    + 引入网页版本，应用可中心化部署，同学们可以通过网页版本更加便捷使用 :ok_hand: :heavy_check_mark:
+        - 构建支持域名/IP两种模式部署，如果是域名部署，请在config.json文件中将domain指定为所需要绑定的域名；
+    
 + #### 设置面板 :clock3:
     + 多网卡IP选择 :ok_hand: :heavy_check_mark:
     + 本地代理服务端口自定义 :ok_hand: :heavy_check_mark:
     + 本地推送端口自定义 :ok_hand: :heavy_check_mark:
     + 本地长连代理服务端口自定义 :clock3: :soon:
+    + 支持Api定义服务指定 :ok_hand: :heavy_check_mark:
+    + 支持买点规则服务指定 :ok_hand: :heavy_check_mark:
+    + 支持代理数据服务指定 :ok_hand: :heavy_check_mark:
+    + 在线设备查看 :ok_hand: :heavy_check_mark:
 
 + #### 数据模型测试数据自动化生成 :clock3: :x:
 
