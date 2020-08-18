@@ -1,5 +1,7 @@
 // import { clipboard } from "electron"
+import axios from "axios"
 import { Component, Prop, Vue, Watch } from "vue-property-decorator"
+import { State } from "vuex-class"
 import { ProxyRequestRecord } from "../../model/DataModels"
 import AddMockRule from "./AddMockRule.vue"
 import JsonViewer from "./JsonViewer.vue"
@@ -19,11 +21,15 @@ export default class ProxyRequestDetail extends Vue {
   @Prop()
   record: ProxyRequestRecord;
 
+  @State((state) => state.Common.localServerConfig.apiDefineServer)
+  apiDefineServer: string;
+
   $refs!: {
     inspectorPanel: any;
     respDataDiv: any;
   };
 
+  apiDesc: string = null;
   wrapperRecord: ProxyRequestRecord = null;
   curImgSrc: string = null;
   curAudioSrc: string = null;
@@ -82,9 +88,37 @@ export default class ProxyRequestDetail extends Vue {
     });
   }
 
+  getApiDefineInfo() {
+    this.apiDesc = null;
+    axios({
+      baseURL: this.apiDefineServer,
+      url: "/api/moreApiInfo.json",
+      method: "POST",
+      data: {
+        keyword: this.record.url.substr(1).split("?")[0],
+        appId: -1,
+        businessId: -1,
+        version: "",
+        pageNo: 1,
+        pageSize: 10
+      },
+    }).then(resp => {
+      if (resp.data.code == 200) {
+        if (resp.data.data.data.length > 0) {
+          this.apiDesc = resp.data.data.data[0].description;
+        } else {
+          this.apiDesc = null;
+        }
+      }
+    }).catch(err => {
+      // console.log(err);
+    });
+  }
+
   @Watch("record")
   onRecordChanged() {
     this.wrapperRecord = Object.assign({}, this.record);
+    this.getApiDefineInfo();
   }
 
   @Watch("showPreview")

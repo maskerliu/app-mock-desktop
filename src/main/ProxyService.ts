@@ -121,10 +121,6 @@ class ProxyService {
         delete headers["mock-uid"];
 
         let requestUrl = originHost + req.path;
-        if (this.dataProxyServer != null && this.dataProxyStatus) {
-          requestUrl = this.dataProxyServer + req.path;
-        }
-
         let options = {
           url: requestUrl,
           method: req.method,
@@ -146,24 +142,18 @@ class ProxyService {
   public handleRequest(req: Request, resp: Response) {
     let startTime = new Date().getTime();
     let sessionId = ++this._sessionId;
-    let reqUrl: Url.UrlWithStringQuery;
-    try {
-      reqUrl = Url.parse(req.headers.host);
-    } catch (err) {
-      console.error("handleRequest", err);
-    }
 
     let requestData = null;
     if (req.method === "GET") {
       requestData = !!req.query ? req.query : null;
     } else {
       try {
-        requestData = !!req.body && req.body != {} ? JSONBigInt.parse(req.body) : null;
+        requestData = !!req.body && Object.keys(req.body).length > 0 ? JSONBigInt.parse(req.body) : null;
       } catch (err) {
+        console.log("test", req.body, req.body);
         console.error("handleRequest", err);
       }
     }
-
     let data: ProxyRequestRecord = {
       id: sessionId,
       type: PorxyType.REQUEST_START,
@@ -176,6 +166,7 @@ class ProxyService {
     // console.log("request", req.header("Mock-Host"), req.header("Mock-Uid"));
     let uid = req.header("mock-uid");
     PushService.sendProxyMessage(data, uid);
+
     let delay = this.proxyDelays[uid] != null ? parseInt(this.proxyDelays[uid].delay) : 0;
     MockService.mockRequestData(sessionId, req, resp, startTime, delay).then(() => {
       // console.log("proxy is mock");

@@ -107,7 +107,6 @@ export default class Settings extends AbstractPage {
       config.versionCheckServer = this.wrapperConfig.versionCheckServer;
     }
 
-    console.log(config);
     this.saveLocalServerConfig(config);
   }
 

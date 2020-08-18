@@ -93,7 +93,7 @@ export default class Live2d extends Vue {
     loadModel() {
         // const url = `${this.apiPath}/get/?id=${this.modelId}-${this.modelTexturesId}`;
         // const callback = console.log(`Live2D 模型 ${this.modelId}-${this.modelTexturesId} 加载完成`);
-        (<any>window).loadlive2d("live2d-main", "/static/live2d/ShizukuTalk/shizuku-48/index.json", null);
+        (<any>window).loadlive2d("live2d-main", "/static/live2d/murakumo/index.json", null);
     }
 
     loadEvent() {

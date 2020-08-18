@@ -6,6 +6,8 @@ import {
   PushMsg, PushMsgType, ClientInfo
 } from "../model/DataModels";
 
+// var Extensions = require('websocket-extensions');
+
 const sockjs = require('sockjs');
 
 class PushService {
