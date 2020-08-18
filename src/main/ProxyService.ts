@@ -48,31 +48,31 @@ class ProxyService {
 
   // TODO: 长连接统带代理初始化，待完善
   public initProxySocketServer(port: number): void {
-    this.proxySocketServer = websocket
-      .createServer((conn: any) => {
-        conn.on("text", (str: string) => {
-          conn.sendText(str);
-        });
-        conn.on("close", (code: number, reason: any) => {
-          console.log("关闭连接");
-        });
-        conn.on("connect", function (code: number) {
-          console.log("开启连接", code);
-        });
-        conn.on("error", (code: number, reason: any) => {
-          console.log("异常关闭");
-        });
-      })
-      .listen(port, () => {
-        console.log(`启动本地代理Socket服务[${port}]`);
-      });
+    // this.proxySocketServer = websocket
+    //   .createServer((conn: any) => {
+    //     conn.on("text", (str: string) => {
+    //       conn.sendText(str);
+    //     });
+    //     conn.on("close", (code: number, reason: any) => {
+    //       console.log("关闭连接");
+    //     });
+    //     conn.on("connect", function (code: number) {
+    //       console.log("开启连接", code);
+    //     });
+    //     conn.on("error", (code: number, reason: any) => {
+    //       console.log("异常关闭");
+    //     });
+    //   })
+    //   .listen(port, () => {
+    //     console.log(`启动本地代理Socket服务[${port}]`);
+    //   });
   }
 
   // TODO: 待完成
   public closeProxySocketServer(callback: any): void {
-    if (this.proxySocketServer != null) {
-      this.proxySocketServer.close(callback);
-    }
+    // if (this.proxySocketServer != null) {
+    //   this.proxySocketServer.close(callback);
+    // }
   }
 
   public setProtoFiles(files: string[]) {
@@ -109,31 +109,18 @@ class ProxyService {
         };
 
 
-        let originHost = req.header("host");
+        let originHost = req.header("mock-host");
         if (originHost == null) {
-          originHost = req.header("mock-host");
+          originHost = req.header("host");
         }
 
-        originHost = req.header("mock-host");
-
         PushService.sendProxyMessage(record, req.header("mock-uid"));
-
-        // let url = Url.parse(originHost);
-        // let host = url.host.split(/[:\/]/)[0];
-        // let port = url.port;
-        // let protocol = url.protocol;
-
         let headers = Object.assign({}, req.headers);
-        // headers.host = protocol + "//" + host;
         delete headers["host"];
         delete headers["mock-host"];
         delete headers["mock-uid"];
 
         let requestUrl = originHost + req.path;
-
-
-        // console.log("stat", req.header("Mock-Host"), req.header("Mock-Uid"));
-
         if (this.dataProxyServer != null && this.dataProxyStatus) {
           requestUrl = this.dataProxyServer + req.path;
         }
@@ -183,7 +170,6 @@ class ProxyService {
       url: req.url,
       method: req.method,
       headers: req.headers,
-      proxyport: reqUrl.port,
       requestData: requestData,
       timestamp: new Date().getSeconds(),
     };
@@ -199,24 +185,17 @@ class ProxyService {
   }
 
   private proxyRequestData(sessionId: number, req: Request, proxyResp: Response, startTime: number, delay: number) {
-    let originHost = req.header("host");
+    let originHost = req.header("mock-host");
     if (originHost == null) {
-      originHost = req.header("mock-host");
+      originHost = req.header("host");
     }
 
-    let url = Url.parse(originHost);
-    let host = url.host.split(/[:\/]/)[0];
-    let port = url.port;
-    let protocol = url.protocol;
-
     let headers = Object.assign({}, req.headers);
-    headers.host = protocol + "//" + host;
-
     delete headers["host"];
     delete headers["mock-host"];
     delete headers["mock-uid"];
 
-    let requestUrl = protocol + "//" + host + req.path;
+    let requestUrl = originHost + req.path;
     if (this.dataProxyServer != null && this.dataProxyStatus) {
       requestUrl = this.dataProxyServer + req.path;
     }
@@ -267,7 +246,7 @@ class ProxyService {
         console.error("proxyRequestData", err);
       }
     }).catch((err: any) => {
-      console.log("axios", err);
+      console.log("axios", err.code);
       let resp = err.response;
       let respData = !!resp ? resp.data : err.message;
       let data: ProxyRequestRecord = {

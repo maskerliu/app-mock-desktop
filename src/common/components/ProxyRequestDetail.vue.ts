@@ -17,21 +17,20 @@ const IMG_RGX = new RegExp("(.jpg|.jpeg|.png|.JPG|.gif|.GIF|.webp)$");
 })
 export default class ProxyRequestDetail extends Vue {
   @Prop()
-  public record: ProxyRequestRecord;
+  record: ProxyRequestRecord;
 
-  public $refs!: {
+  $refs!: {
     inspectorPanel: any;
     respDataDiv: any;
   };
 
-  private wrapperRecord: ProxyRequestRecord = null;
-  private tabActive: string = "0";
-  private curImgSrc: string = null;
-  private curAudioSrc: string = null;
-  private audioPlayer: any = null;
-  private curVideoSrc: string = null;
-  private showPreview: boolean = false;
-  private showAddMockRule: boolean = false;
+  wrapperRecord: ProxyRequestRecord = null;
+  curImgSrc: string = null;
+  curAudioSrc: string = null;
+  audioPlayer: any = null;
+  curVideoSrc: string = null;
+  showPreview: boolean = false;
+  showAddMockRule: boolean = false;
 
   created() {
 

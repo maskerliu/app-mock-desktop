@@ -12,20 +12,20 @@ import { Action, Mutation, State } from "vuex-class";
 export default class App extends Vue {
 
     @State((state) => state.Common.registerUrl)
-    public registerUrl: string;
+    registerUrl: string;
     @State((state) => state.Common.navBarConfig)
-    public navBarConfig: any;
+    navBarConfig: any;
     @State((state) => state.Common.showQrCodeDialog)
-    public showQrCodeDialog: boolean;
+    showQrCodeDialog: boolean;
 
     @Action("init")
-    private init: Function;
+    init: Function;
 
     @Action("unInit")
-    private unInit: Function;
+    unInit: Function;
 
     @Mutation("updateShowQrCodeDialog")
-    private updateShowQrCodeDialog: Function;
+    updateShowQrCodeDialog: Function;
 
     navMenus: Array<{ path: string, tip: string, icon: string }> = [
         { path: "Proxy", tip: "代理", icon: "icon-mock" },
@@ -49,12 +49,10 @@ export default class App extends Vue {
     }
 
     destroyed() {
-        console.log("destory");
         this.unInit();
     }
 
     beforeunloadHandler(e: any) {
-        alert("hello");
         this.unInit();
     }
 
@@ -78,9 +76,5 @@ export default class App extends Vue {
         if (index === this.curPage) return;
         this.curPage = index;
         this.$router.replace({ name: index });
-    }
-
-    onShowQrCode() {
-        this.updateShowQrCodeDialog(true);
     }
 }

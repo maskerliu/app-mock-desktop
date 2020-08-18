@@ -16,16 +16,16 @@ export default class MockRuleSnap extends Vue {
   source: MockRule;
 
   @MockRules.State("curRule")
-  private curRule: MockRule;
+  curRule: MockRule;
 
   @MockRules.Mutation("setCurRule")
-  private setCurRule!: Function;
+  setCurRule!: Function;
 
   @MockRules.Mutation("setShowEditMockRuleDialog")
-  private setShowEditMockRuleDialog!: Function;
+  setShowEditMockRuleDialog!: Function;
 
   @MockRules.Mutation("setShowDeleteMockRuleDialog")
-  private setShowDeleteMockRuleDialog!: Function;
+  setShowDeleteMockRuleDialog!: Function;
 
   created() { }
 
@@ -47,14 +47,12 @@ export default class MockRuleSnap extends Vue {
   }
 
   onMockSwitchChanged() {
-    saveMockRule(this.source, true)
-      .then((result) => {
-        Message({ message: "规则更新成功", type: "success" });
-        // this.fetchPagedMockRules();
-        eventBus.$emit("updateMockRules");
-      })
-      .catch((err) => {
-        Message({ message: err.message, type: "error" });
-      });
+    saveMockRule(this.source, true).then((result) => {
+      Message({ message: "规则更新成功", type: "success" });
+      // this.fetchPagedMockRules();
+      eventBus.$emit("updateMockRules");
+    }).catch((err) => {
+      Message({ message: err.message, type: "error" });
+    });
   }
 }

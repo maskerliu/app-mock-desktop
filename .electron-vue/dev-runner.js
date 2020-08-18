@@ -41,7 +41,6 @@ function logStats(proc, data) {
     console.log(log);
 }
 
-
 function startWeb() {
     return new Promise((resolve, reject) => {
         webConfig.entry.web = [path.join(__dirname, "dev-client")].concat(webConfig.entry.web);

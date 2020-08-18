@@ -17,13 +17,12 @@
     position: fixed;
     width: 250px;
     height: 250px;
-    bottom: 10px;
+    bottom: 0;
     right: 0;
     transition: transform 0.3s ease-in-out;
-    transform: translateY(3px);
+    /* transform: translateY(3px); */
 }
 #live2d:hover {
-    width: 250px;
     transform: translateY(0);
 }
 #live2d-tip {

@@ -1,9 +1,12 @@
 import { ipcRenderer } from "electron";
 import QrcodeVue from "qrcode.vue";
 import { Component, Watch } from "vue-property-decorator";
-import { Mutation, State } from "vuex-class";
+import { Mutation, namespace, State } from "vuex-class";
+import { AppInfo } from "../../model/DataModels";
 import AbstractPage from "./AbstractPage.vue";
 import DebugPanel from "./DebugPanel.vue";
+
+const AppEnv = namespace("AppEnv");
 
 @Component({
   name: "BizMain",
@@ -14,17 +17,17 @@ import DebugPanel from "./DebugPanel.vue";
 })
 export default class BizMain extends AbstractPage {
   @State((state) => state.Common.showQrCodeDialog)
-  public showQrCodeDialog: boolean;
+  showQrCodeDialog: boolean;
   @State((state) => state.Common.registerUrl)
-  public registerUrl: string;
+  registerUrl: string;
   @State((state) => state.Common.navBarConfig)
-  public navBarConfig: any;
+  navBarConfig: any;
+
+  @AppEnv.State("appInfo")
+  appInfo: AppInfo;
 
   @Mutation("updateShowQrCodeDialog")
-  public updateShowQrCodeDialog: Function;
-
-  private canRender: boolean = false;
-  private curPage: string = null;
+  updateShowQrCodeDialog: Function;
 
   navMenus: Array<{ path: string, tip: string, icon: string }> = [
     { path: "Proxy", tip: "代理", icon: "icon-mock" },
@@ -32,8 +35,9 @@ export default class BizMain extends AbstractPage {
     { path: "Spider", tip: "爬虫", icon: "icon-spider" },
     { path: "UpupU", tip: "实验室", icon: "icon-lab" },
     { path: "Settings", tip: "设置", icon: "icon-setting" }
-];
-  public curActivedNavMenuIdx: string = null;
+  ];
+  curPage: string = null;
+  curActivedNavMenuIdx: string = null;
 
   created() { }
 
@@ -84,10 +88,6 @@ export default class BizMain extends AbstractPage {
     ipcRenderer.send("on-app-quit");
   }
 
-  onShowQrCode() {
-    this.updateShowQrCodeDialog(true);
-  }
-
   @Watch("$route")
   onRouteChanged(to: any, from: any) {
     if (to.meta.index > from.meta.index) {
@@ -95,7 +95,7 @@ export default class BizMain extends AbstractPage {
     } else {
     }
     this.updateNavBarConfig({ title: "加载中..." });
-  } 
+  }
 
   click2Reg() { }
 }

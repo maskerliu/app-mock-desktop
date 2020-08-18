@@ -3,7 +3,7 @@ import Message from "element-ui/packages/message"
 import { Component } from "vue-property-decorator"
 import { Action, Mutation, State } from "vuex-class"
 import { isUrl } from "../../common/Utils"
-import { BizType, CMDType, IP, MsgPushClient, PushMsg, PushMsgType } from "../../model/DataModels"
+import { BizType, CMDType, MsgPushClient, PushMsg, PushMsgType, LocalServerConfig, ClientInfo } from "../../model/DataModels"
 import { getAllPushClients } from "../../model/LocaAPIs"
 import AbstractPage from "./AbstractPage.vue"
 
@@ -14,74 +14,37 @@ import AbstractPage from "./AbstractPage.vue"
 })
 export default class Settings extends AbstractPage {
   @State((state) => state.Common.localServerConfig)
-  private localServerConfig: {
-    serverIP: string;
-    proxyHttpPort: number;
-    proxySocketPort: number;
-    ips: Array<IP>;
-    pbFiles: Array<{ name: string; value: string }>;
-  };
+  private localServerConfig: LocalServerConfig;
 
-  @State((state) => state.Common.apiDefineServer)
-  private apiDefineServer: string;
-
-  @State((state) => state.Common.statRuleServer)
-  private statRuleServer: string;
-
-  @State((state) => state.Common.mockRuleServer)
-  private mockRuleServer: string;
-
-  @State((state) => state.Common.dataProxyServer)
-  private dataProxyServer: string;
-
-  @State((state) => state.Common.dataProxyStatus)
-  private dataProxyStatus: boolean;
-
-  @State((state) => state.Common.versionCheckServer)
-  private versionCheckServer: string;
-
+  @State((state) => state.Common.clientInfos)
+  clientInfos: Array<ClientInfo>;
 
   @Action("sendMessage")
   private sendMessage: Function;
 
-  @Mutation("updateLocalServerConfig")
-  private updateLocalServerConfig: Function;
+  @Action("saveLocalServerConfig")
+  private saveLocalServerConfig: Function;
 
-  @Mutation("updateApiDefineServer")
-  private updateApiDefineServer: Function;
+  mrsUrl: string = null;
+  pbFiles: any[] = null;
+  serialPlugin: number = 3;
 
-  @Mutation("updateMockRuleServer")
-  private updateMockRuleServer: Function;
+  dialogVisible: boolean = false;
+  selectClient: MsgPushClient = null;
+  broadcastMsg: string = "";
+  imMsg: string = "";
 
-  @Mutation("updateStatRuleServer")
-  private updateStatRuleServer: Function;
 
-  @Mutation("updateDataProxyServer")
-  private updateDataProxyServer: Function;
+  perferences: Array<{ tooltip: string, key: string }> = [
+    { tooltip: "代理Http服务端口", key: "proxyHttpPort", },
+    { tooltip: "代理长连服务端口", key: "proxySocketPort", },
+    { tooltip: "API定义服务地址", key: "apiDefineServer", },
+    { tooltip: "埋点规则服务地址", key: "statRuleServer", },
+    { tooltip: "代理数据服务地址", key: "dataProxyServer", hasStatus: true, statusKey: "dataProxyStatus" },
+    { tooltip: "更新检查服务地址", key: "versionCheckServer", }
+  ]
 
-  @Mutation("updateVersionCheckServer")
-  private updateVersionCheckServer: Function;
-
-  private dialogVisible: boolean = false;
-  private selectClient: MsgPushClient = null;
-  private broadcastMsg: string = "";
-  private imMsg: string = "";
-  private clients: {} = {};
-
-  private ips: Array<IP>;
-  private curServerIP: string = null;
-  private curProxyHttpPort: number = null;
-  private curProxySocketPort: number = null;
-  private adsUrl: string = null;
-  private srsUrl: string = null;
-  private mrsUrl: string = null;
-  private dpsUrl: string = null;
-  private dpStatus: boolean = false;
-  private vcsUrl: string = null;
-  private pbFiles: any[] = null;
-  private serialPlugin: number = 3;
-
-  private syncClientsTimer: any;
+  wrapperConfig: LocalServerConfig = {};
 
   public created(): void {
     this.updateNavBarConfig({
@@ -89,59 +52,65 @@ export default class Settings extends AbstractPage {
       leftItem: false,
       rightItem: false,
     });
-    this.ips = this.localServerConfig.ips;
-    this.curServerIP = this.localServerConfig.serverIP;
-    this.curProxyHttpPort = this.localServerConfig.proxyHttpPort;
-    this.curProxySocketPort = this.localServerConfig.proxySocketPort;
-    this.pbFiles = this.localServerConfig.pbFiles;
+    this.wrapperConfig = Object.assign({}, this.localServerConfig);
 
-    this.adsUrl = this.apiDefineServer;
-    this.srsUrl = this.statRuleServer;
-    this.mrsUrl = this.mockRuleServer;
-    this.dpsUrl = this.dataProxyServer;
-    this.dpStatus = this.dataProxyStatus;
-    this.vcsUrl = this.versionCheckServer;
-
-    this.syncClientsTimer = setInterval(() => {
-      this.getOnlineClients();
-    }, 3000);
   }
 
   public destroyed(): void {
-    clearInterval(this.syncClientsTimer);
+
   }
 
   public onOpenFileDialog(): void {
     ipcRenderer.send("on-open-folder", "openFile");
   }
 
-  public getOnlineClients() {
-    getAllPushClients().then(resp => {
-      this.clients = resp.data.data;
-    }).catch(err => { })
-  }
-
   public onDataProxySwitchChanged() {
-    if (isUrl(this.dpsUrl)) {
-      this.updateDataProxyServer({ url: this.dpsUrl, status: this.dpStatus });
+    if (this.wrapperConfig.dataProxyStatus) {
+      if (isUrl(this.wrapperConfig.dataProxyServer)) {
+        this.onSave();
+      } else {
+        this.wrapperConfig.dataProxyServer = this.localServerConfig.dataProxyServer;
+        this.wrapperConfig.dataProxyStatus = false;
+        Message.warning("非法URL");
+      }
     } else {
-      Message.warning("非法URL");
-      this.dpStatus = !this.dpStatus;
+      this.onSave();
     }
   }
 
   public onSave(): void {
-    this.updateApiDefineServer(this.adsUrl);
-    this.updateStatRuleServer(this.srsUrl);
-    this.updateMockRuleServer(this.mrsUrl);
-    this.updateDataProxyServer({ url: this.dpsUrl, status: this.dpStatus });
-    this.updateVersionCheckServer(this.vcsUrl);
-    this.updateLocalServerConfig({
-      serverIP: this.curServerIP,
-      proxyHttpPort: this.curProxyHttpPort,
-      proxySocketPort: this.curProxySocketPort,
-    });
+    let config: LocalServerConfig = {};
+
+    if (this.wrapperConfig.proxyHttpPort != this.localServerConfig.proxyHttpPort) {
+      config.proxyHttpPort = this.wrapperConfig.proxyHttpPort;
+    }
+
+    if (this.wrapperConfig.proxySocketPort != this.localServerConfig.proxySocketPort) {
+      config.proxySocketPort = this.wrapperConfig.proxySocketPort;
+    }
+
+    if (this.wrapperConfig.apiDefineServer != this.localServerConfig.apiDefineServer) {
+      config.apiDefineServer = this.wrapperConfig.apiDefineServer;
+    }
+
+    if (this.wrapperConfig.statRuleServer != this.localServerConfig.statRuleServer) {
+      config.statRuleServer = this.wrapperConfig.statRuleServer;
+    }
+
+    if (this.wrapperConfig.dataProxyServer != this.localServerConfig.dataProxyServer ||
+      this.wrapperConfig.dataProxyStatus != this.localServerConfig.dataProxyStatus) {
+      config.dataProxyServer = this.wrapperConfig.dataProxyServer;
+      config.dataProxyStatus = this.wrapperConfig.dataProxyStatus;
+    }
+
+    if (this.wrapperConfig.versionCheckServer != this.localServerConfig.versionCheckServer) {
+      config.versionCheckServer = this.wrapperConfig.versionCheckServer;
+    }
+
+    console.log(config);
+    this.saveLocalServerConfig(config);
   }
+
   public sendBroadcastMsg(): void {
     let msg: PushMsg<any> = {
       type: PushMsgType.TXT,

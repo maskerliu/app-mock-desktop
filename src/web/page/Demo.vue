@@ -1,6 +1,6 @@
 <template>
-    <el-row id="box" style="height: 100%; padding: 15px;">
-        <el-col :span="7" class="bg-border" style="padding: 5px;">
+    <el-row id="box" style="height: 100%; padding: 0;">
+        <el-col :span="12" class="bg-border" style="padding: 5px;">
             <el-row style="padding: 10px 0;">
                 <h5 style="color: grey;">在线Client</h5>
                 <el-input placeholder="请输入内容" v-model="broadcastMsg" size="small">
@@ -9,7 +9,7 @@
                 </el-input>
             </el-row>
             <el-row style="text-align: center; overflow-y: auto; height: calc(100% - 120px);">
-                <el-col :span="6" v-for="item in clients" :key="item.key" style="margin: 10px 0;">
+                <el-col :span="6" v-for="item in clientInfos" :key="item.key" style="margin: 10px 0;">
                     <el-popover placement="bottom" trigger="manual">
                         <el-tooltip
                             slot="reference"

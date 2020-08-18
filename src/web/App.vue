@@ -2,7 +2,11 @@
     <el-row id="app">
         <el-col style="width: 70px; height: 100vh;">
             <el-menu :default-active="curActivedNavMenuIdx" :collapse="false" style="width: 100%; height: 100%;">
-                <el-menu-item index="0" style="padding-left: 20px;margin-top: 50px;" @click="onShowQrCode">
+                <el-menu-item
+                    index="0"
+                    style="padding-left: 20px;margin-top: 50px;"
+                    @click="updateShowQrCodeDialog(true)"
+                >
                     <i class="iconfont icon-qrcode" style="font-size: 1.8rem;"></i>
                 </el-menu-item>
 
@@ -130,11 +134,10 @@
 }
 
 .bg-border {
-    height: calc(100vh - 80px);
     margin: 5px;
     padding: 0;
-    border: 1px solid #f1f1f1;
     border-radius: 8px;
-    box-shadow: 1px 1px 1px rgba(120, 120, 120, 0.5);
+    border: 1px solid #e1e1e1;
+    box-shadow: 0px 12px 8px -12px #000;
 }
 </style>

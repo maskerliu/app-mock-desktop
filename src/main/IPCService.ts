@@ -32,18 +32,6 @@ ipcMain.on("set-proxy-delay", (event: IpcMainEvent, args?: any) => {
   } catch (err) { }
 });
 
-ipcMain.on("update-data-proxy-server", (event: IpcMainEvent, args: { url: string, status: boolean }) => {
-  try {
-    ProxyService.setDataProxyServer(args.url, args.status);
-  } catch (err) { }
-});
-
-ipcMain.on("update-version-check-server", (event: IpcMainEvent, args: { url: string }) => {
-  try {
-    // AsarUpdateService.setVersionCheckServer(args.url);
-  } catch (err) { }
-});
-
 ipcMain.on("get-local-server-config", (event: IpcMainEvent) => {
   event.sender.send("get-local-server-config", LocalServer.getLocalServerConfig());
 });

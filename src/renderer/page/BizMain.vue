@@ -2,7 +2,11 @@
     <el-row id="app">
         <el-col style="width: 70px; height: 100vh;">
             <el-menu :default-active="curActivedNavMenuIdx" :collapse="false" style="width: 100%; height: 100%;">
-                <el-menu-item index="0" style="padding-left: 20px;margin-top: 50px;" @click="onShowQrCode">
+                <el-menu-item
+                    index="0"
+                    style="padding-left: 20px;margin-top: 50px;"
+                    @click="updateShowQrCodeDialog(true)"
+                >
                     <i class="iconfont icon-qrcode" style="font-size: 1.8rem;"></i>
                 </el-menu-item>
                 <el-tooltip
@@ -16,7 +20,7 @@
                         <i class="iconfont" v-bind:class="item.icon" style="font-size: 1.8rem;"></i>
                     </el-menu-item>
                 </el-tooltip>
-                <el-menu-item index="4" style="padding-left: 15px;">
+                <el-menu-item index="4" style="padding-left: 15px;" v-if="appInfo.env != 'production'">
                     <debug-panel />
                 </el-menu-item>
             </el-menu>

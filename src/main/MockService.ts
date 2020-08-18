@@ -149,9 +149,6 @@ class MockService {
     } else {
       delete this.clientMockStatus[uid];
     }
-
-    console.log(this.clientMockStatus);
-
     delete rule.isMock;
 
     if (rule._id === null || rule._id === undefined) {

@@ -1,9 +1,14 @@
+export interface AppInfo {
+  env: string;
+  version: string;
+  bundleId: string;
+}
+
 export enum BizCode {
   SUCCESS = 8000,
   FAIL = 8010,
   ERROR = 9000,
 }
-
 
 export class BizResponse<T> {
   code: number;
@@ -27,6 +32,18 @@ export interface IP {
   internal: boolean;
   cidr: string;
   name: string;
+}
+
+export interface LocalServerConfig {
+  serverIP?: string;
+  proxyHttpPort?: number;
+  proxySocketPort?: number;
+  ips?: Array<IP>;
+  apiDefineServer?: string; // API定义服务地址
+  statRuleServer?: string; // 埋点定义服务地址
+  dataProxyServer?: string; // 流量代理服务地址
+  dataProxyStatus?: boolean; // 流量代理服务是否开启
+  versionCheckServer?: string; // 应用版本更新检查服务
 }
 
 export interface StatisticRecord {
@@ -79,13 +96,6 @@ export class MockRule {
   requests: ProxyRequestRecord[];
 }
 
-export class LocalServerConfig {
-  serverIP: string;
-  proxyHttpPort: number;
-  proxySocketPort: number;
-  ips: Array<IP>;
-}
-
 export interface MsgPushClient {
   key: string;
   uid: string;
@@ -107,14 +117,15 @@ export enum CMDType {
 
 export enum BizType {
   IM = 0,
-  Proxy = 1
+  Proxy = 1,
+  ClientInfos = 2,
 }
 
 export interface PushMsg<T> {
   type: PushMsgType;
   from?: string;
   to?: string;
-  payload: PushMsgPayload<T>;
+  payload?: PushMsgPayload<T>;
 }
 
 export interface PushMsgPayload<T> {
@@ -128,4 +139,11 @@ export enum PorxyType {
   REQUEST_END = 5012,
   STATISTICS = 5020,
   SOCKET = 5030,
+}
+
+export interface ClientInfo {
+  key: string;
+  uid: string;
+  ip: string;
+  port: string;
 }

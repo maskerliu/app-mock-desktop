@@ -1,9 +1,8 @@
+import { LocalServerConfig, ClientInfo } from "../../model/DataModels";
+
 export interface CommonState {
   showQrCodeDialog: boolean;
   registerUrl: string;
-  localServerConfig: {
-    serverIP: string;
-    proxyHttpPort: number;
-    proxySocketPort: number;
-  };
+  localServerConfig: LocalServerConfig;
+  clientInfos: Array<ClientInfo>;
 }

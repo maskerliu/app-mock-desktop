@@ -7,9 +7,7 @@ axios.defaults.adapter = require("axios/lib/adapters/http");
 axios.defaults.timeout = 10000;
 axios.defaults.withCredentials = true;
 axios.interceptors.response.use(
-  (resp) => {
-    return resp;
-  },
+  (resp) => { return resp; },
   (err) => {
     if (err && err.response) {
       switch (err.response.status) {
@@ -57,14 +55,11 @@ axios.interceptors.response.use(
 );
 
 let clientUID = null;
+let BASE_DOMAIN = null;
 
-export function get(
-  path: string,
-  baseUrl?: string,
-  params?: {}
-): AxiosPromise<BizResponse<any>> {
+export function get(path: string, baseURL?: string, params?: {}): AxiosPromise<BizResponse<any>> {
   return axios({
-    baseURL: baseUrl,
+    baseURL: baseURL ? baseURL : BASE_DOMAIN,
     url: path,
     method: "GET",
     params: Object.assign({ uid: clientUID }, params),
@@ -84,14 +79,9 @@ export function get(
   });
 }
 
-export function post(
-  path: string,
-  baseUrl?: string,
-  params?: {},
-  data?: {}
-): AxiosPromise<BizResponse<any>> {
+export function post(path: string, baseURL?: string, params?: {}, data?: {}): AxiosPromise<BizResponse<any>> {
   return axios({
-    baseURL: baseUrl,
+    baseURL: baseURL ? baseURL : BASE_DOMAIN,
     url: path,
     method: "POST",
     params: Object.assign({ uid: clientUID }, params),
@@ -114,4 +104,8 @@ export function post(
 
 export function updateClientUID(uid: string) {
   clientUID = uid;
+}
+
+export function updateBaseDomain(domain: string) {
+  BASE_DOMAIN = domain;
 }

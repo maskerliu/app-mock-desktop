@@ -24,28 +24,30 @@ const MockRules = namespace("MockRules");
   },
 })
 export default class BaseMockRuleMgr extends Vue {
-  private mockRuleSnap: any = MockRuleSnap;
-  private rules: Array<MockRule> = [];
-  private searchKeyword: string = null;
-  private wrapperRule: MockRule = null;
+
 
   @MockRules.Mutation("setShowEditMockRuleDialog")
-  private setShowEditMockRuleDialog!: Function;
+  setShowEditMockRuleDialog!: Function;
 
   @MockRules.Mutation("setShowDeleteMockRuleDialog")
-  private setShowDeleteMockRuleDialog!: Function;
+  setShowDeleteMockRuleDialog!: Function;
 
   @MockRules.State("showEditMockRuleDialog")
-  private showEditMockRuleDialog: boolean;
+  showEditMockRuleDialog: boolean;
 
   @MockRules.State("showDeleteMockRuleDialog")
-  private showDeleteMockRuleDialog: boolean;
+  showDeleteMockRuleDialog: boolean;
 
   @MockRules.Mutation("setCurRule")
-  private setCurRule!: Function;
+  setCurRule!: Function;
 
   @MockRules.State("curRule")
-  private curRule: MockRule;
+  curRule: MockRule;
+
+  mockRuleSnap: any = MockRuleSnap;
+  rules: Array<MockRule> = [];
+  searchKeyword: string = null;
+  wrapperRule: MockRule = null;
 
   created() { this.setCurRule(null); }
 
@@ -59,13 +61,11 @@ export default class BaseMockRuleMgr extends Vue {
   }
 
   fetchPagedMockRules() {
-    searchMockRules(this.searchKeyword)
-      .then((result: any) => {
-        this.rules = result.data.data;
-      })
-      .catch((err) => {
-        Message({ message: err.message, type: "error" });
-      });
+    searchMockRules(this.searchKeyword).then((result: any) => {
+      this.rules = result.data.data;
+    }).catch((err) => {
+      Message({ message: err.message, type: "error" });
+    });
   }
 
   onAddMockRule() {
@@ -75,25 +75,21 @@ export default class BaseMockRuleMgr extends Vue {
 
   onDeleteMockRuleConfirmed() {
     this.setShowDeleteMockRuleDialog(false);
-    deleteMockRule(this.curRule._id)
-      .then((result: any) => {
-        this.fetchPagedMockRules();
-      })
-      .catch((err: any) => {
-        Message({ message: err.message, type: "error" });
-      });
+    deleteMockRule(this.curRule._id).then((result: any) => {
+      this.fetchPagedMockRules();
+    }).catch((err: any) => {
+      Message({ message: err.message, type: "error" });
+    });
   }
 
   onSaveMockRule() {
     if (this.wrapperRule == null) return;
-    saveMockRule(this.wrapperRule, true)
-      .then((result: any) => {
-        Message({ message: "规则更新成功", type: "success" });
-        this.fetchPagedMockRules();
-      })
-      .catch((err) => {
-        Message({ message: err.message, type: "error" });
-      });
+    saveMockRule(this.wrapperRule, true).then((result: any) => {
+      Message({ message: "规则更新成功", type: "success" });
+      this.fetchPagedMockRules();
+    }).catch((err) => {
+      Message({ message: err.message, type: "error" });
+    });
     this.setShowEditMockRuleDialog(false);
   }
 
@@ -101,7 +97,6 @@ export default class BaseMockRuleMgr extends Vue {
   onCurRuleChanged() {
     this.wrapperRule = this.curRule;
   }
-
 
   @Watch("searchKeyword", { immediate: false, deep: false })
   throttlesearchKeywordChange = throttle((val: string) => {

@@ -7,11 +7,9 @@ const chalk = require('chalk');
 const del = require('del');
 const webpack = require('webpack');
 const Multispinner = require('multispinner');
-
 const mainConfig = require('./webpack.main.config');
 const rendererConfig = require('./webpack.renderer.config');
 const webConfig = require('./webpack.web.config');
-
 const doneLog = chalk.bgGreen.white(' DONE ') + ' ';
 const errorLog = chalk.bgRed.white(' ERROR ') + ' ';
 const okayLog = chalk.bgBlue.white(' OKAY ') + ' ';
@@ -23,13 +21,13 @@ const platform = os.platform();
 
 
 if (process.env.BUILD_TARGET === 'clean') clean();
-else if (process.env.BUILD_TARGET === 'web') web()
+else if (process.env.BUILD_TARGET === 'web') web();
 else build();
 
 function clean() {
     del.sync(['build/*', '!build/icons', '!build/icons/icon.*']);
     console.log(`\n${doneLog}\n`);
-    process.exit()
+    process.exit();
 }
 
 function build() {
@@ -72,7 +70,7 @@ function build() {
         process.exit(1);
     });
 
-    pack(webConfig).then(result=>{
+    pack(webConfig).then(result => {
         results += result + '\n\n';
         m.success('web');
     }).catch(err => {

@@ -24,7 +24,6 @@ class WebService {
       }
     } catch (err) {
       console.log("filter error", req.params);
-      console.log("filter error", err);
       this.error(req, resp, err);
     }
   }

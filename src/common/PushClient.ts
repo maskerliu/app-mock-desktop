@@ -1,6 +1,7 @@
 import Message from "element-ui/packages/message";
 import SockJS from "sockjs-client";
 import { BizType, CMDType, PushMsg, PushMsgType, PushMsgPayload } from "../model/DataModels";
+import { getAllPushClients } from "../model/LocaAPIs"
 
 
 export class PushClient {
@@ -42,6 +43,10 @@ export class PushClient {
       }
     };
     this.sockjs.send(JSON.stringify(msg));
+
+    getAllPushClients().then(resp => {
+      this.store.commit("updateClientInfos", resp.data.data);
+    }).catch(err => { })
   }
 
   private handleMsg(data: any): void {
@@ -59,6 +64,10 @@ export class PushClient {
           }
           case BizType.IM: {
             Message({ message: msg.payload.content, type: "success" });
+            break;
+          }
+          case BizType.ClientInfos: {
+            this.store.commit("updateClientInfos", msg.payload.content);
             break;
           }
         }

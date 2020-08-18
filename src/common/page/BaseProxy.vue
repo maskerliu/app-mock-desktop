@@ -47,7 +47,7 @@
         </el-col>
         <el-col ref="resizeBar" class="resize-bar" style="padding: 0;">
             <div
-                style="width: 3px; height: 100%; position: absolute; left: 3px; z-index: 0; border-left: 3px dotted #d6d6d6;"
+                style="width: 1px; height: 100%; position: absolute; left: 4px; z-index: 0; border-left: 2px dotted #d6d6d6;"
             ></div>
             <i
                 class="iconfont icon-division"
@@ -68,13 +68,14 @@
 .resize-bar {
     position: relative;
     width: 10px;
-    height: 100vh;
+    height: calc(100vh - 70px);
+    margin-top: 5px;
     text-align: center;
 }
 
 .record-snap-panel {
     height: calc(100% - 140px);
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
     margin: 15px 0 10px;
 }

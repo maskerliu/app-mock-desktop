@@ -1,4 +1,6 @@
 {
-    "domain": "'https://mock.yupaopao.com'",
-    "dev_domain": "'http://192.168.30.51:8885'"
+    "__": "无域名时不需要指定, 有域名时声明domain字段",
+    "_domain": "https://xxx.xxxx.com",
+    "proxyHttpPort": "8885",
+    "proxySocketPort": "8886"
 }

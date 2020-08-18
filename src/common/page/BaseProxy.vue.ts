@@ -1,6 +1,6 @@
 import { Component, Vue, Watch } from "vue-property-decorator"
 import VirtualList from "vue-virtual-scroll-list"
-import { namespace } from "vuex-class"
+import { namespace, State } from "vuex-class"
 import { PorxyType, ProxyRequestRecord, ProxyStatRecord } from "../../model/DataModels"
 import { setProxyDelay } from "../../model/LocaAPIs"
 import Live2d from '../components/live2d'
@@ -36,7 +36,7 @@ export default class BaseProxy extends Vue {
     @ProxyRecords.Mutation("clearRecords")
     clearRecords!: Function;
 
-    public $refs!: {
+    $refs!: {
         container: any;
         resizeBar: any;
         leftDom: any;
@@ -110,7 +110,6 @@ export default class BaseProxy extends Vue {
     }
 
     onSetDelayChanged(): void {
-        console.log("parent call");
         if (!this.isDelay) this.proxyDelay = null;
         setProxyDelay(this.proxyDelay, this.isDelay).then(resp => {
 

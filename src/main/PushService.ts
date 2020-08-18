@@ -3,7 +3,7 @@ import { Server } from "http";
 import {
   BizCode, BizResponse,
   BizType, CMDType, MsgPushClient, ProxyRequestRecord, ProxyStatRecord,
-  PushMsg, PushMsgType, PushMsgPayload
+  PushMsg, PushMsgType, ClientInfo
 } from "../model/DataModels";
 
 const sockjs = require('sockjs');
@@ -50,6 +50,7 @@ class PushService {
           }
         }
         // conn.write(JSON.stringify(resp));
+        this.boardcastClientInfos();
         break;
       case CMDType.RECONNECT:
         break;
@@ -89,11 +90,10 @@ class PushService {
     }
     if (client != null) delete this.pushClients[client];
 
-    console.error("sockjs close", conn.remoteAddress, conn.remotePort);
+    this.boardcastClientInfos();
   }
 
   private handleError(conn: any): void {
-    console.error("sockjs error", conn.remoteAddress, conn.remotePort);
     let client: string = null;
     for (let key in this.pushClients) {
       if (this.pushClients[key].id == conn.id) {
@@ -102,6 +102,8 @@ class PushService {
       }
     }
     if (client != null) delete this.pushClients[client];
+
+    this.boardcastClientInfos();
   }
 
   public bindServer(httpServer: Server): void {
@@ -116,6 +118,31 @@ class PushService {
   public sendMessage(data: PushMsg<any>, clientUid: string) {
     if (this.pushClients[clientUid] != null) {
       this.pushClients[clientUid].write(JSON.stringify(data));
+    }
+  }
+
+  public boardcastClientInfos() {
+    let data: Array<ClientInfo> = [];
+    for (let key in this.pushClients) {
+      let client = this.pushClients[key];
+      data.push({
+        key: client.id,
+        uid: key,
+        ip: client.remoteAddress,
+        port: client.remotePort
+      });
+    }
+
+    let msg: PushMsg<Array<ClientInfo>> = {
+      type: PushMsgType.TXT,
+    };
+    msg.payload = {
+      type: BizType.ClientInfos,
+      content: data
+    };
+
+    for (let key in this.pushClients) {
+      this.pushClients[key].write(JSON.stringify(msg));
     }
   }
 
@@ -151,6 +178,7 @@ class PushService {
     resp.json(bizResp);
     resp.end();
   }
+
 }
 
 export default new PushService();

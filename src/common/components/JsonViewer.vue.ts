@@ -35,9 +35,9 @@ export default class JsonViewer extends Vue {
   @Prop({ default: true })
   hasSiblings: boolean;
 
-  private innerclosed: boolean = true;
-  private templateDeep: number = 1;
-  private visible: boolean = this.currentDeep < 4;
+  innerclosed: boolean = true;
+  templateDeep: number = 1;
+  visible: boolean = this.currentDeep < 4;
 
   mounted() {
     this.innerclosed = this.closed;

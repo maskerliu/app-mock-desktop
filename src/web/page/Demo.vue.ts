@@ -1,6 +1,6 @@
 import { Component, Vue } from "vue-property-decorator";
-import { Action } from "vuex-class";
-import { BizType, MsgPushClient, PushMsg, PushMsgType } from "../../model/DataModels";
+import { Action, State } from "vuex-class";
+import { BizType, MsgPushClient, PushMsg, PushMsgType, ClientInfo } from "../../model/DataModels";
 import { getAllPushClients } from "../../model/LocaAPIs";
 
 
@@ -12,7 +12,10 @@ import { getAllPushClients } from "../../model/LocaAPIs";
 })
 export default class Demo extends Vue {
     @Action("sendMessage")
-    private sendMessage: Function;
+    sendMessage: Function;
+
+    @State((state) => state.Common.clientInfos)
+    clientInfos: Array<ClientInfo>;
 
     private dialogVisible: boolean = false;
     private selectClient: MsgPushClient = null;
@@ -23,9 +26,7 @@ export default class Demo extends Vue {
     private syncClientsTimer: any;
 
     mounted() {
-        this.syncClientsTimer = setInterval(() => {
-            this.getOnlineClients();
-        }, 3000);
+
     }
 
     destroyed(): void {

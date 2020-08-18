@@ -1,66 +1,36 @@
 <template>
-    <el-row :gutter="24">
-        <el-col :span="16">
+    <el-row :gutter="24" style="margin: 0;">
+        <el-col :span="16" class="bg-border" style=" height: calc(100vh - 60px);">
             <el-form label-width="200px" size="small" style="margin: 15px;">
                 <el-form-item label="网卡选择">
-                    <el-select v-model="curServerIP" placeholder="请选择" size="small" style="width: 100%;">
-                        <el-option v-for="(item, idx) in ips" :key="idx" :label="item.address" :value="item.address">
+                    <el-select v-model="wrapperConfig.serverIP" placeholder="请选择" size="small" style="width: 100%;">
+                        <el-option
+                            v-for="(item, idx) in wrapperConfig.ips"
+                            :key="idx"
+                            :label="item.address"
+                            :value="item.address"
+                        >
                             <span style="float: left">{{ item.name }}</span>
                             <span style="float: right; color: #8492a6; font-size: 13px">{{ item.address }}</span>
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="代理Http服务端口">
-                    <el-input v-model="curProxyHttpPort" size="small"></el-input>
-                </el-form-item>
-                <el-form-item label="代理长连服务端口">
-                    <el-input v-model="curProxySocketPort" size="small"></el-input>
-                </el-form-item>
-                <el-form-item label="API定义服务地址">
-                    <el-input v-model="adsUrl" size="small" clearable placeholder="http://sync.xxx.com/sync:xxxx">
+                <el-form-item :label="item.tooltip" v-for="(item, idx) in perferences" :key="idx">
+                    <el-input v-model="wrapperConfig[item.key]" size="small">
                         <el-button
                             slot="append"
                             icon="iconfont icon-cloud-sync"
-                            @click="updateApiDefineServer(adsUrl)"
+                            @click="onSave()"
+                            v-if="!item.hasStatus"
                         ></el-button>
-                    </el-input>
-                </el-form-item>
-                <el-form-item label="埋点规则服务地址">
-                    <el-input v-model="srsUrl" size="small" clearable placeholder="http://sync.xxx.com/sync:xxxx">
-                        <el-button
-                            slot="append"
-                            icon="iconfont icon-cloud-sync"
-                            @click="updateStatRuleServer(srsUrl)"
-                        ></el-button>
-                    </el-input>
-                </el-form-item>
-                <el-form-item label="Mock数据服务地址">
-                    <el-input v-model="mrsUrl" size="small" clearable placeholder="http://sync.xxx.com/sync:xxxx">
-                        <el-button
-                            slot="append"
-                            icon="iconfont icon-cloud-sync"
-                            @click="updateMockRuleServer(mrsUrl)"
-                        ></el-button>
-                    </el-input>
-                </el-form-item>
-                <el-form-item label="代理数据服务地址">
-                    <el-input v-model="dpsUrl" size="small" clearable placeholder="http://10.111.50.135:9017">
                         <el-switch
-                            v-model="dpStatus"
+                            v-model="wrapperConfig[item.statusKey]"
                             slot="append"
                             active-color="#13ce66"
                             @change="onDataProxySwitchChanged"
+                            v-if="item.hasStatus"
                         >
                         </el-switch>
-                    </el-input>
-                </el-form-item>
-                <el-form-item label="更新检查服务地址">
-                    <el-input v-model="vcsUrl" size="small" clearable placeholder="http://10.111.50.135:9017">
-                        <el-button
-                            slot="append"
-                            icon="iconfont icon-cloud-sync"
-                            @click="updateVersionCheckServer(vcsUrl)"
-                        ></el-button>
                     </el-input>
                 </el-form-item>
                 <el-form-item label="数据序列化插件" :inline="true">
@@ -123,7 +93,7 @@
                 </el-input>
             </el-row>
             <el-row style="text-align: center; overflow-y: auto; height: calc(100% - 120px);">
-                <el-col :span="6" v-for="item in clients" :key="item.key" style="margin: 10px 0;">
+                <el-col :span="6" v-for="item in clientInfos" :key="item.key" style="margin: 10px 0;">
                     <el-popover placement="bottom" trigger="manual">
                         <el-tooltip
                             slot="reference"

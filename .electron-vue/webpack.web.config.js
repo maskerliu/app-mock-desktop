@@ -1,20 +1,19 @@
 'use strict'
 
-process.env.BABEL_ENV = 'web'
+process.env.BABEL_ENV = 'web';
 
-const path = require('path')
-const webpack = require('webpack')
-
-const MinifyPlugin = require("babel-minify-webpack-plugin")
-const CopyWebpackPlugin = require('copy-webpack-plugin')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const tsImportPluginFactory = require('ts-import-plugin')
-const camel2Dash = require('camel-2-dash')
-const { VueLoaderPlugin } = require('vue-loader')
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
-
-const config = require("../config.json")
+const path = require('path');
+const webpack = require('webpack');
+const MinifyPlugin = require("babel-minify-webpack-plugin");
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const tsImportPluginFactory = require('ts-import-plugin');
+const camel2Dash = require('camel-2-dash');
+const { VueLoaderPlugin } = require('vue-loader');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const { getLocalIPs } = require("./utils");
+const config = require("../config.json");
 
 let webConfig = {
     devtool: '#cheap-module-eval-source-map',
@@ -165,8 +164,16 @@ let webConfig = {
 /**
  * Adjust webConfig for production settings
  */
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV == 'production') {
     webConfig.devtool = '';
+
+    let definePluginParams = {
+        "process.env.NODE_ENV": '"production"',
+    }
+
+    if (config.domain) {
+        definePluginParams['process.env.SERVER_BASE_URL'] = `'${config.domain}'`;
+    }
 
     webConfig.plugins.push(
         new MinifyPlugin(),
@@ -182,18 +189,13 @@ if (process.env.NODE_ENV === 'production') {
                 ignore: ['.*']
             }
         ]),
-        new webpack.DefinePlugin({
-            'process.env.NODE_ENV': '"production"',
-            'process.env.SERVER_BASE_URL': config.domain
-        }),
-        new webpack.LoaderOptionsPlugin({
-            minimize: true
-        })
+        new webpack.DefinePlugin(definePluginParams),
+        new webpack.LoaderOptionsPlugin({ minimize: true })
     );
 } else {
     webConfig.plugins.push(
         new webpack.DefinePlugin({
-            'process.env.SERVER_BASE_URL': config.dev_domain
+            'process.env.SERVER_BASE_URL': `'http://${getLocalIPs()[0].address}:${config.proxyHttpPort}'`
         }),
         new BundleAnalyzerPlugin({
             analyzerMode: 'server',

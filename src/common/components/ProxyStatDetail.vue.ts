@@ -12,17 +12,17 @@ import { ProxyStatRecord } from "../../model/DataModels";
 export default class ProxyStatDetail extends Vue {
 
   @Prop()
-  private record: ProxyStatRecord;
+  record: ProxyStatRecord;
 
-  @State((state) => state.Common.statRuleServer)
-  private statRuleServer: string;
+  @State((state) => state.Common.localServerConfig.statRuleServer)
+  statRuleServer: string;
 
-  private statRule: { desc: string, rule: string[], ruleDesc: string } = null;
-  private curStat: any;
+  statRule: { desc: string, rule: string[], ruleDesc: string } = null;
+  curStat: any;
 
-  private rows: any[] = [];
+  rows: any[] = [];
 
-  public $refs!: {
+  $refs!: {
     statsTable: any;
   };
 
@@ -55,13 +55,13 @@ export default class ProxyStatDetail extends Vue {
     elementId = row.event_id == 2001 ? "" : elementId;
     let keyword = row.event_id == 2001 ? pageId : elementId;
 
+    console.log(this.statRuleServer);
     if (elementId == "" && pageId == "") {
       Vue.set(this.rows[index], "rowClassName", "warning-row");
       Message.warning("未找到相关等级埋点");
     } else if (this.statRuleServer == null) {
       Message.warning("请在设置中指定埋点管理服务地址");
     } else {
-      console.log(this.statRuleServer);
       get("/api/stat/queryStats", this.statRuleServer, {
         eventId: row["event_id"],
         keyword: keyword
@@ -78,7 +78,6 @@ export default class ProxyStatDetail extends Vue {
           Message.warning("未找到相关等级埋点");
           return;
         }
-
 
         let stat = resp.data.data.data[0];
         let rules: string[] = stat.rule.split(/[,;，；]/);

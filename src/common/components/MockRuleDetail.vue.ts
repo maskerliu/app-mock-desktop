@@ -25,14 +25,14 @@ export default class MockRuleDetail extends Vue {
   @Prop()
   isMock: boolean;
 
-  public $refs!: {
+  $refs!: {
     jsonEditor: VJsonEditor;
   };
 
-  private rule: MockRule = null;
-  private curRecord: ProxyRequestRecord = null;
-  private showEditor: boolean = false;
-  private showDeleteConfirm: boolean = false;
+  rule: MockRule = null;
+  curRecord: ProxyRequestRecord = null;
+  showEditor: boolean = false;
+  showDeleteConfirm: boolean = false;
 
   created() { }
 
@@ -63,14 +63,12 @@ export default class MockRuleDetail extends Vue {
         break;
       }
     }
-    saveMockRule(this.rule, false)
-      .then((result) => {
-        Message({ message: "更新成功", type: "success" });
-        this.showEditor = false;
-      })
-      .catch((err) => {
-        Message({ message: "更新失败", type: "warning" });
-      });
+    saveMockRule(this.rule, false).then((result) => {
+      Message({ message: "更新成功", type: "success" });
+      this.showEditor = false;
+    }).catch((err) => {
+      Message({ message: "更新失败", type: "warning" });
+    });
   }
 
   onDeleteClicked(request: ProxyRequestRecord) {
@@ -88,14 +86,12 @@ export default class MockRuleDetail extends Vue {
     }
     if (idx != -1) {
       this.rule.requests.splice(idx, 1);
-      saveMockRule(this.rule, false)
-        .then((result) => {
-          this.showDeleteConfirm = false;
-          Message({ message: "删除成功", type: "success" });
-        })
-        .catch((err) => {
-          console.error("onDeleteConfirm", err);
-        });
+      saveMockRule(this.rule, false).then((result) => {
+        this.showDeleteConfirm = false;
+        Message({ message: "删除成功", type: "success" });
+      }).catch((err) => {
+        console.error("onDeleteConfirm", err);
+      });
     }
   }
 

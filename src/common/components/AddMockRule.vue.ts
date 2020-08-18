@@ -18,12 +18,12 @@ export default class AddMockRule extends Vue {
   @Prop()
   record: ProxyRequestRecord;
 
-  private keyword: string = null;
-  private searchLoading: boolean = false;
-  private searchResults: Array<MockRule> = null;
-  private curRule: MockRule = null;
-  private wrapperRecord: ProxyRequestRecord = null;
-  private isSaving: boolean = false;
+  keyword: string = null;
+  searchLoading: boolean = false;
+  searchResults: Array<MockRule> = null;
+  curRule: MockRule = null;
+  wrapperRecord: ProxyRequestRecord = null;
+  isSaving: boolean = false;
 
   $refs!: {
     recordJsonEditor: VJsonEditor;
@@ -43,22 +43,18 @@ export default class AddMockRule extends Vue {
   }
 
   querySearchAsync(keyword: string) {
-    searchMockRules(keyword)
-      .then((result) => {
-        this.searchResults = result.data.data;
-      })
-      .catch((err) => { });
+    searchMockRules(keyword).then((result) => {
+      this.searchResults = result.data.data;
+    }).catch((err) => { });
   }
 
   onRuleSelected(item: MockRule) {
     this.keyword = item.name;
     this.curRule = item;
 
-    getMockRuleDetail(this.curRule._id)
-      .then((result) => {
-        this.curRule = result.data.data;
-      })
-      .catch((err) => { });
+    getMockRuleDetail(this.curRule._id).then((result) => {
+      this.curRule = result.data.data;
+    }).catch((err) => { });
   }
 
   addRule() {
@@ -92,15 +88,13 @@ export default class AddMockRule extends Vue {
     if (this.curRule === null || this.curRule._id === null) {
       this.isSaving = false;
     } else {
-      saveMockRule(this.curRule, false)
-        .then((result) => {
-          Message({ message: "保存成功", type: "success" });
-          this.isSaving = false;
-        })
-        .catch((err) => {
-          Message({ message: "保存失败", type: "warning" });
-          this.isSaving = false;
-        });
+      saveMockRule(this.curRule, false).then((result) => {
+        Message({ message: "保存成功", type: "success" });
+        this.isSaving = false;
+      }).catch((err) => {
+        Message({ message: "保存失败", type: "warning" });
+        this.isSaving = false;
+      });
     }
   }
 
