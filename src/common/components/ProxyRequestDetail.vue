@@ -1,5 +1,5 @@
 <template>
-  <div class="inspector-panel" v-if="wrapperRecord != null" ref="inspectorPanel">
+  <div class="inspector-panel bg-border" v-if="wrapperRecord != null" ref="inspectorPanel">
     <div class="request-path">
       <span class="request-url">
         <b>Path:</b> {{ wrapperRecord.url }}<br />
@@ -76,7 +76,7 @@
 <style>
 .inspector-panel {
   position: relative;
-  height: calc(100vh - 62px);
+  height: calc(100vh - 70px);
   overflow-y: auto;
 }
 

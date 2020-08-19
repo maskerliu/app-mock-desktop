@@ -5,6 +5,7 @@ import { State } from "vuex-class"
 import { ProxyRequestRecord } from "../../model/DataModels"
 import AddMockRule from "./AddMockRule.vue"
 import JsonViewer from "./JsonViewer.vue"
+import { Message } from "element-ui"
 
 const AUDIO_RGX = new RegExp("(.mp3|.ogg|.wav|.m4a|.aac)$");
 const VIDEO_RGX = new RegExp("(.mp4)$");
@@ -90,6 +91,11 @@ export default class ProxyRequestDetail extends Vue {
 
   getApiDefineInfo() {
     this.apiDesc = null;
+    if (this.apiDefineServer == null) {
+      Message.warning("请在设置中指定API定义服务地址");
+      return;
+    }
+
     axios({
       baseURL: this.apiDefineServer,
       url: "/api/moreApiInfo.json",
