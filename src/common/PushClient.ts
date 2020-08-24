@@ -1,7 +1,7 @@
 import Message from "element-ui/packages/message";
 import SockJS from "sockjs-client";
-import { BizType, CMDType, PushMsg, PushMsgType, PushMsgPayload } from "../model/DataModels";
-import { getAllPushClients } from "../model/LocaAPIs"
+import { BizType, CMDType, PushMsg, PushMsgPayload, PushMsgType } from "../model/DataModels";
+import { getAllPushClients } from "../model/LocaAPIs";
 
 
 export class PushClient {
@@ -16,10 +16,11 @@ export class PushClient {
 
   public start(host: string, uid: string): void {
     this.uid = uid;
+    console.log(localStorage.username);
     try {
       this.sockjs.close();
     } catch (err) { }
-    this.sockjs = new SockJS(`${host}/echo`);
+    this.sockjs = new SockJS(`${host}/echo`, { transports: 'websocket' });
     this.sockjs.onopen = () => { this.register(uid); }
     this.sockjs.onmessage = (e: any) => { this.handleMsg(e.data); }
   }
@@ -39,7 +40,7 @@ export class PushClient {
       from: this.sockjs.id,
       payload: {
         type: CMDType.REGISTER,
-        content: uid
+        content: { uid: uid, username: localStorage.username }
       }
     };
     this.sockjs.send(JSON.stringify(msg));

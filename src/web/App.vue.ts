@@ -33,11 +33,14 @@ export default class App extends Vue {
         { path: "Demo", tip: "实验室", icon: "icon-lab" }
     ];
 
+    showLoginDialog: boolean = false;
+    username: string = null;
     curPage: string = null;
     curActivedNavMenuIdx: string = null;
 
     created() {
         this.init();
+        this.username = localStorage.username;
     }
 
     mounted() {
@@ -76,5 +79,10 @@ export default class App extends Vue {
         if (index === this.curPage) return;
         this.curPage = index;
         this.$router.replace({ name: index });
+    }
+
+    login() {
+        localStorage.username = this.username;
+        this.showLoginDialog = false;
     }
 }

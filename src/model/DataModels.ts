@@ -99,6 +99,7 @@ export class MockRule {
 export interface MsgPushClient {
   key: string;
   uid: string;
+  username: string;
   ip: string; // client ip
   port: string; // client port
 }

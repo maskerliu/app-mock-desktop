@@ -1,7 +1,8 @@
+import Message from "element-ui/packages/message";
 import { Component, Vue } from "vue-property-decorator";
 import { Action, State } from "vuex-class";
-import { BizType, MsgPushClient, PushMsg, PushMsgType, ClientInfo } from "../../model/DataModels";
-import { getAllPushClients } from "../../model/LocaAPIs";
+import { isUrl } from "../../common/Utils";
+import { BizType, ClientInfo, LocalServerConfig, MsgPushClient, PushMsg, PushMsgType } from "../../model/DataModels";
 
 
 @Component({
@@ -11,35 +12,64 @@ import { getAllPushClients } from "../../model/LocaAPIs";
     },
 })
 export default class Demo extends Vue {
-    @Action("sendMessage")
-    sendMessage: Function;
-
+    @State((state) => state.Common.localServerConfig)
+    localServerConfig: LocalServerConfig;
     @State((state) => state.Common.clientInfos)
     clientInfos: Array<ClientInfo>;
 
-    private dialogVisible: boolean = false;
-    private selectClient: MsgPushClient = null;
-    private broadcastMsg: string = "";
-    private imMsg: string = "";
-    private clients: {} = {};
+    @Action("saveLocalServerConfig")
+    saveLocalServerConfig: Function;
+    @Action("sendMessage")
+    sendMessage: Function;
 
-    private syncClientsTimer: any;
+    dialogVisible: boolean = false;
+    selectClient: MsgPushClient = null;
+    broadcastMsg: string = "";
+    imMsg: string = "";
+
+    perferences: Array<{ tooltip: string, key: string }> = [
+        { tooltip: "代理Http服务端口", key: "proxyHttpPort", },
+        { tooltip: "代理长连服务端口", key: "proxySocketPort", },
+        { tooltip: "API定义服务地址", key: "apiDefineServer", },
+        { tooltip: "埋点规则服务地址", key: "statRuleServer", },
+        { tooltip: "代理数据服务地址", key: "dataProxyServer", hasStatus: true, statusKey: "dataProxyStatus" },
+    ];
+
+    wrapperConfig: LocalServerConfig = {};
 
     mounted() {
-
+        setTimeout(() => {
+            this.wrapperConfig = Object.assign({}, this.localServerConfig);
+        }, 500);
     }
 
     destroyed(): void {
-        clearInterval(this.syncClientsTimer);
+
     }
 
-    public getOnlineClients() {
-        getAllPushClients().then(resp => {
-            this.clients = resp.data.data;
-        }).catch(err => { })
+    onDataProxySwitchChanged() {
+        if (this.wrapperConfig.dataProxyStatus) {
+            if (isUrl(this.wrapperConfig.dataProxyServer)) {
+                let config: LocalServerConfig = {
+                    dataProxyServer: this.wrapperConfig.dataProxyServer,
+                    dataProxyStatus: this.wrapperConfig.dataProxyStatus
+                }
+                this.saveLocalServerConfig(config);
+            } else {
+                this.wrapperConfig.dataProxyServer = this.localServerConfig.dataProxyServer;
+                this.wrapperConfig.dataProxyStatus = false;
+                Message.warning("非法URL");
+            }
+        } else {
+            let config: LocalServerConfig = {
+                dataProxyServer: this.wrapperConfig.dataProxyServer,
+                dataProxyStatus: this.wrapperConfig.dataProxyStatus
+            }
+            this.saveLocalServerConfig(config);
+        }
     }
 
-    public sendBroadcastMsg(): void {
+    sendBroadcastMsg(): void {
         let msg: PushMsg<any> = {
             type: PushMsgType.TXT,
             payload: {
@@ -51,12 +81,12 @@ export default class Demo extends Vue {
         this.broadcastMsg = "";
     }
 
-    public showOpMenu(client: MsgPushClient): void {
+    showOpMenu(client: MsgPushClient): void {
         this.dialogVisible = true;
         this.selectClient = client;
     }
 
-    public sendMsg(): void {
+    sendMsg(): void {
         let msg: PushMsg<any> = {
             to: this.selectClient.uid,
             type: PushMsgType.TXT,

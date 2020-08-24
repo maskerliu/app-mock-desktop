@@ -1,6 +1,6 @@
 {
     "__": "无域名时不需要指定, 有域名时声明domain字段",
-    "domain": "https://mock.yupaopao.com",
+    "_domain": "https://mock.yupaopao.com",
     "proxyHttpPort": "8885",
     "proxySocketPort": "8886"
 }

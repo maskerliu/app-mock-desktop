@@ -1,7 +1,11 @@
 import "element-ui/lib/theme-chalk/index.css";
 import Vue from "vue";
 
-import { Checkbox, CheckboxGroup, Loading, Input, Row, Col, Menu, MenuItem, Button, Dialog, Table, TableColumn, Switch, Select, Popover, Tooltip, Form, FormItem, Tag } from "element-ui"
+import {
+  Checkbox, CheckboxGroup, Loading, Input, Row, Col, Option,
+  Menu, MenuItem, Button, Dialog, Table, TableColumn,
+  Switch, Select, Popover, Tooltip, Form, FormItem, Tag
+} from "element-ui"
 // @ts-ignore
 import App from "./App";
 import router from "./router";
@@ -23,6 +27,7 @@ Vue.use(Table);
 Vue.use(TableColumn);
 Vue.use(Switch);
 Vue.use(Select);
+Vue.use(Option);
 Vue.use(Popover);
 Vue.use(Tooltip);
 Vue.use(Input);

@@ -38,11 +38,14 @@ export default class BizMain extends AbstractPage {
   ];
   curPage: string = null;
   curActivedNavMenuIdx: string = null;
+  showLoginDialog: boolean = false;
+  username: string = null;
 
   created() { }
 
   mounted() {
     this.onNavTabClick(this.navMenus[0].path);
+    this.username = localStorage.username;
   }
 
   destroy() { }
@@ -98,4 +101,9 @@ export default class BizMain extends AbstractPage {
   }
 
   click2Reg() { }
+
+  login() {
+    localStorage.username = this.username;
+    this.showLoginDialog = false;
+  }
 }

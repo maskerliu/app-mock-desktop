@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import protobuf from "protobufjs";
-import Url from "url";
 import zlib from "zlib";
 import { BizCode, BizResponse, PorxyType, ProxyRequestRecord, ProxyStatRecord } from "../model/DataModels";
 import MockService from "./MockService";
@@ -8,24 +7,44 @@ import PushService from "./PushService";
 
 const JSONBigInt = require("json-bigint");
 const axios = require("axios");
-const websocket = require("nodejs-websocket");
 
 class ProxyService {
   private static PROXY_DEF_TIMEOUT: number = 1000 * 15; // 15s
   private _sessionId: number;
-  private dataProxyServer: string;
   private proxySocketServer: any = null;
-  private dataProxyStatus: boolean = false;
   private pbFiles: Array<{ name: string; value: string }> = null;
-  private proxyDelays: {} = {};
+
+  /**
+   * {
+   *  uid: {
+   *    delay: 500,
+   *    dataProxyServer: http://10.10.120.119,
+   *    dataProxyStatus: true
+   * }
+   * }
+   */
+  private proxyPrefs: {} = {};
 
   constructor() {
     this._sessionId = 0;
   }
 
-  public setDataProxyServer(url: string, status: boolean) {
-    this.dataProxyServer = url;
-    this.dataProxyStatus = status;
+  public setDataProxyServer(url: string, status: boolean, uid: any) {
+    if (this.proxyPrefs[uid] == null) this.proxyPrefs[uid] = {};
+
+    this.proxyPrefs[uid] = Object.assign(this.proxyPrefs[uid], {
+      dataProxyServer: url,
+      dataProxyStatus: status
+    });
+  }
+
+  public getDataProxyServer(uid: any) {
+    if (this.proxyPrefs[uid]) {
+      return {
+        dataProxyServer: this.proxyPrefs[uid].dataProxyServer,
+        dataProxyStatus: this.proxyPrefs[uid].dataProxyStatus
+      }
+    } else return {};
   }
 
   public setProxyDelay(req: Request, resp: Response): void {
@@ -34,9 +53,9 @@ class ProxyService {
     let delay: any = req.query["delay"];
 
     if (isDelay) {
-      this.proxyDelays[uid] = { delay: delay };
+      this.proxyPrefs[uid] = Object.assign(this.proxyPrefs[uid], { delay: delay });
     } else {
-      delete this.proxyDelays[uid];
+      delete this.proxyPrefs[uid].delay;
     }
 
     let bizResp: BizResponse<string> = new BizResponse<string>();
@@ -75,6 +94,7 @@ class ProxyService {
     // }
   }
 
+  // TODO: PB数据序列化支持
   public setProtoFiles(files: string[]) {
     files.forEach((item: string) => {
       var strs = item.split("/");
@@ -140,6 +160,11 @@ class ProxyService {
   }
 
   public handleRequest(req: Request, resp: Response) {
+    // 清理无效配置
+    Object.keys(this.proxyPrefs).forEach(key => {
+      if (PushService.pushClients[key] == null) delete this.proxyPrefs[key];
+    });
+
     let startTime = new Date().getTime();
     let sessionId = ++this._sessionId;
 
@@ -163,11 +188,12 @@ class ProxyService {
       requestData: requestData,
       timestamp: new Date().getSeconds(),
     };
-    // console.log("request", req.header("Mock-Host"), req.header("Mock-Uid"));
+
     let uid = req.header("mock-uid");
     PushService.sendProxyMessage(data, uid);
 
-    let delay = this.proxyDelays[uid] != null ? parseInt(this.proxyDelays[uid].delay) : 0;
+    let delay: number = this.proxyPrefs[uid] != null && this.proxyPrefs[uid].hasOwnProperty("delay") ? parseInt(this.proxyPrefs[uid].delay) : 0;
+
     MockService.mockRequestData(sessionId, req, resp, startTime, delay).then(() => {
       // console.log("proxy is mock");
     }).catch(reason => {
@@ -187,9 +213,25 @@ class ProxyService {
     delete headers["mock-uid"];
 
     let requestUrl = originHost + req.path;
-    if (this.dataProxyServer != null && this.dataProxyStatus) {
-      requestUrl = this.dataProxyServer + req.path;
+
+    let dataProxyServer = null;
+    let dataProxyStatus = false;
+
+    let uid = req.header("mock-uid");
+    if (this.proxyPrefs[uid]) {
+      if (this.proxyPrefs[uid].hasOwnProperty("dataProxyServer")) {
+        dataProxyServer = this.proxyPrefs[uid].dataProxyServer;
+      }
+      if (this.proxyPrefs[uid].hasOwnProperty("dataProxyStatus")) {
+        dataProxyStatus = this.proxyPrefs[uid].dataProxyStatus;
+      }
     }
+
+    if (dataProxyServer != null && dataProxyStatus) {
+      requestUrl = dataProxyServer + req.path;
+    }
+
+    console.log(requestUrl);
 
     let options = {
       url: requestUrl,
@@ -217,27 +259,23 @@ class ProxyService {
     }
 
     axios(options).then((resp: any) => {
-      try {
-        setTimeout(() => {
-          let data: ProxyRequestRecord = {
-            id: sessionId,
-            type: PorxyType.REQUEST_END,
-            statusCode: resp.status,
-            responseHeaders: !!resp.headers ? resp.headers : null,
-            responseData: !!resp.data ? JSON.stringify(resp.data) : null,
-            time: new Date().getTime() - startTime,
-            isMock: false,
-          };
-          PushService.sendProxyMessage(data, req.header("mock-uid"));
+      setTimeout(() => {
+        let data: ProxyRequestRecord = {
+          id: sessionId,
+          type: PorxyType.REQUEST_END,
+          statusCode: resp.status,
+          responseHeaders: !!resp.headers ? resp.headers : null,
+          responseData: !!resp.data ? JSON.stringify(resp.data) : null,
+          time: new Date().getTime() - startTime,
+          isMock: false,
+        };
+        PushService.sendProxyMessage(data, uid);
 
-          proxyResp.send(resp.data);
-          proxyResp.end();
-        }, delay);
-      } catch (err) {
-        console.error("proxyRequestData", err);
-      }
+        proxyResp.send(resp.data);
+        proxyResp.end();
+      }, delay);
     }).catch((err: any) => {
-      console.log("axios", err.code);
+      console.error("axios", err.code);
       let resp = err.response;
       let respData = !!resp ? resp.data : err.message;
       let data: ProxyRequestRecord = {
@@ -249,11 +287,12 @@ class ProxyService {
         time: new Date().getTime() - startTime,
         isMock: false,
       };
-      PushService.sendProxyMessage(data, req.header("mock-uid"));
+      PushService.sendProxyMessage(data, uid);
       proxyResp.send(err.message);
       proxyResp.end();
     });
   }
+
 }
 
 export default new ProxyService();

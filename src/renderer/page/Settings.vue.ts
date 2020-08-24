@@ -1,10 +1,9 @@
 import { ipcRenderer } from "electron"
 import Message from "element-ui/packages/message"
 import { Component } from "vue-property-decorator"
-import { Action, Mutation, State } from "vuex-class"
+import { Action, State } from "vuex-class"
 import { isUrl } from "../../common/Utils"
-import { BizType, CMDType, MsgPushClient, PushMsg, PushMsgType, LocalServerConfig, ClientInfo } from "../../model/DataModels"
-import { getAllPushClients } from "../../model/LocaAPIs"
+import { BizType, ClientInfo, CMDType, LocalServerConfig, MsgPushClient, PushMsg, PushMsgType } from "../../model/DataModels"
 import AbstractPage from "./AbstractPage.vue"
 
 
@@ -14,16 +13,16 @@ import AbstractPage from "./AbstractPage.vue"
 })
 export default class Settings extends AbstractPage {
   @State((state) => state.Common.localServerConfig)
-  private localServerConfig: LocalServerConfig;
+  localServerConfig: LocalServerConfig;
 
   @State((state) => state.Common.clientInfos)
   clientInfos: Array<ClientInfo>;
 
   @Action("sendMessage")
-  private sendMessage: Function;
+  sendMessage: Function;
 
   @Action("saveLocalServerConfig")
-  private saveLocalServerConfig: Function;
+  saveLocalServerConfig: Function;
 
   mrsUrl: string = null;
   pbFiles: any[] = null;
@@ -34,7 +33,6 @@ export default class Settings extends AbstractPage {
   broadcastMsg: string = "";
   imMsg: string = "";
 
-
   perferences: Array<{ tooltip: string, key: string }> = [
     { tooltip: "代理Http服务端口", key: "proxyHttpPort", },
     { tooltip: "代理长连服务端口", key: "proxySocketPort", },
@@ -42,29 +40,28 @@ export default class Settings extends AbstractPage {
     { tooltip: "埋点规则服务地址", key: "statRuleServer", },
     { tooltip: "代理数据服务地址", key: "dataProxyServer", hasStatus: true, statusKey: "dataProxyStatus" },
     { tooltip: "更新检查服务地址", key: "versionCheckServer", }
-  ]
+  ];
 
   wrapperConfig: LocalServerConfig = {};
 
-  public created(): void {
+  created(): void {
     this.updateNavBarConfig({
       title: "设置",
       leftItem: false,
       rightItem: false,
     });
     this.wrapperConfig = Object.assign({}, this.localServerConfig);
+  }
+
+  destroyed(): void {
 
   }
 
-  public destroyed(): void {
-
-  }
-
-  public onOpenFileDialog(): void {
+  onOpenFileDialog(): void {
     ipcRenderer.send("on-open-folder", "openFile");
   }
 
-  public onDataProxySwitchChanged() {
+  onDataProxySwitchChanged() {
     if (this.wrapperConfig.dataProxyStatus) {
       if (isUrl(this.wrapperConfig.dataProxyServer)) {
         this.onSave();
@@ -78,7 +75,7 @@ export default class Settings extends AbstractPage {
     }
   }
 
-  public onSave(): void {
+  onSave(): void {
     let config: LocalServerConfig = {};
 
     if (this.wrapperConfig.proxyHttpPort != this.localServerConfig.proxyHttpPort) {
@@ -110,7 +107,7 @@ export default class Settings extends AbstractPage {
     this.saveLocalServerConfig(config);
   }
 
-  public sendBroadcastMsg(): void {
+  sendBroadcastMsg(): void {
     let msg: PushMsg<any> = {
       type: PushMsgType.TXT,
       payload: {
@@ -122,7 +119,7 @@ export default class Settings extends AbstractPage {
     this.broadcastMsg = "";
   }
 
-  public sendMsg(): void {
+  sendMsg(): void {
     let msg: PushMsg<any> = {
       to: this.selectClient.uid,
       type: PushMsgType.TXT,
@@ -135,7 +132,7 @@ export default class Settings extends AbstractPage {
     this.imMsg = "";
   }
 
-  public kickDown(): void {
+  kickDown(): void {
     this.sendMessage({
       to: this.selectClient.uid,
       type: PushMsgType.CMD,
@@ -145,7 +142,7 @@ export default class Settings extends AbstractPage {
     });
   }
 
-  public showOpMenu(client: MsgPushClient): void {
+  showOpMenu(client: MsgPushClient): void {
     this.dialogVisible = true;
     this.selectClient = client;
   }

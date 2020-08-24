@@ -2,21 +2,20 @@ import { Request, Response } from "express";
 import { Server } from "http";
 import {
   BizCode, BizResponse,
-  BizType, CMDType, MsgPushClient, ProxyRequestRecord, ProxyStatRecord,
-  PushMsg, PushMsgType, ClientInfo
+  BizType,
+  ClientInfo, CMDType, MsgPushClient, ProxyRequestRecord, ProxyStatRecord,
+  PushMsg, PushMsgType
 } from "../model/DataModels";
-
-// var Extensions = require('websocket-extensions');
 
 const sockjs = require('sockjs');
 
 class PushService {
-  private pushClients: {} = {};
+  public pushClients: {} = {};
 
   private sockjsServer: any;
 
   constructor() {
-    this.sockjsServer = sockjs.createServer({ prefix: '/echo' });
+    this.sockjsServer = sockjs.createServer({ prefix: '/echo', transports: 'websocket' });
     this.sockjsServer.on('connection', (conn: any) => {
       conn.on('data', (message: any) => { this.handleMsg(conn, message) });
       conn.on('close', () => { this.handleClose(conn); });
@@ -41,25 +40,15 @@ class PushService {
   private handleCMD(conn: any, msg: PushMsg<any>) {
     switch (msg.payload.type) {
       case CMDType.REGISTER:
-        let uid = msg.payload.content;
-        this.pushClients[uid] = conn;
-
-        let resp: PushMsg<any> = {
-          type: PushMsgType.CMD,
-          payload: {
-            type: CMDType.REGISTER,
-            content: uid
-          }
-        }
-        // conn.write(JSON.stringify(resp));
+        let uid = msg.payload.content.uid;
+        this.pushClients[uid] = { conn: conn, username: msg.payload.content.username };
         this.boardcastClientInfos();
         break;
       case CMDType.RECONNECT:
         break;
       case CMDType.KICKDOWN:
-        if (this.pushClients[msg.to]) {
-          this.pushClients[msg.to].write(JSON.stringify(msg));
-        }
+        if (this.pushClients[msg.to])
+          this.pushClients[msg.to].conn.write(JSON.stringify(msg));
         break;
     }
   }
@@ -68,13 +57,12 @@ class PushService {
     switch (msg.payload.type) {
       case BizType.IM: {
         if (msg.to == null) {
-          for (let key in this.pushClients) {
-            if (key == msg.from) continue;
-            this.pushClients[key].write(JSON.stringify(msg));
-          }
+          Object.keys(this.pushClients).forEach(key => {
+            if (key != msg.from) this.pushClients[key].write(JSON.stringify(msg));
+          });
         } else {
           if (this.pushClients[msg.to] != null) {
-            this.pushClients[msg.to].write(JSON.stringify(msg));
+            this.pushClients[msg.to].conn.write(JSON.stringify(msg));
           }
         }
         break;
@@ -83,27 +71,17 @@ class PushService {
   }
 
   private handleClose(conn: any): void {
-    let client: string = null;
-    for (let key in this.pushClients) {
-      if (this.pushClients[key].id == conn.id) {
-        client = key;
-        break;
-      }
-    }
-    if (client != null) delete this.pushClients[client];
+    Object.keys(this.pushClients).forEach(key => {
+      if (this.pushClients[key].conn.id == conn.id) { delete this.pushClients[key]; }
+    });
 
     this.boardcastClientInfos();
   }
 
   private handleError(conn: any): void {
-    let client: string = null;
-    for (let key in this.pushClients) {
-      if (this.pushClients[key].id == conn.id) {
-        client = key;
-        break;
-      }
-    }
-    if (client != null) delete this.pushClients[client];
+    Object.keys(this.pushClients).forEach(key => {
+      if (this.pushClients[key].conn.id == conn.id) delete this.pushClients[key];
+    });
 
     this.boardcastClientInfos();
   }
@@ -119,21 +97,22 @@ class PushService {
 
   public sendMessage(data: PushMsg<any>, clientUid: string) {
     if (this.pushClients[clientUid] != null) {
-      this.pushClients[clientUid].write(JSON.stringify(data));
+      this.pushClients[clientUid].conn.write(JSON.stringify(data));
     }
   }
 
   public boardcastClientInfos() {
     let data: Array<ClientInfo> = [];
-    for (let key in this.pushClients) {
+    Object.keys(this.pushClients).forEach(key => {
       let client = this.pushClients[key];
       data.push({
-        key: client.id,
+        key: client.conn.id,
         uid: key,
-        ip: client.remoteAddress,
-        port: client.remotePort
+        username: client.username,
+        ip: client.conn.remoteAddress,
+        port: client.conn.remotePort
       });
-    }
+    });
 
     let msg: PushMsg<Array<ClientInfo>> = {
       type: PushMsgType.TXT,
@@ -143,9 +122,9 @@ class PushService {
       content: data
     };
 
-    for (let key in this.pushClients) {
-      this.pushClients[key].write(JSON.stringify(msg));
-    }
+    Object.keys(this.pushClients).forEach(key => {
+      this.pushClients[key].conn.write(JSON.stringify(msg));
+    });
   }
 
   public sendProxyMessage(data: ProxyRequestRecord | ProxyStatRecord, clientUid: string) {
@@ -157,9 +136,8 @@ class PushService {
         content: data
       }
     }
-
     if (this.pushClients[clientUid] != null) {
-      this.pushClients[clientUid].write(JSON.stringify(pushMsg));
+      this.pushClients[clientUid].conn.write(JSON.stringify(pushMsg));
     }
   }
 
@@ -167,15 +145,17 @@ class PushService {
     let bizResp: BizResponse<Array<MsgPushClient>> = new BizResponse<Array<MsgPushClient>>();
     bizResp.code = BizCode.SUCCESS;
     bizResp.data = [];
-    for (let key in this.pushClients) {
+
+    Object.keys(this.pushClients).forEach(key => {
       let client = this.pushClients[key];
       bizResp.data.push({
-        key: client.id,
+        key: client.conn.id,
         uid: key,
-        ip: client.remoteAddress,
-        port: client.remotePort
+        username: client.username,
+        ip: client.conn.remoteAddress,
+        port: client.conn.remotePort
       });
-    }
+    });
 
     resp.json(bizResp);
     resp.end();

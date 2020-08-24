@@ -2,9 +2,9 @@ import { ActionTree, Commit, GetterTree, MutationTree } from "vuex"
 import store from "../"
 import { PushClient } from "../../../common/PushClient"
 import { generateUid } from "../../../common/Utils"
-import { updateClientUID, updateBaseDomain } from "../../../model/BasicLocalAPI"
-import { PushMsg, ClientInfo } from "../../../model/DataModels"
-import { getLocalServerConfig, getAllPushClients } from "../../../model/LocaAPIs"
+import { updateBaseDomain, updateClientUID } from "../../../model/BasicLocalAPI"
+import { ClientInfo, LocalServerConfig, PushMsg } from "../../../model/DataModels"
+import { getLocalServerConfig, syncLocalServerConfig } from "../../../model/LocaAPIs"
 import { CommonState } from "../types"
 
 const state: CommonState = {
@@ -23,6 +23,8 @@ const state: CommonState = {
 };
 
 let pushClient: PushClient = null;
+let uid = generateUid();
+updateClientUID(uid);
 
 export const getters: GetterTree<CommonState, any> = {};
 
@@ -40,6 +42,11 @@ export const actions: ActionTree<CommonState, any> = {
     unInit(context: { commit: Commit }): void {
         pushClient.close();
     },
+    saveLocalServerConfig(context: { commit: Commit }, config: LocalServerConfig) {
+        syncLocalServerConfig(config).then(resp => {
+            state.localServerConfig = resp.data.data;
+        }).catch(err => { });
+    },
     sendMessage(context: { commit: Commit }, params: PushMsg<any>) {
         pushClient.send(params);
     }
@@ -50,11 +57,8 @@ export const mutations: MutationTree<CommonState> = {
     updateShowQrCodeDialog(state, display) {
         state.showQrCodeDialog = display;
     },
-    updateLocalServerConfig(state, params) {
-        let uid = generateUid();
-        state.localServerConfig = params;
-        updateClientUID(uid);
-
+    updateLocalServerConfig(state, config: LocalServerConfig) {
+        state.localServerConfig = config;
         if (process.env.NODE_ENV == 'production' && process.env.SERVER_BASE_URL) {
             state.registerUrl = `${process.env.SERVER_BASE_URL}/mw/register?_=0__0&uid=${uid}`;
             pushClient.start(`${process.env.SERVER_BASE_URL}`, uid);

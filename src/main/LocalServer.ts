@@ -10,6 +10,7 @@ import ProxyService from "./ProxyService";
 import PushService from "./PushService";
 import WebService from "./WebService";
 
+const JSONBigInt = require("json-bigint");
 const config = require("../../config.json");
 
 const CorsOptions: {} = {
@@ -67,6 +68,15 @@ class LocalServer {
           let bizResp: BizResponse<LocalServerConfig> = new BizResponse<LocalServerConfig>();
           bizResp.code = BizCode.SUCCESS;
           bizResp.data = this.getLocalServerConfig();
+          resp.json(bizResp);
+          resp.end();
+        } else if (/^\/appmock\/saveLocalServerConfig/.test(req.url)) {
+          let config: LocalServerConfig = JSONBigInt.parse(req.body);
+          ProxyService.setDataProxyServer(config.dataProxyServer, config.dataProxyStatus, req.query["uid"]);
+          this.updateLocalServerConfig(config);
+          let bizResp: BizResponse<LocalServerConfig> = new BizResponse<LocalServerConfig>();
+          bizResp.code = BizCode.SUCCESS;
+          bizResp.data = Object.assign(this.getLocalServerConfig(), ProxyService.getDataProxyServer(req.query["uid"]));
           resp.json(bizResp);
           resp.end();
         } else {

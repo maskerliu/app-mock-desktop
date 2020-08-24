@@ -1,4 +1,4 @@
-import { AxiosPromise } from "axios";
+import Axios, { AxiosPromise } from "axios";
 import { get, post } from "./BasicLocalAPI";
 import { BizResponse, LocalServerConfig, MockRule, MsgPushClient } from "./DataModels";
 
@@ -24,6 +24,10 @@ export function deleteMockRule(ruleId: string): AxiosPromise<BizResponse<string>
 
 export function getLocalServerConfig(): AxiosPromise<BizResponse<LocalServerConfig>> {
   return get("/appmock/getLocalServerConfig");
+}
+
+export function syncLocalServerConfig(config: LocalServerConfig): AxiosPromise<BizResponse<LocalServerConfig>> {
+  return post("/appmock/saveLocalServerConfig", null, null, config);
 }
 
 export function getAllPushClients(): AxiosPromise<BizResponse<Array<MsgPushClient>>> {

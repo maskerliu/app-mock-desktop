@@ -8,6 +8,7 @@ import { PushClient } from "../../../common/PushClient";
 import { generateUid } from "../../../common/Utils";
 import { updateClientUID, updateBaseDomain } from "../../../model/BasicLocalAPI";
 import { LocalServerConfig, PushMsg, ClientInfo } from "../../../model/DataModels";
+import { syncLocalServerConfig } from "../../../model/LocaAPIs";
 import { CommonState, NavBarConfig } from "../types";
 
 const state: CommonState = {
@@ -34,8 +35,14 @@ export const actions: ActionTree<CommonState, any> = {
   init(context: { commit: Commit }): void {
     pushClient = new PushClient(store);
 
+    if (process.env.NODE_ENV != 'production' && process.env.SERVER_BASE_URL) {
+      updateBaseDomain(process.env.SERVER_BASE_URL);
+    }
+
     db.get('localServerConfig').then((result: any) => {
-      ipcRenderer.send("update-local-server-config", result.config);
+      syncLocalServerConfig(result.config).then(resp => {
+        state.localServerConfig = resp.data.data;
+      }).catch(err => { });
     }).catch(err => { });
 
     ipcRenderer.on("get-local-server-config", (event: any, data: any) => {
@@ -81,7 +88,9 @@ export const actions: ActionTree<CommonState, any> = {
         Message.success({ message: "应用配置更新成功", duration: 500 });
       }).catch(err => { Message.warning("应用配置更新失败"); })
     });
-    ipcRenderer.send("update-local-server-config", newConfig);
+    syncLocalServerConfig(newConfig).then(resp => {
+      state.localServerConfig = resp.data.data;
+    }).catch(err => { });
   },
   sendMessage(context: { commit: Commit }, params: PushMsg<any>) {
     pushClient.send(params);

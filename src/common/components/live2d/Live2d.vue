@@ -1,7 +1,7 @@
 <template>
   <div id="live2d" :style="{ zIndex }" @mouseover="toolShow = true" @mouseout="toolShow = false">
     <div v-show="mainShow">
-      <canvas id="live2d-main" width="250" height="250" />
+      <canvas id="live2d-main" width="250" height="350" />
     </div>
     <div id="live2d-toggle" v-show="!mainShow" @click="mainShow = true">
       <span>看板娘</span>
@@ -15,9 +15,9 @@
 #live2d {
   position: fixed;
   width: 250px;
-  height: 250px;
+  height: 350px;
   bottom: 0;
-  right: 0;
+  right: 10px;
   transition: transform 0.3s ease-in-out;
   /* transform: translateY(3px); */
 }

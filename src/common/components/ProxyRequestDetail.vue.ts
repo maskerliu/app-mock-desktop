@@ -96,6 +96,11 @@ export default class ProxyRequestDetail extends Vue {
       return;
     }
 
+    axios.defaults.adapter = require("axios/lib/adapters/http");
+    axios.defaults.timeout = 10000;
+    axios.defaults.withCredentials = true;
+    axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+
     axios({
       baseURL: this.apiDefineServer,
       url: "/api/moreApiInfo.json",

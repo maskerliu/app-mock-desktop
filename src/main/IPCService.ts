@@ -26,20 +26,7 @@ ipcMain.on("on-app-quit", (event: IpcMainEvent, args?: any) => {
   app.quit();
 });
 
-ipcMain.on("set-proxy-delay", (event: IpcMainEvent, args?: any) => {
-  try {
-    // ProxyService.setProxyDelay(args.delay);
-  } catch (err) { }
-});
-
 ipcMain.on("get-local-server-config", (event: IpcMainEvent) => {
-  event.sender.send("get-local-server-config", LocalServer.getLocalServerConfig());
-});
-
-ipcMain.on("update-local-server-config", (event: IpcMainEvent, args?: any) => {
-  try {
-    LocalServer.updateLocalServerConfig(args);
-  } catch (err) { }
   event.sender.send("get-local-server-config", LocalServer.getLocalServerConfig());
 });
 

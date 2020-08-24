@@ -55,7 +55,6 @@ export default class ProxyStatDetail extends Vue {
     elementId = row.event_id == 2001 ? "" : elementId;
     let keyword = row.event_id == 2001 ? pageId : elementId;
 
-    console.log(this.statRuleServer);
     if (elementId == "" && pageId == "") {
       Vue.set(this.rows[index], "rowClassName", "warning-row");
       Message.warning("未找到相关等级埋点");

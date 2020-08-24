@@ -20,8 +20,10 @@ export default class Live2d extends Vue {
     }
 
     loadModel() {
-        let random: number = Math.floor((Math.random() * 10) % 10) + 1;
+        let random: number = Math.floor((Math.random() * 7) % 7) + 1;
         let fileName: string = (Array(4).join('0') + random).slice(-4);
         (<any>window).loadlive2d("live2d-main", `/static/live2d/l2d_${fileName}/index.json`, null);
+        // (<any>window).loadlive2d("live2d-main", `/static/live2d/c124_00/model.json`, null);
+
     }
 }
