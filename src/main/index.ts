@@ -36,6 +36,7 @@ function createMainWindow(): void {
       nodeIntegration: true,
       webSecurity: false,
       offscreen: false,
+      enableRemoteModule: true,  
     },
   });
 

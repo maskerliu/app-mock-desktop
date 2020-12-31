@@ -58,7 +58,7 @@
             <proxy-request-detail :record="curRecord" v-if="curRecord != null && curRecord.type != 5020" />
             <proxy-stat-detail :record="curRecord" v-if="curRecord != null && curRecord.type == 5020" />
         </el-col>
-        <live2d></live2d>
+        <!-- <live2d></live2d> -->
     </el-row>
 </template>
 

@@ -1,5 +1,5 @@
 import { webFrame } from "electron";
-import { Component } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { Mutation } from "vuex-class";
 import BaseProxy from "../../common/page/BaseProxy.vue";
 
@@ -7,14 +7,15 @@ import BaseProxy from "../../common/page/BaseProxy.vue";
 @Component({
   name: "Proxy",
   components: {
+    BaseProxy
   },
 })
-export default class Proxy extends BaseProxy {
+export default class Proxy extends Vue {
 
   @Mutation("updateNavBarConfig")
   protected updateNavBarConfig: Function;
 
-  created() {
+  mounted() {
     this.updateNavBarConfig({
       title: "代理",
       leftItem: false,
@@ -27,7 +28,7 @@ export default class Proxy extends BaseProxy {
   }
 
   clearProxyRecrods(): void {
-    super.clearProxyRecrods();
+    // super.clearProxyRecrods();
     webFrame.clearCache();
   }
 

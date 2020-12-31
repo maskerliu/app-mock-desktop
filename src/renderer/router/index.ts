@@ -21,7 +21,7 @@ export default new VueRouter({
         {
             path: '/proxy',
             name: 'Proxy',
-            component: require('../../common/page/BaseProxy').default,
+            component: require('@/page/Proxy').default,
         },
         {
             path: '/mockRuleMgr',

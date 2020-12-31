@@ -64,7 +64,7 @@ class MockService {
               };
               PushService.sendProxyMessage(data, uid);
             }, proxyDelay);
-            resolve();
+            resolve(true);
           }
         }
         reject();
@@ -91,8 +91,8 @@ class MockService {
       selector: selector,
       limit: 15,
       fields: ["_id", "name", "desc"],
-      sort: ["name"],
     }).then((result: any) => {
+      console.log(result)
       let rules: Array<MockRule> = [];
       for (let i: number = 0; i < result.docs.length; ++i) {
         try {

@@ -16,7 +16,6 @@ export class PushClient {
 
   public start(host: string, uid: string): void {
     this.uid = uid;
-    console.log(localStorage.username);
     try {
       this.sockjs.close();
     } catch (err) { }

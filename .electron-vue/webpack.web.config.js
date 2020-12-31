@@ -1,10 +1,10 @@
 'use strict'
 
-process.env.BABEL_ENV = 'web';
+// process.env.BABEL_ENV = 'web';
 
 const path = require('path');
 const webpack = require('webpack');
-const MinifyPlugin = require("babel-minify-webpack-plugin");
+// const MinifyPlugin = require("babel-minify-webpack-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -40,33 +40,38 @@ let webConfig = {
                 test: /\.html$/,
                 use: 'vue-html-loader'
             },
+            // {
+            //     test: /\.tsx?$/,
+            //     use: [
+            //         'babel-loader',
+            //         {
+            //             loader: "ts-loader",
+            //             options: {
+            //                 appendTsSuffixTo: [/\.vue$/],
+            //                 transpileOnly: true,
+            //                 getCustomTransformers: () => ({
+            //                     before: [tsImportPluginFactory({
+            //                         libraryName: 'element-ui',
+            //                         libraryDirectory: 'lib',
+            //                         camel2DashComponentName: true,
+            //                         style: (_path) =>
+            //                             path.join('element-ui', 'lib', 'theme-chalk', `${
+            //                                 camel2Dash(path.basename(_path, '.js'))}.css`),
+            //                     })]
+            //                 }),
+            //                 compilerOptions: {
+            //                     module: 'es2015'
+            //                 },
+            //             }
+            //         }
+            //     ],
+            //     // include: [path.resolve(__dirname, '../src/web'), path.resolve(__dirname, '../src/common')],
+            //     exclude: /node_modules/,
+            // },
             {
                 test: /\.tsx?$/,
-                use: [
-                    'babel-loader',
-                    {
-                        loader: "ts-loader",
-                        options: {
-                            appendTsSuffixTo: [/\.vue$/],
-                            transpileOnly: true,
-                            getCustomTransformers: () => ({
-                                before: [tsImportPluginFactory({
-                                    libraryName: 'element-ui',
-                                    libraryDirectory: 'lib',
-                                    camel2DashComponentName: true,
-                                    style: (_path) =>
-                                        path.join('element-ui', 'lib', 'theme-chalk', `${
-                                            camel2Dash(path.basename(_path, '.js'))}.css`),
-                                })]
-                            }),
-                            compilerOptions: {
-                                module: 'es2015'
-                            },
-                        }
-                    }
-                ],
-                // include: [path.resolve(__dirname, '../src/web'), path.resolve(__dirname, '../src/common')],
-                exclude: /node_modules/,
+                use: "ts-loader",
+                exclude: /node_modules/
             },
             {
                 test: /\.vue$/,
@@ -176,7 +181,7 @@ if (process.env.NODE_ENV == 'production') {
     }
 
     webConfig.plugins.push(
-        new MinifyPlugin(),
+        // new MinifyPlugin(),
         new CopyWebpackPlugin([
             {
                 from: path.join(__dirname, '../static/live2d'),
@@ -197,18 +202,18 @@ if (process.env.NODE_ENV == 'production') {
         new webpack.DefinePlugin({
             'process.env.SERVER_BASE_URL': `'http://${getLocalIPs()[0].address}:${config.proxyHttpPort}'`
         }),
-        new BundleAnalyzerPlugin({
-            analyzerMode: 'server',
-            analyzerHost: '127.0.0.1',
-            analyzerPort: 9088,
-            reportFilename: 'report.html',
-            defaultSizes: 'parsed',
-            openAnalyzer: true,
-            generateStatsFile: false,
-            statsFilename: 'stats.json',
-            statsOptions: null,
-            logLevel: 'info'
-        }),
+        // new BundleAnalyzerPlugin({
+        //     analyzerMode: 'server',
+        //     analyzerHost: '127.0.0.1',
+        //     analyzerPort: 9088,
+        //     reportFilename: 'report.html',
+        //     defaultSizes: 'parsed',
+        //     openAnalyzer: true,
+        //     generateStatsFile: false,
+        //     statsFilename: 'stats.json',
+        //     statsOptions: null,
+        //     logLevel: 'info'
+        // }),
     );
 }
 

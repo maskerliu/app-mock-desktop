@@ -1,6 +1,6 @@
 "use strict";
 
-process.env.BABEL_ENV = "renderer";
+
 const path = require("path");
 const { dependencies } = require("../package.json");
 const webpack = require("webpack");
@@ -45,31 +45,36 @@ let rendererConfig = {
             },
             {
                 test: /\.tsx?$/,
-                use: [
-                    'babel-loader',
-                    {
-                        loader: "ts-loader",
-                        options: {
-                            appendTsSuffixTo: [/\.vue$/],
-                            transpileOnly: true,
-                            getCustomTransformers: () => ({
-                                before: [tsImportPluginFactory({
-                                    libraryName: 'element-ui',
-                                    libraryDirectory: 'lib',
-                                    camel2DashComponentName: true,
-                                    style: (_path) =>
-                                        path.join('element-ui', 'lib', 'theme-chalk', `${
-                                            camel2Dash(path.basename(_path, '.js'))}.css`),
-                                })]
-                            }),
-                            compilerOptions: {
-                                module: 'es2015'
-                            },
-                        }
-                    }
-                ],
-                exclude: /node_modules/,
+                use: "ts-loader",
+                exclude: /node_modules/
             },
+            // {
+            //     test: /\.tsx?$/,
+            //     use: [
+            //         'babel-loader',
+            //         {
+            //             loader: "ts-loader",
+            //             options: {
+            //                 appendTsSuffixTo: [/\.vue$/],
+            //                 transpileOnly: true,
+            //                 getCustomTransformers: () => ({
+            //                     before: [tsImportPluginFactory({
+            //                         libraryName: 'element-ui',
+            //                         libraryDirectory: 'lib',
+            //                         camel2DashComponentName: true,
+            //                         style: (_path) =>
+            //                             path.join('element-ui', 'lib', 'theme-chalk', `${
+            //                                 camel2Dash(path.basename(_path, '.js'))}.css`),
+            //                     })]
+            //                 }),
+            //                 compilerOptions: {
+            //                     module: 'es2015'
+            //                 },
+            //             }
+            //         }
+            //     ],
+            //     exclude: /node_modules/,
+            // },
             {
                 test: /\.node$/,
                 use: "node-loader"
@@ -240,18 +245,18 @@ if (process.env.NODE_ENV === "production") {
         new webpack.DefinePlugin({
             'process.env.SERVER_BASE_URL': `'http://${getLocalIPs()[0].address}:${config.proxyHttpPort}'`
         }),
-        new BundleAnalyzerPlugin({
-            analyzerMode: 'server',
-            analyzerHost: '127.0.0.1',
-            analyzerPort: 9089,
-            reportFilename: 'report.html',
-            defaultSizes: 'parsed',
-            openAnalyzer: true,
-            generateStatsFile: false,
-            statsFilename: 'stats.json',
-            statsOptions: null,
-            logLevel: 'info'
-        }),
+        // new BundleAnalyzerPlugin({
+        //     analyzerMode: 'server',
+        //     analyzerHost: '127.0.0.1',
+        //     analyzerPort: 9089,
+        //     reportFilename: 'report.html',
+        //     defaultSizes: 'parsed',
+        //     openAnalyzer: true,
+        //     generateStatsFile: false,
+        //     statsFilename: 'stats.json',
+        //     statsOptions: null,
+        //     logLevel: 'info'
+        // }),
     );
 }
 
