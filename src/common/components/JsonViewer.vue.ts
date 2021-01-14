@@ -37,7 +37,7 @@ export default class JsonViewer extends Vue {
 
   innerclosed: boolean = true;
   templateDeep: number = 1;
-  visible: boolean = this.currentDeep < 4;
+  visible: boolean = false;
 
   mounted() {
     this.innerclosed = this.closed;

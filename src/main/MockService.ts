@@ -78,12 +78,13 @@ class MockService {
     let keyword: any = req.query["keyword"];
     let uid = req.query["uid"];
     let selector = { _id: { $ne: /_design\/idx/ } };
-    if (keyword == null) {
-      selector = Object.assign(selector, { name: { $ne: keyword } });
-    } else {
+    if (keyword != null && keyword != undefined) {
       selector = Object.assign(selector, {
         name: { $regex: new RegExp(`${keyword}`) },
       });
+      
+    } else {
+      // selector = Object.assign(selector, { name: { $ne: keyword } });
     }
 
     let bizResp: BizResponse<Array<MockRule>> = new BizResponse<Array<MockRule>>();
