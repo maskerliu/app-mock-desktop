@@ -59,7 +59,8 @@
     "axios": "^0.21.1",
     "protobufjs": "^6.8.9",
     "pouchdb": "^7.2.2",
-    "pouchdb-find": "^7.2.2"
+    "pouchdb-find": "^7.2.2",
+    "ws": "^7.4.2"
   },
   "devDependencies": {
     "@types/pouchdb": "^6.4.0",

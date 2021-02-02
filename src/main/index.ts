@@ -2,7 +2,7 @@ import { app, BrowserWindow, Menu, nativeImage, shell, Tray } from "electron"
 import path from "path"
 // import AsarUpdateService from "./AsarUpdateService"
 import LocalServer from "./LocalServer"
-
+import GameFrameSyncService from "./GameFrameSyncService"
 require("./IPCService")
 
 
@@ -110,6 +110,7 @@ app.on("ready", () => {
   // AsarUpdateService.setParentWindow(mainWindow);
   // AsarUpdateService.check();
   LocalServer.startProxyHttpServer();
+  GameFrameSyncService.start();
 });
 
 app.on("window-all-closed", () => {
