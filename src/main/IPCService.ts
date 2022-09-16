@@ -4,6 +4,11 @@ import { mainWindow } from "./";
 import LocalServer from "./LocalServer";
 import ProxyService from "./ProxyService";
 
+
+ipcMain.handle("getAppDir", async (event: IpcMainEvent, args?: any) => {
+  return app.getPath("userData");
+})
+
 ipcMain.on("on-app-maximize", (event: IpcMainEvent, args?: any) => {
   if (mainWindow == null) return;
 
@@ -26,8 +31,8 @@ ipcMain.on("on-app-quit", (event: IpcMainEvent, args?: any) => {
   app.quit();
 });
 
-ipcMain.on("get-local-server-config", (event: IpcMainEvent) => {
-  event.sender.send("get-local-server-config", LocalServer.getLocalServerConfig());
+ipcMain.handle("get-local-server-config", async (event: IpcMainEvent) => {
+  return LocalServer.getLocalServerConfig();
 });
 
 ipcMain.on("on-open-folder", (event: IpcMainEvent, args?: any) => {

@@ -9,7 +9,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const tsImportPluginFactory = require('ts-import-plugin');
-const camel2Dash = require('camel-2-dash');
 const { VueLoaderPlugin } = require('vue-loader');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { getLocalIPs } = require("./utils");
@@ -40,34 +39,6 @@ let webConfig = {
                 test: /\.html$/,
                 use: 'vue-html-loader'
             },
-            // {
-            //     test: /\.tsx?$/,
-            //     use: [
-            //         'babel-loader',
-            //         {
-            //             loader: "ts-loader",
-            //             options: {
-            //                 appendTsSuffixTo: [/\.vue$/],
-            //                 transpileOnly: true,
-            //                 getCustomTransformers: () => ({
-            //                     before: [tsImportPluginFactory({
-            //                         libraryName: 'element-ui',
-            //                         libraryDirectory: 'lib',
-            //                         camel2DashComponentName: true,
-            //                         style: (_path) =>
-            //                             path.join('element-ui', 'lib', 'theme-chalk', `${
-            //                                 camel2Dash(path.basename(_path, '.js'))}.css`),
-            //                     })]
-            //                 }),
-            //                 compilerOptions: {
-            //                     module: 'es2015'
-            //                 },
-            //             }
-            //         }
-            //     ],
-            //     // include: [path.resolve(__dirname, '../src/web'), path.resolve(__dirname, '../src/common')],
-            //     exclude: /node_modules/,
-            // },
             {
                 test: /\.tsx?$/,
                 use: "ts-loader",

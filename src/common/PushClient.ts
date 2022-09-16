@@ -34,6 +34,7 @@ export class PushClient {
   }
 
   private register(uid: string): void {
+    console.log(this.sockjs.id)
     let msg: PushMsg<any> = {
       type: PushMsgType.CMD,
       from: this.sockjs.id,

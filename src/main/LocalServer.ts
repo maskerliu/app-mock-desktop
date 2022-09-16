@@ -46,8 +46,8 @@ class LocalServer {
     this.httpApp.use(cors(corsOpts));
     this.httpApp.use(compression());
     this.httpApp.use(express.static(path.resolve(__dirname, '../web')));
-    this.httpApp.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
-    this.httpApp.use(bodyParser.text({ type: "application/json", limit: '50mb' }));
+    // this.httpApp.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
+    // this.httpApp.use(bodyParser.text({ type: "application/json", limit: '50mb' }));
     this.httpApp.use((req: any, resp: Response, next: any) => {
       if (/^\/burying-point\//.test(req.url)) {
         let buf = [];

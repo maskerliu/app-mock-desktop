@@ -28,7 +28,7 @@ class MockService {
     });
     this.updateMockSettings();
   }
-
+  
   public mockRequestData(
     sessionId: number,
     req: Request,
@@ -82,7 +82,7 @@ class MockService {
       selector = Object.assign(selector, {
         name: { $regex: new RegExp(`${keyword}`) },
       });
-      
+
     } else {
       // selector = Object.assign(selector, { name: { $ne: keyword } });
     }

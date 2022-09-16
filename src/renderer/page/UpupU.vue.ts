@@ -1,7 +1,6 @@
 import { Component, Vue, Prop } from "vue-property-decorator"
 import { Action, namespace, Getter, Mutation, State } from "vuex-class"
 
-import { remote } from "electron"
 
 import fs from "fs"
 import axios from 'axios'
@@ -68,26 +67,26 @@ export default class UpupU extends AbstractPage {
 
     public saveUpup(): void {
         this.dataUrl = this.$refs.drawContainer.toDataURL("image/png");
-        remote.dialog.showSaveDialog({
-            title: "保存文件",
-            defaultPath: "",
-            properties: ['createDirectory'],
-            filters: [
-                { name: 'webp', extensions: ["webp"] },
-                { name: 'png', extensions: ["png", "PNG"] },
-                { name: 'jpg', extensions: ["jpg", "jpeg"] },
-                { name: 'All Files', extensions: ['*'] }
-            ]
-        }).then(result => {
-            let base64Data = this.dataUrl.replace(/^data:image\/(png|jpg|webp)+;base64,/, "");
-            let dataBuffer = new Buffer(base64Data, 'base64');
-            fs.writeFile(result.filePath, dataBuffer, (err) => {
-                console.log(err);
-            });
+        // remote.dialog.showSaveDialog({
+        //     title: "保存文件",
+        //     defaultPath: "",
+        //     properties: ['createDirectory'],
+        //     filters: [
+        //         { name: 'webp', extensions: ["webp"] },
+        //         { name: 'png', extensions: ["png", "PNG"] },
+        //         { name: 'jpg', extensions: ["jpg", "jpeg"] },
+        //         { name: 'All Files', extensions: ['*'] }
+        //     ]
+        // }).then(result => {
+        //     let base64Data = this.dataUrl.replace(/^data:image\/(png|jpg|webp)+;base64,/, "");
+        //     let dataBuffer = new Buffer(base64Data, 'base64');
+        //     fs.writeFile(result.filePath, dataBuffer, (err) => {
+        //         console.log(err);
+        //     });
 
-        }).catch(err => {
-            console.log(err)
-        });
+        // }).catch(err => {
+        //     console.log(err)
+        // });
 
     }
 

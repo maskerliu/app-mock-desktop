@@ -16,7 +16,8 @@
       "es2015",
       "es2016",
       "es2017.object"
-    ]
+    ],
+    "jsx": "preserve"
   },
   "include": [
     "src/**/*"
@@ -24,5 +25,5 @@
   "exclude": [
     "node_modules"
   ],
-  "compileOnSave": true
+  "compileOnSave": true,
 }

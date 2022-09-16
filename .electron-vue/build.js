@@ -36,7 +36,7 @@ function build() {
     del.sync(['dist/electron/*', '!.gitkeep']);
     del.sync(['dist/web/*', '!.gitkeep']);
 
-    const tasks = ['main', 'renderer'];
+    const tasks = ['main', 'renderer', 'web'];
     const m = new Multispinner(tasks, {
         preText: 'building',
         postText: 'process'
@@ -74,6 +74,7 @@ function build() {
         results += result + '\n\n';
         m.success('web');
     }).catch(err => {
+        console.error("tommmm", err);
         m.error('web');
         console.log(`\n  ${errorLog}failed to build web process`);
         console.error(`\n${err}\n`);

@@ -1,6 +1,6 @@
 "use strict";
 
-process.env.BABEL_ENV = "main";
+// process.env.BABEL_ENV = "main";
 
 const path = require("path");
 const { dependencies } = require("../package.json");

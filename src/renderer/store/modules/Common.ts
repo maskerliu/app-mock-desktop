@@ -1,4 +1,5 @@
-import { ipcRenderer, remote } from "electron";
+import remote from "@electron/remote";
+import { ipcRenderer } from "electron";
 import Message from "element-ui/packages/message";
 import path from "path";
 import PouchDB from "pouchdb";
@@ -6,8 +7,8 @@ import { ActionTree, Commit, GetterTree, MutationTree } from "vuex";
 import store from "../";
 import { PushClient } from "../../../common/PushClient";
 import { generateUid } from "../../../common/Utils";
-import { updateClientUID, updateBaseDomain } from "../../../model/BasicLocalAPI";
-import { LocalServerConfig, PushMsg, ClientInfo } from "../../../model/DataModels";
+import { updateBaseDomain, updateClientUID } from "../../../model/BasicLocalAPI";
+import { ClientInfo, LocalServerConfig, PushMsg } from "../../../model/DataModels";
 import { syncLocalServerConfig } from "../../../model/LocaAPIs";
 import { CommonState, NavBarConfig } from "../types";
 
@@ -25,7 +26,8 @@ const state: CommonState = {
   clientInfos: []
 };
 
-const db = new PouchDB(path.join(remote.app.getPath("userData"), 'SharePerferences'), { adapter: 'leveldb' });
+let db = null;
+
 let pushClient: PushClient = null;
 
 export const getters: GetterTree<CommonState, any> = {};
@@ -35,21 +37,28 @@ export const actions: ActionTree<CommonState, any> = {
   init(context: { commit: Commit }): void {
     pushClient = new PushClient(store);
 
-    if (process.env.NODE_ENV != 'production' && process.env.SERVER_BASE_URL) {
-      updateBaseDomain(process.env.SERVER_BASE_URL);
-    }
+    ipcRenderer.invoke("getAppDir")
+      .then((data) => {
+        db = new PouchDB(path.join(data, 'SharePerferences'), { adapter: 'leveldb' });
+      })
+      .then(() => {
+        if (process.env.NODE_ENV != 'production' && process.env.SERVER_BASE_URL) {
+          updateBaseDomain(process.env.SERVER_BASE_URL);
+        }
 
-    db.get('localServerConfig').then((result: any) => {
-      syncLocalServerConfig(result.config).then(resp => {
-        state.localServerConfig = resp.data.data;
-      }).catch(err => { });
-    }).catch(err => { });
+        db.get('localServerConfig')
+          .then((result: any) => {
+            syncLocalServerConfig(result.config).then(resp => {
+              state.localServerConfig = resp.data.data;
+            }).catch(err => { });
+          }).catch(() => { });
+      })
+      .catch((err) => { console.log(err) });
 
-    ipcRenderer.on("get-local-server-config", (event: any, data: any) => {
-      store.commit("updateLocalServerConfig", data);
-    });
-
-    ipcRenderer.send("get-local-server-config");
+    ipcRenderer.invoke("get-local-server-config")
+      .then((data: any) => {
+        store.commit("updateLocalServerConfig", data);
+      });
 
     ipcRenderer.on("on-selected-files", (event: any, data: any) => {
       // data.files.forEach((item: string) => {
@@ -59,7 +68,6 @@ export const actions: ActionTree<CommonState, any> = {
     });
   },
   unInit(context: { commit: Commit }): void {
-    ipcRenderer.removeAllListeners("get-local-server-config");
     ipcRenderer.removeAllListeners("on-selected-files");
   },
   saveLocalServerConfig(context: { commit: Commit }, config: LocalServerConfig) {

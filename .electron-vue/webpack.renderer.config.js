@@ -10,7 +10,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 const TerserPlugin = require("terser-webpack-plugin");
 const tsImportPluginFactory = require('ts-import-plugin');
-const camel2Dash = require('camel-2-dash');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { getLocalIPs } = require("./utils");
 const config = require("../config.json");
@@ -48,33 +47,6 @@ let rendererConfig = {
                 use: "ts-loader",
                 exclude: /node_modules/
             },
-            // {
-            //     test: /\.tsx?$/,
-            //     use: [
-            //         'babel-loader',
-            //         {
-            //             loader: "ts-loader",
-            //             options: {
-            //                 appendTsSuffixTo: [/\.vue$/],
-            //                 transpileOnly: true,
-            //                 getCustomTransformers: () => ({
-            //                     before: [tsImportPluginFactory({
-            //                         libraryName: 'element-ui',
-            //                         libraryDirectory: 'lib',
-            //                         camel2DashComponentName: true,
-            //                         style: (_path) =>
-            //                             path.join('element-ui', 'lib', 'theme-chalk', `${
-            //                                 camel2Dash(path.basename(_path, '.js'))}.css`),
-            //                     })]
-            //                 }),
-            //                 compilerOptions: {
-            //                     module: 'es2015'
-            //                 },
-            //             }
-            //         }
-            //     ],
-            //     exclude: /node_modules/,
-            // },
             {
                 test: /\.node$/,
                 use: "node-loader"
@@ -138,7 +110,7 @@ let rendererConfig = {
                 removeAttributeQuotes: true,
                 removeComments: true
             },
-            nodeModules: process.env.NODE_ENV !== "production" ? path.resolve(__dirname, "../node_modules") : false
+            // nodeModules: process.env.NODE_ENV !== "production" ? path.resolve(__dirname, "../node_modules") : false
         }),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoEmitOnErrorsPlugin()

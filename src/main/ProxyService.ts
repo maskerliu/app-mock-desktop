@@ -1,3 +1,4 @@
+import axios, { AxiosRequestConfig, Method } from "axios";
 import { Request, Response } from "express";
 import protobuf from "protobufjs";
 import zlib from "zlib";
@@ -6,7 +7,6 @@ import MockService from "./MockService";
 import PushService from "./PushService";
 
 const JSONBigInt = require("json-bigint");
-const axios = require("axios");
 
 class ProxyService {
   private static PROXY_DEF_TIMEOUT: number = 1000 * 15; // 15s
@@ -201,7 +201,7 @@ class ProxyService {
     });
   }
 
-  private proxyRequestData(sessionId: number, req: Request, proxyResp: Response, startTime: number, delay: number) {
+  private async proxyRequestData(sessionId: number, req: Request, proxyResp: Response, startTime: number, delay: number) {
     let originHost = req.header("mock-host");
     if (originHost == null) {
       originHost = req.header("host");
@@ -211,6 +211,14 @@ class ProxyService {
     delete headers["host"];
     delete headers["mock-host"];
     delete headers["mock-uid"];
+
+    let response = await axios({
+      url: "https://test-gateway-web.yupaopao.com/openapi/mockKey/getMockKey",
+      method: "GET",
+    })
+
+    headers["Mock-Key"] = response.data
+
 
     let requestUrl = originHost + req.path;
 
@@ -231,11 +239,9 @@ class ProxyService {
       requestUrl = dataProxyServer + req.path;
     }
 
-    console.log(requestUrl);
-
-    let options = {
+    let options: AxiosRequestConfig = {
       url: requestUrl,
-      method: req.method,
+      method: req.method as Method,
       headers: headers,
       transformResponse: [
         (data: any) => {
@@ -270,7 +276,6 @@ class ProxyService {
           isMock: false,
         };
         PushService.sendProxyMessage(data, uid);
-
         proxyResp.send(resp.data);
         proxyResp.end();
       }, delay);

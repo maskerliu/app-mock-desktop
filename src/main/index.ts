@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu, nativeImage, shell, Tray } from "electron"
 import path from "path"
 // import AsarUpdateService from "./AsarUpdateService"
 import LocalServer from "./LocalServer"
+
 require("./IPCService")
 
 
@@ -33,9 +34,10 @@ function createMainWindow(): void {
     icon: icon,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
       webSecurity: false,
       offscreen: false,
-      enableRemoteModule: true,  
+      enableRemoteModule: true,
     },
   });
 
